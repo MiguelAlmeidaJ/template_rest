@@ -9,6 +9,7 @@ $method=$_SERVER['REQUEST_METHOD'];
 try {
  if($path==='/' && $method==='GET'){header('Content-Type: text/html; charset=utf-8');readfile(__DIR__.'/site.html');exit;}
  if($path==='/api/health' && $method==='GET')Api::send(['status'=>'ok']);
+ if($path==='/api/payments/options' && $method==='GET')Api::send(Modules::paymentOptions());
  if($path==='/api/products' && $method==='GET')Api::send(Modules::products());
  if($path==='/api/reservations/slots' && $method==='GET')Api::send(Modules::slots((string)($_GET['date']??'')));
  if($path==='/api/delivery/quote' && $method==='POST')Api::send(Modules::delivery(Api::input()));

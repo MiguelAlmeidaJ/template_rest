@@ -3,6 +3,7 @@ declare(strict_types=1);
 namespace App;
 use DomainException;
 use DateTimeImmutable;
+use App\Payments\Settings;
 final class Modules {
  static function products():array{return Db::pdo()->query("SELECT p.id,p.name,p.description,p.price_cents,c.name category FROM products p JOIN categories c ON c.id=p.category_id WHERE p.active=1 ORDER BY c.id,p.name")->fetchAll();}
  static function delivery(array $d):array{
@@ -11,19 +12,21 @@ final class Modules {
  if(!$zone)throw new DomainException('Área não atendida');if($subtotal<(int)$zone['min_order_cents'])throw new DomainException('Pedido abaixo do mínimo');
  return ['zone_id'=>(int)$zone['id'],'fee_cents'=>(int)$zone['fee_cents'],'total_cents'=>$subtotal+(int)$zone['fee_cents']];
  }
+ static function paymentOptions():array{$s=Settings::get();return ['mode'=>$s['online_enabled']?'online':'manual','provider'=>$s['online_enabled']?$s['provider']:null,'manual_methods'=>['card','pix','cash']];}
  static function order(array $d):array{
  $name=trim((string)($d['customer_name']??''));$phone=preg_replace('/\D+/','',(string)($d['customer_phone']??''));$mode=$d['fulfillment']??'pickup';$items=$d['items']??[];
  if(mb_strlen($name)<2||strlen($phone)<10||!in_array($mode,['pickup','delivery'],true)||!is_array($items)||!count($items)||count($items)>50)throw new DomainException('Pedido inválido');
  $ids=[];foreach($items as $item){$id=filter_var($item['product_id']??null,FILTER_VALIDATE_INT);$qty=filter_var($item['quantity']??null,FILTER_VALIDATE_INT);if(!$id||!$qty||$qty>30||isset($ids[$id]))throw new DomainException('Itens inválidos ou duplicados');$ids[$id]=$qty;}
+ $settings=Settings::get();$paymentMode=$settings['online_enabled']?'online':'manual';$manualMethod=(string)($d['manual_payment_method']??'');if($paymentMode==='manual'&&!in_array($manualMethod,['card','pix','cash'],true))throw new DomainException('Selecione a forma de pagamento manual');
  $db=Db::pdo();$db->beginTransaction();
  try{
  $subtotal=0;$lines=[];$q=$db->prepare('SELECT price_cents FROM products WHERE id=? AND active=1');
  foreach($ids as $id=>$qty){$q->execute([$id]);$product=$q->fetch();if(!$product)throw new DomainException('Produto indisponível');$price=(int)$product['price_cents'];$subtotal+=$price*$qty;$lines[]=[$id,$qty,$price];}
  $fee=0;$zone=null;$address=null;
  if($mode==='delivery'){$address=trim((string)($d['address']??''));if(mb_strlen($address)<8)throw new DomainException('Endereço inválido');$quote=self::delivery(['neighborhood'=>$d['neighborhood']??'','subtotal_cents'=>$subtotal]);$fee=$quote['fee_cents'];$zone=$quote['zone_id'];}
- $q=$db->prepare("INSERT INTO orders(customer_name,customer_phone,fulfillment,address,zone_id,subtotal_cents,delivery_fee_cents,total_cents) VALUES(?,?,?,?,?,?,?,?)");$q->execute([$name,$phone,$mode,$address,$zone,$subtotal,$fee,$subtotal+$fee]);$id=(int)$db->lastInsertId();
+ $q=$db->prepare("INSERT INTO orders(customer_name,customer_phone,fulfillment,address,zone_id,subtotal_cents,delivery_fee_cents,total_cents,payment_mode,manual_payment_method) VALUES(?,?,?,?,?,?,?,?,?,?)");$q->execute([$name,$phone,$mode,$address,$zone,$subtotal,$fee,$subtotal+$fee,$paymentMode,$paymentMode==='manual'?$manualMethod:null]);$id=(int)$db->lastInsertId();
  $q=$db->prepare('INSERT INTO order_items(order_id,product_id,quantity,unit_price_cents) VALUES(?,?,?,?)');foreach($lines as $line)$q->execute([$id,...$line]);
- $db->commit();return ['order_id'=>$id,'total_cents'=>$subtotal+$fee,'payment_status'=>'pending','status'=>'pending'];
+ $db->commit();return ['order_id'=>$id,'total_cents'=>$subtotal+$fee,'payment_status'=>'pending','status'=>'pending','payment_mode'=>$paymentMode];
  }catch(\Throwable $e){if($db->inTransaction())$db->rollBack();throw $e;}
  }
  static function slots(string $date):array{
@@ -41,8 +44,12 @@ final class Modules {
  }
  static function checkout(array $d):array{
  $id=filter_var($d['order_id']??null,FILTER_VALIDATE_INT);if(!$id)throw new DomainException('Pedido inválido');
- $q=Db::pdo()->prepare('SELECT total_cents,payment_status FROM orders WHERE id=?');$q->execute([$id]);$order=$q->fetch();if(!$order)throw new DomainException('Pedido não encontrado');if($order['payment_status']!=='pending')throw new DomainException('Pagamento já processado');
- if(($_ENV['PAYMENT_PROVIDER']??'demo')!=='demo')throw new DomainException('Gateway real ainda não implementado');
- return ['provider'=>'demo','order_id'=>$id,'amount_cents'=>(int)$order['total_cents'],'status'=>'simulation_only','message'=>'Nenhuma cobrança realizada'];
+ $q=Db::pdo()->prepare('SELECT total_cents,payment_mode,payment_status FROM orders WHERE id=?');$q->execute([$id]);$o=$q->fetch();
+ if(!$o)throw new DomainException('Pedido não encontrado');
+ if($o['payment_mode']!=='online')throw new DomainException('O pagamento deste pedido é manual');
+ if($o['payment_status']!=='pending')throw new DomainException('Pedido não está pendente');
+ $settings=Settings::get();if(!$settings['online_enabled'])throw new DomainException('Gateway online desativado');
+ $gateway=$settings['provider']==='mercadopago'?new \App\Payments\MercadoPago():new \App\Payments\PagBank();
+ return $gateway->createCheckout($id,(int)$o['total_cents']);
  }
 }
