@@ -15,7 +15,13 @@ final class Cms{
  return $definitions;
  }
 
- public static function extraDefinitions():array{return [object Object];}
+ public static function extraDefinitions():array{return [
+  'inicio' => [['feature_meat', 'Comida mineira'], ['feature_salad', 'Saladas & acompanhamentos'], ['feature_pasta', 'Massas & especiais'], ['amenities_heading', 'Tudo pensado para você.'], ['cta_title', 'O seu almoço tem endereço certo.'], ['cta_desc', 'Faça seu pedido ou venha aproveitar um almoço especial com a gente.']],
+  'cardapio' => [['category_description', 'Estas são categorias de pratos que fazem parte da proposta gastronômica do restaurante, não uma lista de disponibilidade em tempo real.'], ['variety_title', 'O que você encontra por aqui'], ['cta_title', 'Quer saber o que tem hoje?']],
+  'o-restaurante' => [['features_title', 'Cada detalhe importa.']],
+  'galeria' => [['cta_title', 'Venha conhecer de perto.']],
+  'contato' => [['contact_title', 'A sua próxima parada para o almoço.']]
+ ];}
  public static function field(string $page,string $key,string $default=''):string{
   static $cache=[];$id="$page.$key";if(array_key_exists($id,$cache))return $cache[$id];
   try{$q=Db::pdo()->prepare('SELECT field_value FROM cms_fields WHERE page_slug=? AND field_key=?');$q->execute([$page,$key]);$v=$q->fetchColumn();return $cache[$id]=$v===false?$default:(string)$v;}catch(\PDOException $e){error_log((string)$e);return $default;}
