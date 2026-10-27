@@ -18,3 +18,16 @@ body{font-size:var(--font-body)}
 
 /* Horário de funcionamento: cartão de destaque sob a capa */
 .hours-wrap{position:relative;z-index:3;margin-top:-2.6rem}.hours-card{display:flex;align-items:center;gap:1.5rem;padding:1.55rem 2rem;border-radius:.85rem;background:#fff;box-shadow:0 .75rem 2.5rem #21212118;border:1px solid #f0e9e0}.hours-icon{width:3.75rem;height:3.75rem;flex-shrink:0;display:grid;place-items:center;border-radius:50%;background:#fff0e1;color:#f98017;font-size:2.25rem}.hours-copy{flex:1}.hours-eyebrow{font-size:.68rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#2d6835}.hours-copy h2{font-family:'Open Sans',sans-serif;font-size:clamp(1.15rem,1.6vw,1.5rem);line-height:1.3;margin:.2rem 0 .3rem}.hours-copy p{font-size:.9rem;margin:0;color:#535353}.hours-copy strong{color:#bc1c23}.hours-link{background:#2d6835;color:white;white-space:nowrap;border-radius:.4rem;padding:.85rem 1.2rem;font-weight:700;font-size:.82rem}.hours-link:hover{background:#205128;color:white}.topline a{color:inherit}.topline a:hover{text-decoration:underline}@media(max-width:650px){.hours-wrap{margin-top:-1.5rem}.hours-card{flex-wrap:wrap;gap:.9rem;padding:1.25rem}.hours-icon{width:2.9rem;height:2.9rem;font-size:1.75rem}.hours-copy{flex-basis:calc(100% - 4rem)}.hours-link{margin-left:auto;width:100%;text-align:center}.hours-copy h2{font-size:1.18rem}}
+
+/* Benefit icons — restrained, responsive motion */
+.benefits-enhanced{gap:1.4rem}
+.benefits-enhanced .benefit{border:1px solid #ebe5dd;border-radius:.9rem;padding:1.8rem 1.5rem 1.6rem;background:#fffdf9;transition:transform .28s ease,box-shadow .28s ease,border-color .28s ease}
+.benefits-enhanced .benefit-icon{display:grid;place-items:center;width:3.4rem;height:3.4rem;margin-bottom:1.5rem;border-radius:.85rem;background:#fff0df;color:#f98017;transition:transform .35s ease,background-color .3s ease}
+.benefits-enhanced .benefit-icon svg{width:1.8rem;height:1.8rem;transition:transform .4s ease}
+.benefits-enhanced .benefit-icon-2{background:#e9f2e7;color:#2d6835}
+.benefits-enhanced .benefit-icon-3{background:#fbe8e8;color:#bc1c23}
+.benefits-enhanced .benefit-icon-4{background:#edf4e5;color:#658638}
+.benefits-enhanced .benefit b{font-family:'Open Sans',Arial,sans-serif;font-size:clamp(1rem,1.25vw,1.18rem);line-height:1.35;display:block;min-height:2.6em}
+.benefits-enhanced .benefit p{font-size:.83rem;line-height:1.65;margin:.6rem 0 0}
+@media(hover:hover){.benefits-enhanced .benefit:hover{transform:translateY(-.35rem);border-color:#dfd6c9;box-shadow:0 .9rem 2rem #2121210e}.benefits-enhanced .benefit:hover .benefit-icon{transform:rotate(-5deg)}.benefits-enhanced .benefit:hover .benefit-icon svg{transform:scale(1.1)}}
+@media(prefers-reduced-motion:reduce){.benefits-enhanced .benefit,.benefits-enhanced .benefit-icon,.benefits-enhanced .benefit-icon svg{transition:none!important;animation:none!important}.benefits-enhanced .benefit:hover,.benefits-enhanced .benefit:hover .benefit-icon,.benefits-enhanced .benefit:hover svg{transform:none!important}}
