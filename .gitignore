@@ -1,3 +1,6 @@
 .env
 /vendor/
 /storage/
+
+/public/assets/images/bia/uploads/*
+!/public/assets/images/bia/uploads/.htaccess
