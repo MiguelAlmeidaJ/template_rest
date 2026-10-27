@@ -1,21 +1,23 @@
 <?php
 declare(strict_types=1);
 require dirname(__DIR__).'/src/bootstrap.php';
-use App\Db;
-use App\Api;
-use App\Modules;
+use App\Api;use App\Modules;
 $path=parse_url($_SERVER['REQUEST_URI'],PHP_URL_PATH);
 $method=$_SERVER['REQUEST_METHOD'];
-try {
- if($path==='/' && $method==='GET'){header('Content-Type: text/html; charset=utf-8');readfile(__DIR__.'/site.html');exit;}
- if($path==='/api/health' && $method==='GET')Api::send(['status'=>'ok']);
- if($path==='/api/payments/options' && $method==='GET')Api::send(Modules::paymentOptions());
- if($path==='/api/products' && $method==='GET')Api::send(Modules::products());
- if($path==='/api/reservations/slots' && $method==='GET')Api::send(Modules::slots((string)($_GET['date']??'')));
- if($path==='/api/delivery/quote' && $method==='POST')Api::send(Modules::delivery(Api::input()));
- if($path==='/api/orders' && $method==='POST')Api::send(Modules::order(Api::input()),201);
- if($path==='/api/reservations' && $method==='POST')Api::send(Modules::reservation(Api::input()),201);
- if($path==='/api/payments/checkout' && $method==='POST')Api::send(Modules::checkout(Api::input()));
- Api::send(['error'=>'Rota não encontrada'],404);
-} catch(DomainException $e){Api::send(['error'=>$e->getMessage()],422);}
-catch(Throwable $e){error_log((string)$e);Api::send(['error'=>'Erro interno'],500);}
+try{
+if($path==='/'&&$method==='GET'){require __DIR__.'/includes/site.php';bia_header('Início','Início');?>
+<section class="hero"><?php bia_photo('hero','Comida caseira servida em um ambiente acolhedor','',false);?><div class="shell"><div class="hero-copy"><span class="eyebrow">O sabor de se sentir em casa</span><h1 class="display">Tempero de casa.<br><em>Sabor de verdade.</em></h1><p>Comida mineira, variedade todos os dias e aquele carinho que transforma o almoço em um momento especial.</p><div class="actions"><a class="btn" href="/cardapio/">Conheça nosso cardápio ↗</a><a class="btn btn-outline" href="<?=BIA_WHATSAPP?>" target="_blank" rel="noopener noreferrer">Faça seu pedido</a></div><div class="hero-note"><span>✦ Além Paraíba · Minas Gerais</span><span>✦ Diariamente · 10h30 às 15h</span></div></div></div></section>
+<section class="section shell"><div class="section-header"><div><span class="eyebrow">Escolha o seu favorito</span><h2 class="title">Uma mesa cheia de sabores.</h2></div><p class="lead">Da tradição mineira às opções mais leves, aqui sempre tem algo gostoso esperando por você.</p></div><div class="cards"><a href="/cardapio/" class="category-card"><?php bia_photo('meat','Seleção de carnes preparadas com carinho');?><div><span>DO NOSSO JEITO</span><h3>Comida mineira</h3><span>Conhecer o cardápio ↗</span></div></a><a href="/cardapio/" class="category-card"><?php bia_photo('salad','Saladas e legumes variados');?><div><span>FRESCOR TODO DIA</span><h3>Saladas & acompanhamentos</h3><span>Conhecer o cardápio ↗</span></div></a><a href="/cardapio/" class="category-card"><?php bia_photo('pasta','Pratos de massas');?><div><span>PARA TODOS OS GOSTOS</span><h3>Massas & especiais</h3><span>Conhecer o cardápio ↗</span></div></a></div></section>
+<section class="split"><?php bia_photo('interior','Interior de restaurante com mesas preparadas','split-photo');?><div class="split-copy"><span class="eyebrow">Muito além do almoço</span><h2 class="title">Um lugar para se reunir e saborear.</h2><p class="lead">Ambiente amplo, climatizado e acolhedor, com espaço para 144 pessoas. Sinta-se à vontade: a casa é sua.</p><a class="btn" href="/o-restaurante/">Conheça o restaurante ↗</a></div></section>
+<section class="section shell"><div class="section-header"><div><span class="eyebrow">Conforto e praticidade</span><h2 class="title">Tudo pensado para você.</h2></div></div><div class="benefits"><div class="benefit"><b>Ambiente climatizado</b><p>Conforto para aproveitar seu almoço.</p></div><div class="benefit"><b>Estacionamento grátis</b><p>Mais comodidade na visita.</p></div><div class="benefit"><b>Acessibilidade</b><p>Um espaço preparado para receber.</p></div><div class="benefit"><b>Wi-Fi grátis</b><p>Mais praticidade para o seu dia.</p></div></div></section><section class="shell section"><div class="cta-panel"><span class="eyebrow" style="color:#efcd81">Bateu aquela fome?</span><h2 class="title">O seu almoço tem endereço certo.</h2><p class="lead">Faça seu pedido ou venha aproveitar um almoço especial com a gente.</p><a class="btn" href="<?=BIA_WHATSAPP?>" target="_blank" rel="noopener noreferrer">Faça seu pedido ↗</a></div></section>
+<?php bia_footer();exit;}
+if($path==='/api/health'&&$method==='GET')Api::send(['status'=>'ok']);
+if($path==='/api/payments/options'&&$method==='GET')Api::send(Modules::paymentOptions());
+if($path==='/api/products'&&$method==='GET')Api::send(Modules::products());
+if($path==='/api/reservations/slots'&&$method==='GET')Api::send(Modules::slots((string)($_GET['date']??'')));
+if($path==='/api/delivery/quote'&&$method==='POST')Api::send(Modules::delivery(Api::input()));
+if($path==='/api/orders'&&$method==='POST')Api::send(Modules::order(Api::input()),201);
+if($path==='/api/reservations'&&$method==='POST')Api::send(Modules::reservation(Api::input()),201);
+if($path==='/api/payments/checkout'&&$method==='POST')Api::send(Modules::checkout(Api::input()));
+Api::send(['error'=>'Rota não encontrada'],404);
+}catch(DomainException $e){Api::send(['error'=>$e->getMessage()],422);}catch(Throwable $e){error_log((string)$e);Api::send(['error'=>'Erro interno'],500);}
