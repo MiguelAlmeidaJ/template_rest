@@ -1,4 +1,11 @@
 Options -Indexes
+DirectoryIndex index.php
 RewriteEngine On
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^ index.php [QSA,L]
+
+# Preserve existing files and directories, including /cardapio/, /admin/ and static assets.
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [END]
+
+# API and other virtual paths go through the application router.
+RewriteRule ^ index.php [QSA,END]
