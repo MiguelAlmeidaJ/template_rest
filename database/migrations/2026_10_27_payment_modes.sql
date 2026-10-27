@@ -1,0 +1,4 @@
+ALTER TABLE orders ADD COLUMN payment_mode ENUM('manual','online') NOT NULL DEFAULT 'manual', ADD COLUMN manual_payment_method ENUM('card','pix','cash') NULL, ADD COLUMN paid_at DATETIME NULL;
+CREATE TABLE payment_settings(id TINYINT UNSIGNED PRIMARY KEY,online_enabled BOOLEAN NOT NULL DEFAULT FALSE,provider ENUM('mercadopago','pagbank') NOT NULL DEFAULT 'mercadopago');
+INSERT INTO payment_settings VALUES(1,0,'mercadopago');
+CREATE TABLE payment_audit(id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,order_id BIGINT UNSIGNED NOT NULL,admin_id INT UNSIGNED NOT NULL,action VARCHAR(70) NOT NULL,created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,FOREIGN KEY(order_id) REFERENCES orders(id),FOREIGN KEY(admin_id) REFERENCES admins(id));

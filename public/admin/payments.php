@@ -1,0 +1,17 @@
+<?php
+declare(strict_types=1);
+require dirname(__DIR__,2).'/src/bootstrap.php';
+session_name('raiz_admin');session_set_cookie_params(['httponly'=>true,'secure'=>!empty($_SERVER['HTTPS'])&&$_SERVER['HTTPS']!=='off','samesite'=>'Lax']);session_start();
+if(!isset($_SESSION['admin_id'])){header('Location: /admin/');exit;}
+$csrf=$_SESSION['csrf']??=bin2hex(random_bytes(24));$notice='';
+if($_SERVER['REQUEST_METHOD']==='POST'){
+ if(!hash_equals($csrf,(string)($_POST['csrf']??''))){http_response_code(403);exit('CSRF inválido');}
+ try{
+ if(($_POST['action']??'')==='config'){\App\Payments\Settings::save(isset($_POST['enabled']),(string)($_POST['provider']??''));$notice='Configuração salva.';}
+ elseif(($_POST['action']??'')==='confirm'){$id=filter_var($_POST['order_id']??null,FILTER_VALIDATE_INT);if(!$id)throw new DomainException('Pedido inválido');\App\Payments\Manual::confirm($id,(int)$_SESSION['admin_id']);$notice='Recebimento confirmado.';}
+ else throw new DomainException('Ação inválida');
+ }catch(\DomainException $e){$notice=$e->getMessage();}catch(\Throwable $e){error_log((string)$e);$notice='Erro ao salvar';}
+}
+$s=\App\Payments\Settings::get();$orders=\App\Db::pdo()->query("SELECT id,customer_name,total_cents,status,payment_status,manual_payment_method FROM orders WHERE payment_mode='manual' ORDER BY id DESC LIMIT 50")->fetchAll();
+function h($v){return htmlspecialchars((string)$v,ENT_QUOTES,'UTF-8');}
+?><!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pagamentos | Raiz & Brasa</title><link rel="stylesheet" href="/assets/app.css"></head><body><header><a class="brand" href="/">Raiz & Brasa</a><nav><a href="/admin/">Painel</a></nav></header><main class="wrap section"><h1>Pagamentos</h1><p class="notice"><?=h($notice?:'Gerencie as formas de pagamento e recebimentos manuais.')?></p><section class="panel"><h2>Configuração</h2><form method="post"><input type="hidden" name="csrf" value="<?=h($csrf)?>"><input type="hidden" name="action" value="config"><label><input type="checkbox" name="enabled" value="1" style="width:auto" <?=$s['online_enabled']?'checked':''?>> Habilitar pagamento online</label><label>Gateway<select name="provider"><option value="mercadopago" <?=$s['provider']==='mercadopago'?'selected':''?>>Mercado Pago</option><option value="pagbank" <?=$s['provider']==='pagbank'?'selected':''?>>PagBank (PagSeguro)</option></select></label><p class="muted">A ativação real fica bloqueada até as integrações e webhooks estarem implementados e testados.</p><button>Salvar</button></form></section><section class="section"><h2>Recebimentos manuais</h2><div class="panel"><?php foreach($orders as $o):?><div class="line"><span>#<?=h($o['id'])?> · <?=h($o['customer_name'])?> · <?=h($o['manual_payment_method']??'')?> · R$ <?=number_format($o['total_cents']/100,2,',','.')?> · <?=h($o['payment_status'])?></span><?php if($o['payment_status']==='pending'&&$o['status']!=='cancelled'):?><form method="post" onsubmit="return confirm('Confirmar que este valor foi recebido?')"><input type="hidden" name="csrf" value="<?=h($csrf)?>"><input type="hidden" name="action" value="confirm"><input type="hidden" name="order_id" value="<?=h($o['id'])?>"><button>Marcar pago</button></form><?php endif;?></div><?php endforeach;?></div></section></main></body></html>
