@@ -4,14 +4,18 @@ namespace App;
 use DomainException;
 final class Cms{
  public static function definitions():array{
- return [
+ $definitions=[
  'inicio'=>['label'=>'Início','fields'=>['hero_eyebrow'=>['Chamada da capa','O sabor de se sentir em casa'],'hero_title'=>['Título da capa','Tempero de casa.'],'hero_subtitle'=>['Destaque da capa','Sabor de verdade.'],'hero_description'=>['Descrição da capa','Comida mineira, variedade todos os dias e aquele carinho que transforma o almoço em um momento especial.'],'featured_title'=>['Título dos sabores','Uma mesa cheia de sabores.'],'featured_description'=>['Texto dos sabores','Da tradição mineira às opções mais leves, aqui sempre tem algo gostoso esperando por você.'],'about_title'=>['Título do restaurante','Um lugar para se reunir e saborear.'],'about_description'=>['Texto do restaurante','Ambiente amplo, climatizado e acolhedor, com espaço para 144 pessoas. Sinta-se à vontade: a casa é sua.']],'images'=>['hero'=>'Imagem da capa','meat'=>'Comida mineira','salad'=>'Saladas','pasta'=>'Massas','interior'=>'Interior']],
  'cardapio'=>['label'=>'Cardápio','fields'=>['page_title'=>['Título','Tem sempre algo gostoso no cardápio.'],'page_description'=>['Introdução','Comida mineira, carnes variadas, massas, saladas e sobremesas. Nossa seleção muda ao longo dos dias — confirme as opções de hoje pelo WhatsApp.'],'section_title'=>['Título da seção','Nossos sabores.']],'images'=>['meat'=>'Comida mineira','salad'=>'Saladas','pasta'=>'Massas']],
  'o-restaurante'=>['label'=>'O Restaurante','fields'=>['page_title'=>['Título','Um restaurante feito para receber bem.'],'page_description'=>['Introdução','Comida saborosa, variedade e um ambiente em que todo mundo pode se sentir à vontade.'],'about_title'=>['Título da história','O sabor da vida está em quem tempera.'],'about_description'=>['História e estrutura','No Restaurante da Bia, o almoço vai além do prato. Nosso espaço é amplo, bem iluminado e climatizado, com 144 lugares para receber famílias, amigos e quem valoriza uma refeição feita com cuidado.']],'images'=>['interior'=>'Foto do restaurante']],
  'galeria'=>['label'=>'Galeria','fields'=>['page_title'=>['Título','Sabores, encontros e momentos.'],'page_description'=>['Descrição','Um espaço para conhecer o clima do restaurante. As imagens atuais são demonstrativas e serão substituídas por fotografias reais.']],'images'=>[]],
  'contato'=>['label'=>'Contato','fields'=>['page_title'=>['Título','Vamos conversar?'],'page_description'=>['Introdução','Confira onde estamos, nosso horário de funcionamento e os canais para falar com a equipe.']],'images'=>['table'=>'Foto da página']]
  ];
+ foreach(self::extraDefinitions() as $slug=>$entries){foreach($entries as [$key,$value]){$definitions[$slug]['fields'][$key]=[ucfirst(str_replace('_',' ',$key)),$value];}}
+ return $definitions;
  }
+
+ public static function extraDefinitions():array{return [object Object];}
  public static function field(string $page,string $key,string $default=''):string{
   static $cache=[];$id="$page.$key";if(array_key_exists($id,$cache))return $cache[$id];
   try{$q=Db::pdo()->prepare('SELECT field_value FROM cms_fields WHERE page_slug=? AND field_key=?');$q->execute([$page,$key]);$v=$q->fetchColumn();return $cache[$id]=$v===false?$default:(string)$v;}catch(\PDOException $e){error_log((string)$e);return $default;}
