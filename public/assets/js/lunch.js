@@ -577,12 +577,16 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       const result = await response.json();
       if (!response.ok) throw Error(result.error || 'Não foi possível registrar o pedido');
-      feedback.textContent =
-        'Pedido #' +
-        result.order_id +
-        ' recebido! Total: ' +
-        money(result.total_cents) +
-        '. Aguarde a confirmação do restaurante.';
+      feedback.textContent = '';
+      const successDialog = document.querySelector('#lunch-success-dialog');
+      document.querySelector('#lunch-success-number').textContent = '#' + result.order_id;
+      document.querySelector('#lunch-success-total').textContent = money(result.total_cents);
+      document.querySelector('#lunch-success-track').href =
+        '/cliente/?order=' + encodeURIComponent(result.order_id);
+      document.querySelector('#lunch-success-info').textContent = authenticated
+        ? 'Acompanhe o andamento do pedido na sua conta.'
+        : 'Para acompanhar, entre ou crie sua conta no próximo passo. Este pedido será vinculado à sua conta neste navegador.';
+      successDialog.showModal();
       form.reset();
       qty = 1;
       groups = [{ id: nextId++, count: 1, name: '', items: [] }];

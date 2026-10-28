@@ -117,6 +117,9 @@ final class Lunch
             }
             \App\AdminNotification::create('order', $orderId, 'Novo pedido recebido', 'Pedido #'.$orderId.' enviado por '.$name, '/admin/lunch-orders.php');
             $db->commit();
+            if (!$customerId) {
+                Customer::rememberGuestOrder($orderId);
+            }
             return ['order_id' => $orderId,'total_cents' => $total,'quantity' => count($normalized),'status' => 'pending','payment_status' => 'pending'];
         } catch (\Throwable $e) {
             if ($db->inTransaction()) {

@@ -46,6 +46,7 @@ final class Customer
         self::boot();
         session_regenerate_id(true);
         $_SESSION['bia_customer_id'] = (int)$user['id'];
+        self::claimGuestOrders();
     }
     public static function register(string $email, string $password): void
     {
@@ -67,7 +68,39 @@ final class Customer
         self::boot();
         session_regenerate_id(true);
         $_SESSION['bia_customer_id'] = (int)Db::pdo()->lastInsertId();
+        self::claimGuestOrders();
     }
+    /**
+     * Link only orders created within this same customer session.
+     * Never claim an order based solely on a public order number.
+     */
+    public static function rememberGuestOrder(int $orderId): void
+    {
+        self::boot();
+        if (self::id() || $orderId <= 0) {
+            return;
+        }
+        $orders = $_SESSION['bia_guest_orders'] ?? [];
+        $orders[] = $orderId;
+        $_SESSION['bia_guest_orders'] = array_slice(array_unique(array_map('intval', $orders)), -25);
+    }
+
+    private static function claimGuestOrders(): void
+    {
+        $customerId = self::id();
+        $orders = $_SESSION['bia_guest_orders'] ?? [];
+        if (!$customerId || !$orders) {
+            return;
+        }
+        $query = Db::pdo()->prepare('UPDATE lunch_orders SET customer_id=? WHERE id=? AND customer_id IS NULL');
+        foreach ($orders as $orderId) {
+            if (filter_var($orderId, FILTER_VALIDATE_INT)) {
+                $query->execute([$customerId, (int)$orderId]);
+            }
+        }
+        unset($_SESSION['bia_guest_orders']);
+    }
+
     public static function requireLogin(): int
     {
         $id = self::id();
