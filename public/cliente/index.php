@@ -122,7 +122,8 @@ if ($id): ?>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@400;600;700;800&display=swap">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="/assets/css/bia.css?v=17">
-  <?php $customerFavicon=\App\Cms::setting('favicon'); if ($customerFavicon): ?>
+  <?php $customerFavicon = \App\Cms::setting('favicon');
+    if ($customerFavicon): ?>
   <link rel="icon" href="<?=bia_esc($customerFavicon)?>">
   <?php endif; ?>
 </head>
@@ -130,7 +131,8 @@ if ($id): ?>
 <a class="skip" href="#conteudo">Ir para conteúdo</a>
 <div class="customer-private-topbar">
   <a href="/" class="customer-private-brand">
-    <?php $customerLogo=\App\Cms::setting('logo'); if ($customerLogo): ?>
+    <?php $customerLogo = \App\Cms::setting('logo');
+    if ($customerLogo): ?>
     <img src="<?=bia_esc($customerLogo)?>" alt="Restaurante da Bia">
     <?php else: ?>Restaurante da Bia<?php endif; ?>
   </a>

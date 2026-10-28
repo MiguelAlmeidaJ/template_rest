@@ -2772,12 +2772,71 @@ body {
 }
 
 /* Dedicated customer area: no public-site header, navigation or footer */
-.customer-private-body{background:#fff5ec;min-height:100vh;color:#212121}
-.customer-private-topbar{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.9rem max(1.5rem,calc((100vw - 80rem)/2));background:#fff;border-bottom:1px solid #ebe8e2;min-height:5rem}
-.customer-private-brand{display:flex;align-items:center;text-decoration:none;color:#2d6835;font:700 1rem 'Open Sans',Arial,sans-serif}
-.customer-private-brand img{display:block;width:auto;max-width:11rem;max-height:3.4rem;object-fit:contain}
-.customer-private-topbar>span{font-size:.82rem;color:#6e796f}
-.customer-private-back{display:inline-flex;align-items:center;gap:.5rem;color:#2d6835;text-decoration:none;font-size:.82rem;font-weight:700}
-.customer-private-back:hover{color:#bc1c23}
-.customer-private-body .customer-page{padding-top:clamp(2rem,4vw,3.5rem);padding-bottom:4rem}
-@media(max-width:600px){.customer-private-topbar{padding:.8rem 1rem;min-height:4.2rem}.customer-private-brand img{max-width:8rem;max-height:2.7rem}.customer-private-topbar>span{display:none}.customer-private-back{font-size:.74rem}}
+.customer-private-body {
+  background: #fff5ec;
+  min-height: 100vh;
+  color: #212121;
+}
+.customer-private-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem max(1.5rem, calc((100vw - 80rem) / 2));
+  background: #fff;
+  border-bottom: 1px solid #ebe8e2;
+  min-height: 5rem;
+}
+.customer-private-brand {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: #2d6835;
+  font:
+    700 1rem "Open Sans",
+    Arial,
+    sans-serif;
+}
+.customer-private-brand img {
+  display: block;
+  width: auto;
+  max-width: 11rem;
+  max-height: 3.4rem;
+  object-fit: contain;
+}
+.customer-private-topbar > span {
+  font-size: 0.82rem;
+  color: #6e796f;
+}
+.customer-private-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #2d6835;
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+.customer-private-back:hover {
+  color: #bc1c23;
+}
+.customer-private-body .customer-page {
+  padding-top: clamp(2rem, 4vw, 3.5rem);
+  padding-bottom: 4rem;
+}
+@media (max-width: 600px) {
+  .customer-private-topbar {
+    padding: 0.8rem 1rem;
+    min-height: 4.2rem;
+  }
+  .customer-private-brand img {
+    max-width: 8rem;
+    max-height: 2.7rem;
+  }
+  .customer-private-topbar > span {
+    display: none;
+  }
+  .customer-private-back {
+    font-size: 0.74rem;
+  }
+}
