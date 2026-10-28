@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once dirname(__DIR__, 2) . '/src/bootstrap.php';
 const BIA_WHATSAPP='https://wa.me/5532987112340';
 function bia_esc(string $s):string{return htmlspecialchars($s,ENT_QUOTES,'UTF-8');}
 function bia_header(string $title,string $active):void{
