@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require dirname(__DIR__,3).'/src/bootstrap.php';
+header('Content-Type: text/html; charset=UTF-8');
 require __DIR__.'/layout.php';
 session_name('raiz_admin');
 session_set_cookie_params(['httponly'=>true,'secure'=>!empty($_SERVER['HTTPS'])&&$_SERVER['HTTPS']!=='off','samesite'=>'Lax']);

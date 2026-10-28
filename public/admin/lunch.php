@@ -17,7 +17,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){cms_csrf();try{
    $id=filter_var($record['id']??null,FILTER_VALIDATE_INT);
    $name=trim(preg_replace('/^\\xEF\\xBB\\xBF/', '',(string)($record['name']??'')));
    $category=trim((string)($record['category']??''));
-   if(!$id||isset($ids[$id])||mb_strlen($name,'UTF-8')<2||mb_strlen($name,'UTF-8')>140||!in_array($category,$categories,true))throw new DomainException('Verifique os nomes e categorias antes de salvar');
+   if(!$id||!mb_check_encoding($name,'UTF-8')||isset($ids[$id])||mb_strlen($name,'UTF-8')<2||mb_strlen($name,'UTF-8')>140||!in_array($category,$categories,true))throw new DomainException('Verifique os nomes e categorias antes de salvar');
    $ids[$id]=true;$updates[]=[$name,$category,!empty($record['by_weight'])?1:0,!empty($record['active'])?1:0,$id];
   }
   $db=Db::pdo();$db->beginTransaction();
