@@ -28,21 +28,3 @@ body{font-size:var(--font-body)}
 .benefits-editorial .benefit p{font-size:.84rem;margin:.55rem 0 0;color:#666;line-height:1.75}
 @media(hover:hover){.benefits-editorial .benefit:hover{border-top-color:#2d6835;transform:none;box-shadow:none}.benefits-editorial .benefit:hover .benefit-icon,.benefits-editorial .benefit:hover svg{transform:none}}
 @media(prefers-reduced-motion:reduce){.benefits-editorial .benefit{transition:none}}
-
-/* Google reviews: authentic reviews only, official attributions */
-.reviews-section{background:#fff9f2}
-.reviews-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.25rem}
-.review-card{display:flex;flex-direction:column;min-width:0;background:white;padding:1.6rem;border:1px solid #eadfd1;border-radius:.65rem}
-.review-stars{color:#f98017;letter-spacing:.16em;font-size:1.1rem}
-.review-card blockquote{font-size:.91rem;line-height:1.75;color:#3a3a3a;margin:1rem 0 1.5rem;flex:1}
-.review-author{display:flex;align-items:center;gap:.75rem}
-.review-author img{height:2.4rem;width:2.4rem;border-radius:50%;object-fit:cover}
-.review-author strong,.review-author small{display:block}
-.review-author strong{font-size:.85rem}
-.review-author small{font-size:.74rem;color:#666}
-.review-card>a{font-size:.76rem;color:#2d6835;margin-top:1.2rem;font-weight:700}
-.reviews-google-link{font-size:.8rem;font-weight:700;color:#2d6835}
-.reviews-attribution{margin:1.35rem 0 0;color:#666;font-size:.75rem}
-.google-word{font-weight:700;letter-spacing:-.03em;color:#4285f4}
-@media(max-width:900px){.reviews-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:650px){.reviews-grid{grid-template-columns:1fr}}
