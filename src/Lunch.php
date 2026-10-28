@@ -1,0 +1,45 @@
+<?php
+declare(strict_types=1);
+namespace App;
+use DomainException;
+final class Lunch {
+ public static function settings():array {
+  $s=Db::pdo()->query('SELECT price_cents,max_choices,pix_enabled,card_enabled,orders_enabled FROM lunch_settings WHERE id=1')->fetch();
+  if(!$s)throw new DomainException('Execute a migração das quentinhas');
+  return $s;
+ }
+ public static function items():array {
+  return Db::pdo()->query('SELECT id,name,category FROM daily_menu_items WHERE active=1 ORDER BY category,sort_order,id')->fetchAll();
+ }
+ public static function create(array $data):array{
+  $s=self::settings();
+  if(!(int)$s['orders_enabled'])throw new DomainException('Pedidos temporariamente indisponíveis');
+  $method=(string)($data['payment_method']??'');
+  if(!in_array($method,['pix','card'],true)||!(int)$s[$method.'_enabled'])throw new DomainException('Forma de pagamento indisponível');
+  $name=trim((string)($data['customer_name']??''));$phone=preg_replace('/\D/','',(string)($data['customer_phone']??''));
+  $address=trim((string)($data['address']??''));$neighborhood=trim((string)($data['neighborhood']??''));$reference=trim((string)($data['reference_point']??''));
+  $boxes=$data['boxes']??[];
+  if(mb_strlen($name)<2||mb_strlen($name)>150||strlen($phone)<10||strlen($phone)>13||mb_strlen($address)<8||mb_strlen($address)>350||mb_strlen($neighborhood)<2||mb_strlen($neighborhood)>120||mb_strlen($reference)<2||mb_strlen($reference)>350||!is_array($boxes)||count($boxes)<1||count($boxes)>20||!array_is_list($boxes))throw new DomainException('Confira nome, telefone, endereço, referência e quantidade de quentinhas');
+  $db=Db::pdo();$available=[];
+  foreach(self::items() as $item)$available[(int)$item['id']]=$item['name'];
+  $normalized=[];
+  foreach($boxes as $box){
+   $chosen=$box['items']??[];
+   if(!is_array($chosen)||!array_is_list($chosen)||count($chosen)<1||count($chosen)>(int)$s['max_choices'])throw new DomainException('Seleções da quentinha inválidas');
+   $ids=[];
+   foreach($chosen as $id){$id=filter_var($id,FILTER_VALIDATE_INT);if(!$id||!isset($available[$id])||isset($ids[$id]))throw new DomainException('Item repetido ou indisponível no cardápio');$ids[$id]=$available[$id];}
+   $normalized[]=$ids;
+  }
+  $unit=(int)$s['price_cents'];$total=$unit*count($normalized);
+  $db->beginTransaction();
+  try{
+   $q=$db->prepare('INSERT INTO lunch_orders(customer_name,customer_phone,address,neighborhood,reference_point,payment_method,quantity,unit_price_cents,total_cents) VALUES(?,?,?,?,?,?,?,?,?)');
+   $q->execute([$name,$phone,$address,$neighborhood,$reference,$method,count($normalized),$unit,$total]);
+   $orderId=(int)$db->lastInsertId();
+   $boxInsert=$db->prepare('INSERT INTO lunch_order_boxes(order_id,box_number) VALUES(?,?)');
+   $itemInsert=$db->prepare('INSERT INTO lunch_order_choices(box_id,menu_item_id,item_name) VALUES(?,?,?)');
+   foreach($normalized as $index=>$items){$boxInsert->execute([$orderId,$index+1]);$boxId=(int)$db->lastInsertId();foreach($items as $id=>$item)$itemInsert->execute([$boxId,$id,$item]);}
+   $db->commit();return ['order_id'=>$orderId,'total_cents'=>$total,'quantity'=>count($normalized),'status'=>'pending','payment_status'=>'pending'];
+  }catch(\Throwable $e){if($db->inTransaction())$db->rollBack();throw $e;}
+ }
+}
