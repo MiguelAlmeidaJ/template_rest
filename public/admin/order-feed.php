@@ -67,6 +67,8 @@ try {
     } elseif ($_SERVER['REQUEST_METHOD'] !== 'GET') {
         orderFeedReply(405, ['ok' => false,'error' => 'Método não permitido.']);
     }
+    // Reading the conversation acknowledges incoming messages without requiring a reply.
+    \App\AdminNotification::markReferenceRead('chat', $id);
     $q = $db->prepare('SELECT id,sender,body,created_at FROM lunch_messages WHERE order_id=? ORDER BY id ASC LIMIT 200');
     $q->execute([$id]);
     orderFeedReply(200, ['ok' => true,'messages' => $q->fetchAll()]);

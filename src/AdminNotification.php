@@ -18,6 +18,26 @@ final class AdminNotification
         $q = Db::pdo()->prepare('INSERT INTO admin_notifications(type,reference_id,title,message,link) VALUES(?,?,?,?,?)');
         $q->execute([$type,$referenceId,mb_substr($title, 0, 190),mb_substr($message, 0, 255),$link]);
     }
+    public static function markReferenceRead(string $type, int $referenceId): void
+    {
+        $query = Db::pdo()->prepare(
+            'UPDATE admin_notifications SET is_read=1,read_at=COALESCE(read_at,NOW()) WHERE type=? AND reference_id=? AND is_read=0'
+        );
+        $query->execute([$type, $referenceId]);
+    }
+
+    public static function unreadCountByType(string $type): int
+    {
+        $query = Db::pdo()->prepare('SELECT COUNT(*) FROM admin_notifications WHERE type=? AND is_read=0');
+        $query->execute([$type]);
+        return (int) $query->fetchColumn();
+    }
+
+    public static function unreadCountExcludingChat(): int
+    {
+        return (int) Db::pdo()->query("SELECT COUNT(*) FROM admin_notifications WHERE type<>'chat' AND is_read=0")->fetchColumn();
+    }
+
     public static function unreadCount(): int
     {
         return (int)Db::pdo()->query('SELECT COUNT(*) FROM admin_notifications WHERE is_read=0')->fetchColumn();

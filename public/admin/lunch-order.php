@@ -50,6 +50,8 @@ if (!$order) {
 }
 $stmt = $db->prepare('SELECT b.id,b.box_number,b.box_name,c.item_name FROM lunch_order_boxes b LEFT JOIN lunch_order_choices c ON c.box_id=b.id WHERE b.order_id=? ORDER BY b.box_number,c.id');
 $stmt->execute([$id]);
+// Opening the order counts as reading its incoming-order notification.
+\App\AdminNotification::markReferenceRead('order', $id);
 $boxes = [];
 foreach ($stmt->fetchAll() as $row) {
     $boxNumber = (int)$row['box_number'];

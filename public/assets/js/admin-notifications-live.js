@@ -28,7 +28,22 @@ document.addEventListener('DOMContentLoaded', () => {
       loading = false;
     }
   }
-  const timer = setInterval(refresh, 10000);
+  list.addEventListener('click', (event) => {
+    const link = event.target.closest('a[data-notification-id]');
+    if (!link) return;
+    // Navigation remains available even if acknowledging the notification fails.
+    const data = new FormData();
+    data.set('csrf', link.dataset.notificationCsrf);
+    data.set('action', 'read');
+    data.set('id', link.dataset.notificationId);
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon('/admin/notifications.php', data);
+    } else {
+      fetch('/admin/notifications.php', { method: 'POST', body: data, credentials: 'same-origin', keepalive: true }).catch(() => {});
+    }
+    link.closest('.notification-item')?.classList.replace('is-unread', 'is-read');
+  });
+  const timer = setInterval(refresh, 5000);
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) refresh();
   });
