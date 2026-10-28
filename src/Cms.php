@@ -8,33 +8,98 @@ use DomainException;
 
 final class Cms
 {
+    /**
+     * Campos editáveis realmente presentes nas páginas públicas.
+     * O segundo elemento é o texto ORIGINAL usado pelo tema para substituição.
+     * Ao adicionar um texto, registre-o aqui com uma chave estável e um rótulo humano.
+     */
     public static function definitions(): array
     {
-        $definitions = [
-        'inicio' => ['label' => 'Início','fields' => ['hero_eyebrow' => ['Chamada da capa','O sabor de se sentir em casa'],'hero_title' => ['Título da capa','Tempero de casa.'],'hero_subtitle' => ['Destaque da capa','Sabor de verdade.'],'hero_description' => ['Descrição da capa','Comida mineira, variedade todos os dias e aquele carinho que transforma o almoço em um momento especial.'],'featured_title' => ['Título dos sabores','Uma mesa cheia de sabores.'],'featured_description' => ['Texto dos sabores','Da tradição mineira às opções mais leves, aqui sempre tem algo gostoso esperando por você.'],'about_title' => ['Título do restaurante','Um lugar para se reunir e saborear.'],'about_description' => ['Texto do restaurante','Ambiente amplo, climatizado e acolhedor, com espaço para 144 pessoas. Sinta-se à vontade: a casa é sua.']],'images' => ['hero' => 'Imagem da capa','meat' => 'Comida mineira','salad' => 'Saladas','pasta' => 'Massas','interior' => 'Interior']],
-        'cardapio' => ['label' => 'Cardápio','fields' => ['page_title' => ['Título','Tem sempre algo gostoso no cardápio.'],'page_description' => ['Introdução','Comida mineira, carnes variadas, massas, saladas e sobremesas. Nossa seleção muda ao longo dos dias — confirme as opções de hoje pelo WhatsApp.'],'section_title' => ['Título da seção','Nossos sabores.']],'images' => ['meat' => 'Comida mineira','salad' => 'Saladas','pasta' => 'Massas']],
-        'o-restaurante' => ['label' => 'O Restaurante','fields' => ['page_title' => ['Título','Um restaurante feito para receber bem.'],'page_description' => ['Introdução','Comida saborosa, variedade e um ambiente em que todo mundo pode se sentir à vontade.'],'about_title' => ['Título da história','O sabor da vida está em quem tempera.'],'about_description' => ['História e estrutura','No Restaurante da Bia, o almoço vai além do prato. Nosso espaço é amplo, bem iluminado e climatizado, com 144 lugares para receber famílias, amigos e quem valoriza uma refeição feita com cuidado.']],'images' => ['interior' => 'Foto do restaurante']],
-        'galeria' => ['label' => 'Galeria','fields' => ['page_title' => ['Título','Sabores, encontros e momentos.'],'page_description' => ['Descrição','Um espaço para conhecer o clima do restaurante. As imagens atuais são demonstrativas e serão substituídas por fotografias reais.']],'images' => []],
-        'contato' => ['label' => 'Contato','fields' => ['page_title' => ['Título','Vamos conversar?'],'page_description' => ['Introdução','Confira onde estamos, nosso horário de funcionamento e os canais para falar com a equipe.']],'images' => ['table' => 'Foto da página']],
+        return [
+            'inicio' => [
+                'label' => 'Início',
+                'fields' => [
+                    'hero_eyebrow' => ['Chamada da capa', 'O sabor de se sentir em casa'],
+                    'hero_title' => ['Título principal da capa', 'Tempero de casa.'],
+                    'hero_subtitle' => ['Destaque da capa', 'Sabor de verdade.'],
+                    'hero_description' => ['Descrição da capa', 'Comida mineira, variedade todos os dias e aquele carinho que transforma o almoço em um momento especial.'],
+                    'hero_button' => ['Botão da capa', 'Conheça nosso cardápio'],
+                    'hours_eyebrow' => ['Chamada do horário', 'Venha almoçar com a gente'],
+                    'hours_title' => ['Título do horário', 'Nosso horário de atendimento'],
+                    'featured_eyebrow' => ['Chamada dos sabores', 'Escolha o seu favorito'],
+                    'featured_title' => ['Título dos sabores', 'Uma mesa cheia de sabores.'],
+                    'featured_description' => ['Descrição dos sabores', 'Da tradição mineira às opções mais leves, aqui sempre tem algo gostoso esperando por você.'],
+                    'feature_meat' => ['Categoria: comida mineira', 'Comida mineira'],
+                    'feature_salad' => ['Categoria: saladas', 'Saladas & acompanhamentos'],
+                    'feature_pasta' => ['Categoria: massas', 'Massas & especiais'],
+                    'about_eyebrow' => ['Chamada sobre o restaurante', 'Muito além do almoço'],
+                    'about_title' => ['Título sobre o restaurante', 'Um lugar para se reunir e saborear.'],
+                    'about_description' => ['Texto sobre o restaurante', 'Ambiente amplo, climatizado e acolhedor, com espaço para 144 pessoas. Sinta-se à vontade: a casa é sua.'],
+                    'order_eyebrow' => ['Chamada para pedir', 'SEU ALMOÇO, DO SEU JEITO'],
+                    'order_title' => ['Título da seção de pedidos', 'Comida de verdade.'],
+                    'order_subtitle' => ['Destaque da seção de pedidos', 'Do nosso fogão para você.'],
+                    'order_description' => ['Descrição da seção de pedidos', 'Escolha os pratos do dia, monte sua quentinha e aproveite o sabor da Bia onde estiver.'],
+                    'order_button' => ['Botão principal de pedidos', 'Montar minha quentinha'],
+                ],
+                'images' => [
+                    'hero' => 'Imagem de capa',
+                    'meat' => 'Comida mineira e seção de pedidos',
+                    'salad' => 'Saladas',
+                    'pasta' => 'Massas',
+                    'interior' => 'Interior do restaurante',
+                ],
+            ],
+            'cardapio' => [
+                'label' => 'Cardápio',
+                'fields' => [
+                    'menu_eyebrow' => ['Chamada do cardápio', 'COMIDA FEITA COM CARINHO'],
+                    'menu_title' => ['Título do cardápio', 'Cardápio do dia'],
+                    'menu_notice' => ['Aviso sobre itens por peso', 'Itens com * são vendidos por peso e não entram nas quentinhas.'],
+                    'menu_button' => ['Botão de pedido', 'Monte sua quentinha'],
+                ],
+                'images' => [],
+            ],
+            'o-restaurante' => [
+                'label' => 'O Restaurante',
+                'fields' => [
+                    'about_eyebrow' => ['Chamada da história', 'O Restaurante da Bia'],
+                    'about_title' => ['Título da história', 'O sabor da vida está em quem tempera.'],
+                    'about_description' => ['Apresentação do restaurante', 'No Restaurante da Bia, o almoço vai além do prato. Nosso espaço é amplo, bem iluminado e climatizado, com 144 lugares para receber famílias, amigos e quem valoriza uma refeição feita com cuidado.'],
+                    'food_description' => ['Variedade de pratos', 'Diariamente, oferecemos uma grande variedade de acompanhamentos quentes, saladas, comida mineira, massas, carnes e sobremesas.'],
+                    'gallery_button' => ['Botão para galeria', 'Conheça nossos espaços'],
+                ],
+                'images' => [
+                    'interior' => 'Fotografia do restaurante',
+                ],
+            ],
+            'galeria' => [
+                'label' => 'Galeria',
+                'fields' => [
+                    'gallery_eyebrow' => ['Chamada da galeria', 'Um pouco da nossa casa'],
+                    'gallery_title' => ['Título da galeria', 'Sabores, encontros e momentos.'],
+                    'gallery_description' => ['Descrição da galeria', 'Um espaço para conhecer o clima do restaurante. As imagens atuais são demonstrativas e serão substituídas por fotografias reais.'],
+                    'gallery_cta_title' => ['Título do convite', 'Venha conhecer de perto.'],
+                    'gallery_cta_description' => ['Texto do convite', 'Estamos esperando por você em Além Paraíba.'],
+                    'gallery_cta_button' => ['Botão do convite', 'Como chegar'],
+                ],
+                'images' => [],
+            ],
+            'contato' => [
+                'label' => 'Contato',
+                'fields' => [
+                    'contact_title' => ['Título da página', 'Venha nos visitar.'],
+                    'contact_description' => ['Descrição da página', 'Uma boa comida e um ambiente acolhedor esperam por você.'],
+                    'address_title' => ['Título do endereço', 'Nosso endereço'],
+                    'hours_title' => ['Título dos horários', 'Horário de atendimento'],
+                    'phone_title' => ['Título do telefone', 'Telefone e WhatsApp'],
+                ],
+                'images' => [
+                    'table' => 'Foto do restaurante',
+                ],
+            ],
         ];
-        foreach (self::extraDefinitions() as $slug => $entries) {
-            foreach ($entries as [$key,$value]) {
-                $definitions[$slug]['fields'][$key] = [ucfirst(str_replace('_', ' ', $key)),$value];
-            }
-        }
-        return $definitions;
     }
 
-    public static function extraDefinitions(): array
-    {
-        return [
-         'inicio' => [['feature_meat', 'Comida mineira'], ['feature_salad', 'Saladas & acompanhamentos'], ['feature_pasta', 'Massas & especiais'], ['amenities_heading', 'Tudo pensado para você.'], ['cta_title', 'O seu almoço tem endereço certo.'], ['cta_desc', 'Faça seu pedido ou venha aproveitar um almoço especial com a gente.']],
-         'cardapio' => [['category_description', 'Estas são categorias de pratos que fazem parte da proposta gastronômica do restaurante, não uma lista de disponibilidade em tempo real.'], ['variety_title', 'O que você encontra por aqui'], ['cta_title', 'Quer saber o que tem hoje?']],
-         'o-restaurante' => [['features_title', 'Cada detalhe importa.']],
-         'galeria' => [['cta_title', 'Venha conhecer de perto.']],
-         'contato' => [['contact_title', 'A sua próxima parada para o almoço.']],
-        ];
-    }
     public static function field(string $page, string $key, string $default = ''): string
     {
         static $cache = [];
