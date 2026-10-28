@@ -1,0 +1,15 @@
+{
+  "name": "restaurante-da-bia/site",
+  "description": "Ferramentas de padronização do código PHP do restaurante.",
+  "type": "project",
+  "require": {
+    "php": "^8.2"
+  },
+  "require-dev": {
+    "friendsofphp/php-cs-fixer": "^3.80"
+  },
+  "scripts": {
+    "format:php": "php-cs-fixer fix --using-cache=no --allow-risky=no",
+    "check:php": "php-cs-fixer fix --dry-run --diff --using-cache=no --allow-risky=no"
+  }
+}

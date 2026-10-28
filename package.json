@@ -1,0 +1,11 @@
+{
+  "name": "restaurante-da-bia",
+  "private": true,
+  "scripts": {
+    "format:front": "prettier --write \"public/**/*.js\" \"public/**/*.css\"",
+    "check:front": "prettier --check \"public/**/*.js\" \"public/**/*.css\""
+  },
+  "devDependencies": {
+    "prettier": "3.6.2"
+  }
+}

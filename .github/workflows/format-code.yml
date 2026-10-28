@@ -1,0 +1,69 @@
+name: Padronizar código
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**/*.php'
+      - '**/*.js'
+      - '**/*.css'
+      - '.php-cs-fixer.dist.php'
+      - '.prettierrc.json'
+      - '.github/workflows/format-code.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: format-main
+  cancel-in-progress: false
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obter repositório
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Configurar PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer
+
+      - name: Instalar ferramentas PHP
+        run: composer install --no-interaction --no-progress --no-scripts --prefer-dist
+
+      - name: Padronizar PHP
+        run: composer run format:php
+
+      - name: Validar sintaxe de todos os arquivos PHP
+        run: |
+          find public src scripts -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: Configurar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Padronizar JavaScript e CSS
+        run: |
+          npm install --no-save --no-package-lock
+          npm run format:front
+
+      - name: Validar sintaxe JavaScript
+        run: |
+          find public -name '*.js' -print0 | xargs -0 -n1 node --check
+
+      - name: Publicar formatação
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -u
+          if ! git diff --cached --quiet; then
+            git commit -m 'style: formatar PHP, JS e CSS em todo o projeto'
+            git push origin HEAD:main
+          fi
