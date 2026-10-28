@@ -16,10 +16,10 @@ try {
 <section class="split"><?php bia_photo('interior', 'Interior de restaurante com mesas preparadas', 'split-photo');?><div class="split-copy"><span class="eyebrow">Muito além do almoço</span><h2 class="title">Um lugar para se reunir e saborear.</h2><p class="lead">Ambiente amplo, climatizado e acolhedor, com espaço para 144 pessoas. Sinta-se à vontade: a casa é sua.</p><a class="btn" href="/o-restaurante/">Conheça o restaurante ↗</a></div></section>
 <div class="shell home-amenities" aria-label="Comodidades do restaurante">
   <ul class="home-amenities-list">
-    <li><i class="bi bi-wind" aria-hidden="true"></i><span>Ambiente climatizado</span></li>
-    <li><i class="bi bi-p-square" aria-hidden="true"></i><span>Estacionamento grátis</span></li>
-    <li><i class="bi bi-universal-access" aria-hidden="true"></i><span>Acessibilidade</span></li>
-    <li><i class="bi bi-wifi" aria-hidden="true"></i><span>Wi-Fi grátis</span></li>
+    <li><span class="home-amenity-icon"><i class="bi bi-wind" aria-hidden="true"></i></span><span>Ambiente climatizado</span></li>
+    <li><span class="home-amenity-icon"><i class="bi bi-p-square" aria-hidden="true"></i></span><span>Estacionamento grátis</span></li>
+    <li><span class="home-amenity-icon"><i class="bi bi-universal-access" aria-hidden="true"></i></span><span>Acessibilidade</span></li>
+    <li><span class="home-amenity-icon"><i class="bi bi-wifi" aria-hidden="true"></i></span><span>Wi-Fi grátis</span></li>
   </ul>
 </div>
 <section class="shell section home-order-section" aria-labelledby="home-order-title">

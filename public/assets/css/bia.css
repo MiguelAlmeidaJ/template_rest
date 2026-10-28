@@ -2101,3 +2101,40 @@ body {
     font-size: 1.05rem;
   }
 }
+
+/* Amenities: reference-inspired circular icons above each label */
+.home-amenities .home-amenities-list {
+  padding-block: 1.6rem;
+  gap: 1rem;
+}
+.home-amenities .home-amenities-list li {
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  gap: .85rem;
+  font-size: .86rem;
+  color: #263d2c;
+}
+.home-amenity-icon {
+  display: grid;
+  place-items: center;
+  width: 4rem;
+  height: 4rem;
+  flex: none;
+  border-radius: 50%;
+  background: #fff0e3;
+}
+.home-amenities .home-amenities-list .home-amenity-icon .bi {
+  font-size: 1.7rem;
+  color: #f98017;
+}
+@media (max-width: 790px) {
+  .home-amenities .home-amenities-list li {
+    justify-content: center;
+  }
+}
+@media (max-width: 440px) {
+  .home-amenity-icon { width: 3.4rem; height: 3.4rem; }
+  .home-amenities .home-amenities-list .home-amenity-icon .bi { font-size: 1.45rem; }
+  .home-amenities .home-amenities-list li { font-size: .76rem; }
+}
