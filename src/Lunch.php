@@ -9,7 +9,17 @@ final class Lunch {
   return $s;
  }
  public static function items():array {
-  return Db::pdo()->query('SELECT id,name,category FROM daily_menu_items WHERE active=1 ORDER BY category,sort_order,id')->fetchAll();
+  return Db::pdo()->query('SELECT id,name,category FROM daily_menu_items WHERE active=1 AND by_weight=0 ORDER BY sort_order,id')->fetchAll();
+ }
+ public static function menu():array {
+  return Db::pdo()->query('SELECT id,name,category,by_weight,sort_order FROM daily_menu_items WHERE active=1 ORDER BY sort_order,id')->fetchAll();
+ }
+ public static function menuDate():string {
+  $v=Db::pdo()->query('SELECT updated_at FROM lunch_menu_meta WHERE id=1')->fetchColumn();
+  return $v?(new \DateTimeImmutable((string)$v))->format('d/m/Y'):'';
+ }
+ public static function touchMenu():void {
+  Db::pdo()->exec('INSERT INTO lunch_menu_meta(id,updated_at) VALUES(1,NOW()) ON DUPLICATE KEY UPDATE updated_at=NOW()');
  }
  public static function create(array $data):array{
   $s=self::settings();
