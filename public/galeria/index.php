@@ -1,6 +1,13 @@
 <?php
 require dirname(__DIR__).'/includes/site.php';
-require dirname(__DIR__,2).'/src/bootstrap.php';
-$photos=[];try{$photos=\App\Cms::gallery();}catch(\Throwable $e){error_log((string)$e);}
-bia_header('Galeria','Galeria');
-?><section class="page-hero"><div class="shell"><span class="eyebrow">Um pouco da nossa casa</span><h1 class="title">Sabores, encontros e momentos.</h1><p class="lead">Um espaço para conhecer o clima do restaurante. As imagens atuais são demonstrativas e serão substituídas por fotografias reais.</p></div></section><section class="shell section"><div class="gallery-grid"><?php foreach($photos as $photo):if(!(bool)$photo['is_visible'])continue;?><figure><img loading="lazy" src="<?=bia_esc($photo['filename'])?>" alt="<?=bia_esc($photo['alt_text'])?>"><?php if($photo['caption']):?><figcaption class="gallery-caption"><?=bia_esc($photo['caption'])?></figcaption><?php endif;?></figure><?php endforeach;?></div><?php if(!$photos):?><p class="notice">Em breve, novas fotos do Restaurante da Bia.</p><?php endif;?></section><section class="shell section"><div class="cta-panel"><h2 class="title">Venha conhecer de perto.</h2><p class="lead">Estamos esperando por você em Além Paraíba.</p><a class="btn" href="/contato/">Como chegar ↗</a></div></section><?php bia_footer();
+require dirname(__DIR__, 2).'/src/bootstrap.php';
+$photos = [];
+try {
+    $photos = \App\Cms::gallery();
+} catch (\Throwable $e) {
+    error_log((string)$e);
+}
+bia_header('Galeria', 'Galeria');
+?><section class="page-hero"><div class="shell"><span class="eyebrow">Um pouco da nossa casa</span><h1 class="title">Sabores, encontros e momentos.</h1><p class="lead">Um espaço para conhecer o clima do restaurante. As imagens atuais são demonstrativas e serão substituídas por fotografias reais.</p></div></section><section class="shell section"><div class="gallery-grid"><?php foreach ($photos as $photo):if (!(bool)$photo['is_visible']) {
+    continue;
+}?><figure><img loading="lazy" src="<?=bia_esc($photo['filename'])?>" alt="<?=bia_esc($photo['alt_text'])?>"><?php if ($photo['caption']):?><figcaption class="gallery-caption"><?=bia_esc($photo['caption'])?></figcaption><?php endif;?></figure><?php endforeach;?></div><?php if (!$photos):?><p class="notice">Em breve, novas fotos do Restaurante da Bia.</p><?php endif;?></section><section class="shell section"><div class="cta-panel"><h2 class="title">Venha conhecer de perto.</h2><p class="lead">Estamos esperando por você em Além Paraíba.</p><a class="btn" href="/contato/">Como chegar ↗</a></div></section><?php bia_footer();

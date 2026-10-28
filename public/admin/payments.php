@@ -1,20 +1,48 @@
 <?php
 declare(strict_types=1);
-require dirname(__DIR__,2).'/src/bootstrap.php';require __DIR__.'/includes/layout.php';
-session_name('raiz_admin');session_set_cookie_params(['httponly'=>true,'secure'=>!empty($_SERVER['HTTPS'])&&$_SERVER['HTTPS']!=='off','samesite'=>'Lax']);session_start();
-if(!isset($_SESSION['admin_id'])){header('Location: /admin/');exit;}
-$csrf=$_SESSION['csrf']??=bin2hex(random_bytes(24));$notice='';$noticeType='success';
-if($_SERVER['REQUEST_METHOD']==='POST'){
- if(!hash_equals($csrf,(string)($_POST['csrf']??''))){http_response_code(403);exit('CSRF inválido');}
- try{
- if(($_POST['action']??'')==='config'){\App\Payments\Settings::save(isset($_POST['enabled']),(string)($_POST['provider']??''));$notice='Configuração salva.';}
- elseif(($_POST['action']??'')==='confirm'){$id=filter_var($_POST['order_id']??null,FILTER_VALIDATE_INT);if(!$id)throw new DomainException('Pedido inválido');\App\Payments\Manual::confirm($id,(int)$_SESSION['admin_id']);$notice='Recebimento registrado com sucesso.';}
- else throw new DomainException('Ação inválida');
- }catch(\DomainException $e){$notice=$e->getMessage();$noticeType='warning';}catch(\Throwable $e){error_log((string)$e);$notice='Erro ao salvar. Verifique os logs.';$noticeType='danger';}
+require dirname(__DIR__, 2).'/src/bootstrap.php';
+require __DIR__.'/includes/layout.php';
+session_name('raiz_admin');
+session_set_cookie_params(['httponly' => true,'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off','samesite' => 'Lax']);
+session_start();
+if (!isset($_SESSION['admin_id'])) {
+    header('Location: /admin/');
+    exit;
 }
-$s=\App\Payments\Settings::get();$orders=\App\Db::pdo()->query("SELECT id,customer_name,total_cents,status,payment_status,manual_payment_method FROM orders WHERE payment_mode='manual' ORDER BY id DESC LIMIT 50")->fetchAll();
-adm_start('Pagamentos','payments');?>
+$csrf = $_SESSION['csrf'] ??= bin2hex(random_bytes(24));
+$notice = '';
+$noticeType = 'success';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!hash_equals($csrf, (string)($_POST['csrf'] ?? ''))) {
+        http_response_code(403);
+        exit('CSRF inválido');
+    }
+    try {
+        if (($_POST['action'] ?? '') === 'config') {
+            \App\Payments\Settings::save(isset($_POST['enabled']), (string)($_POST['provider'] ?? ''));
+            $notice = 'Configuração salva.';
+        } elseif (($_POST['action'] ?? '') === 'confirm') {
+            $id = filter_var($_POST['order_id'] ?? null, FILTER_VALIDATE_INT);
+            if (!$id) {
+                throw new DomainException('Pedido inválido');
+            }\App\Payments\Manual::confirm($id, (int)$_SESSION['admin_id']);
+            $notice = 'Recebimento registrado com sucesso.';
+        } else {
+            throw new DomainException('Ação inválida');
+        }
+    } catch (\DomainException $e) {
+        $notice = $e->getMessage();
+        $noticeType = 'warning';
+    } catch (\Throwable $e) {
+        error_log((string)$e);
+        $notice = 'Erro ao salvar. Verifique os logs.';
+        $noticeType = 'danger';
+    }
+}
+$s = \App\Payments\Settings::get();
+$orders = \App\Db::pdo()->query("SELECT id,customer_name,total_cents,status,payment_status,manual_payment_method FROM orders WHERE payment_mode='manual' ORDER BY id DESC LIMIT 50")->fetchAll();
+adm_start('Pagamentos', 'payments');?>
 <div class="mb-4"><span class="page-kicker">FINANCEIRO</span><h1 class="page-title">Pagamentos</h1><p class="page-subtitle">Configure os meios de recebimento e acompanhe as baixas manuais.</p></div>
-<?php if($notice):?><div class="alert alert-<?=adm_h($noticeType)?>" role="alert"><?=adm_h($notice)?></div><?php endif;?>
-<div class="row g-4 mb-4"><div class="col-lg-7"><section class="content-card h-100"><div class="content-heading"><h2>Configurações de recebimento</h2><span class="badge text-bg-secondary">Modo manual</span></div><div class="settings-tile"><form method="post"><input type="hidden" name="csrf" value="<?=adm_h($csrf)?>"><input type="hidden" name="action" value="config"><div class="form-check form-switch mb-4"><input class="form-check-input" type="checkbox" role="switch" id="online" name="enabled" value="1" <?=$s['online_enabled']?'checked':''?>><label class="form-check-label fw-semibold" for="online">Ativar pagamento online</label><div class="small text-secondary">Ao ativar, os pagamentos deverão ser processados por um gateway.</div></div><label class="form-label fw-semibold" for="provider">Gateway preferencial</label><select class="form-select mb-3" id="provider" name="provider"><option value="mercadopago" <?=$s['provider']==='mercadopago'?'selected':''?>>Mercado Pago</option><option value="pagbank" <?=$s['provider']==='pagbank'?'selected':''?>>PagBank / PagSeguro</option></select><div class="alert alert-warning small"><i class="bi bi-shield-lock me-1"></i> A ativação real permanece bloqueada até a integração oficial e a validação dos webhooks. Nenhuma cobrança real é efetuada.</div><button class="btn btn-bia" type="submit">Salvar configuração</button></form></div></section></div><div class="col-lg-5"><section class="content-card h-100"><div class="content-heading"><h2>Como funciona o modo manual</h2></div><div class="settings-tile"><div class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i> Cliente escolhe cartão, Pix ou dinheiro.</div><div class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i> Pedido permanece com pagamento pendente.</div><div class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i> Após receber, confirme no painel.</div><p class="text-secondary small mb-0">A baixa fica registrada com data, administrador e histórico de auditoria.</p></div></section></div></div>
-<section class="content-card"><div class="content-heading"><div><h2>Recebimentos manuais</h2><small class="text-secondary">Últimos 50 pedidos</small></div></div><?php if(!$orders):?><div class="empty-state"><i class="bi bi-wallet2"></i><strong>Sem pagamentos manuais registrados</strong><p>Os pedidos aparecerão aqui assim que forem criados.</p></div><?php else:?><div class="table-responsive"><table class="table mb-0"><thead><tr><th>Pedido</th><th>Cliente</th><th>Forma</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead><tbody><?php foreach($orders as $o):?><tr><td><strong>#<?=adm_h($o['id'])?></strong></td><td><?=adm_h($o['customer_name'])?></td><td><?=adm_h(['card'=>'Cartão','pix'=>'Pix','cash'=>'Dinheiro'][$o['manual_payment_method']]??'-')?></td><td>R$ <?=number_format((int)$o['total_cents']/100,2,',','.')?></td><td><?=adm_status($o['payment_status'])?></td><td><?php if($o['payment_status']==='pending'&&$o['status']!=='cancelled'):?><form method="post" onsubmit="return confirm('Confirma que recebeu este pagamento?')"><input type="hidden" name="csrf" value="<?=adm_h($csrf)?>"><input type="hidden" name="action" value="confirm"><input type="hidden" name="order_id" value="<?=adm_h($o['id'])?>"><button class="btn btn-sm btn-bia">Marcar como pago</button></form><?php else:?><span class="text-secondary">—</span><?php endif;?></td></tr><?php endforeach;?></tbody></table></div><?php endif;?></section><?php adm_end();
+<?php if ($notice):?><div class="alert alert-<?=adm_h($noticeType)?>" role="alert"><?=adm_h($notice)?></div><?php endif;?>
+<div class="row g-4 mb-4"><div class="col-lg-7"><section class="content-card h-100"><div class="content-heading"><h2>Configurações de recebimento</h2><span class="badge text-bg-secondary">Modo manual</span></div><div class="settings-tile"><form method="post"><input type="hidden" name="csrf" value="<?=adm_h($csrf)?>"><input type="hidden" name="action" value="config"><div class="form-check form-switch mb-4"><input class="form-check-input" type="checkbox" role="switch" id="online" name="enabled" value="1" <?=$s['online_enabled'] ? 'checked' : ''?>><label class="form-check-label fw-semibold" for="online">Ativar pagamento online</label><div class="small text-secondary">Ao ativar, os pagamentos deverão ser processados por um gateway.</div></div><label class="form-label fw-semibold" for="provider">Gateway preferencial</label><select class="form-select mb-3" id="provider" name="provider"><option value="mercadopago" <?=$s['provider'] === 'mercadopago' ? 'selected' : ''?>>Mercado Pago</option><option value="pagbank" <?=$s['provider'] === 'pagbank' ? 'selected' : ''?>>PagBank / PagSeguro</option></select><div class="alert alert-warning small"><i class="bi bi-shield-lock me-1"></i> A ativação real permanece bloqueada até a integração oficial e a validação dos webhooks. Nenhuma cobrança real é efetuada.</div><button class="btn btn-bia" type="submit">Salvar configuração</button></form></div></section></div><div class="col-lg-5"><section class="content-card h-100"><div class="content-heading"><h2>Como funciona o modo manual</h2></div><div class="settings-tile"><div class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i> Cliente escolhe cartão, Pix ou dinheiro.</div><div class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i> Pedido permanece com pagamento pendente.</div><div class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i> Após receber, confirme no painel.</div><p class="text-secondary small mb-0">A baixa fica registrada com data, administrador e histórico de auditoria.</p></div></section></div></div>
+<section class="content-card"><div class="content-heading"><div><h2>Recebimentos manuais</h2><small class="text-secondary">Últimos 50 pedidos</small></div></div><?php if (!$orders):?><div class="empty-state"><i class="bi bi-wallet2"></i><strong>Sem pagamentos manuais registrados</strong><p>Os pedidos aparecerão aqui assim que forem criados.</p></div><?php else:?><div class="table-responsive"><table class="table mb-0"><thead><tr><th>Pedido</th><th>Cliente</th><th>Forma</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead><tbody><?php foreach ($orders as $o):?><tr><td><strong>#<?=adm_h($o['id'])?></strong></td><td><?=adm_h($o['customer_name'])?></td><td><?=adm_h(['card' => 'Cartão','pix' => 'Pix','cash' => 'Dinheiro'][$o['manual_payment_method']] ?? '-')?></td><td>R$ <?=number_format((int)$o['total_cents'] / 100, 2, ',', '.')?></td><td><?=adm_status($o['payment_status'])?></td><td><?php if ($o['payment_status'] === 'pending' && $o['status'] !== 'cancelled'):?><form method="post" onsubmit="return confirm('Confirma que recebeu este pagamento?')"><input type="hidden" name="csrf" value="<?=adm_h($csrf)?>"><input type="hidden" name="action" value="confirm"><input type="hidden" name="order_id" value="<?=adm_h($o['id'])?>"><button class="btn btn-sm btn-bia">Marcar como pago</button></form><?php else:?><span class="text-secondary">—</span><?php endif;?></td></tr><?php endforeach;?></tbody></table></div><?php endif;?></section><?php adm_end();

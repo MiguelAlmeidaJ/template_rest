@@ -1,24 +1,50 @@
 <?php
 declare(strict_types=1);
 require __DIR__.'/includes/cms-boot.php';
-use App\Cms;use App\Db;
-$fields=['name'=>'Nome do restaurante','city'=>'Cidade e estado','address'=>'Rua, número e complemento','district'=>'Bairro','hours'=>'Horário de atendimento','phone'=>'Telefone / WhatsApp','whatsapp'=>'WhatsApp (somente números com DDI)','instagram'=>'Instagram (URL completa)','maps'=>'Link para localização no Google Maps'];
-$defaults=['name'=>'Restaurante da Bia','city'=>'Além Paraíba, MG','address'=>'Rua Dr. Sobral Pinto, 425','district'=>'Vila Laroca','hours'=>'Todos os dias · 10h30 às 15h','phone'=>'(32) 98711-2340','whatsapp'=>'5532987112340','instagram'=>'','maps'=>''];
-if($_SERVER['REQUEST_METHOD']==='POST'){cms_csrf();try{
- $saved=[];
- foreach($fields as $key=>$label){$value=trim((string)($_POST[$key]??''));if(!mb_check_encoding($value,'UTF-8')||mb_strlen($value)>300)throw new DomainException('Valor inválido: '.$label);
- if($key==='whatsapp'&&$value!==''&&!preg_match('/^[0-9]{10,15}$/',$value))throw new DomainException('WhatsApp deve conter apenas números, incluindo código do país.');
- if(in_array($key,['instagram','maps'],true)&&$value!==''&&(!filter_var($value,FILTER_VALIDATE_URL)||!str_starts_with($value,'https://')))throw new DomainException('Informe uma URL HTTPS válida: '.$label);
- $saved['restaurant_'.$key]=$value;
- }
- $db=Db::pdo();$db->beginTransaction();try{$q=$db->prepare('INSERT INTO cms_settings(setting_key,setting_value) VALUES(?,?) ON DUPLICATE KEY UPDATE setting_value=VALUES(setting_value)');foreach($saved as $key=>$value)$q->execute([$key,$value]);$db->commit();}catch(Throwable $e){$db->rollBack();throw $e;}cms_notice('Informações do restaurante atualizadas.');
- }catch(Throwable $e){cms_notice($e instanceof DomainException?$e->getMessage():'Erro ao salvar informações.','danger');}}
-adm_start('Informações do restaurante','settings');cms_feedback();?>
+use App\Cms;
+use App\Db;
+
+$fields = ['name' => 'Nome do restaurante','city' => 'Cidade e estado','address' => 'Rua, número e complemento','district' => 'Bairro','hours' => 'Horário de atendimento','phone' => 'Telefone / WhatsApp','whatsapp' => 'WhatsApp (somente números com DDI)','instagram' => 'Instagram (URL completa)','maps' => 'Link para localização no Google Maps'];
+$defaults = ['name' => 'Restaurante da Bia','city' => 'Além Paraíba, MG','address' => 'Rua Dr. Sobral Pinto, 425','district' => 'Vila Laroca','hours' => 'Todos os dias · 10h30 às 15h','phone' => '(32) 98711-2340','whatsapp' => '5532987112340','instagram' => '','maps' => ''];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    cms_csrf();
+    try {
+        $saved = [];
+        foreach ($fields as $key => $label) {
+            $value = trim((string)($_POST[$key] ?? ''));
+            if (!mb_check_encoding($value, 'UTF-8') || mb_strlen($value) > 300) {
+                throw new DomainException('Valor inválido: '.$label);
+            }
+            if ($key === 'whatsapp' && $value !== '' && !preg_match('/^[0-9]{10,15}$/', $value)) {
+                throw new DomainException('WhatsApp deve conter apenas números, incluindo código do país.');
+            }
+            if (in_array($key, ['instagram','maps'], true) && $value !== '' && (!filter_var($value, FILTER_VALIDATE_URL) || !str_starts_with($value, 'https://'))) {
+                throw new DomainException('Informe uma URL HTTPS válida: '.$label);
+            }
+            $saved['restaurant_'.$key] = $value;
+        }
+        $db = Db::pdo();
+        $db->beginTransaction();
+        try {
+            $q = $db->prepare('INSERT INTO cms_settings(setting_key,setting_value) VALUES(?,?) ON DUPLICATE KEY UPDATE setting_value=VALUES(setting_value)');
+            foreach ($saved as $key => $value) {
+                $q->execute([$key,$value]);
+            }$db->commit();
+        } catch (Throwable $e) {
+            $db->rollBack();
+            throw $e;
+        }cms_notice('Informações do restaurante atualizadas.');
+    } catch (Throwable $e) {
+        cms_notice($e instanceof DomainException ? $e->getMessage() : 'Erro ao salvar informações.', 'danger');
+    }
+}
+adm_start('Informações do restaurante', 'settings');
+cms_feedback();?>
 <div class="restaurant-info-page">
 <div class="restaurant-info-heading"><a href="/admin/settings.php" class="restaurant-back"><i class="bi bi-arrow-left"></i> Voltar às configurações</a><span class="page-kicker">DADOS DO ESTABELECIMENTO</span><h1 class="page-title">Informações do restaurante</h1><p class="page-subtitle">Mantenha endereço, atendimento e canais de contato atualizados em um único lugar.</p></div>
 <form method="post" class="restaurant-info-form"><input type="hidden" name="csrf" value="<?=adm_h($csrf)?>">
-<section class="restaurant-info-section"><div class="restaurant-info-section-heading"><span class="restaurant-info-section-icon"><i class="bi bi-shop"></i></span><div><h2>Dados principais</h2><p>Informações que identificam o restaurante.</p></div></div><div class="restaurant-info-fields"><div class="restaurant-info-field restaurant-field-wide"><label for="restaurant-name">Nome do restaurante</label><input class="form-control" id="restaurant-name" name="name" maxlength="300" value="<?=adm_h(Cms::setting('restaurant_name')?:$defaults['name'])?>" required></div><div class="restaurant-info-field"><label for="restaurant-city">Cidade e estado</label><input class="form-control" id="restaurant-city" name="city" maxlength="300" value="<?=adm_h(Cms::setting('restaurant_city')?:$defaults['city'])?>" required></div></div></section>
-<section class="restaurant-info-section"><div class="restaurant-info-section-heading"><span class="restaurant-info-section-icon"><i class="bi bi-geo-alt"></i></span><div><h2>Localização e funcionamento</h2><p>Endereço e horários exibidos aos visitantes.</p></div></div><div class="restaurant-info-fields"><div class="restaurant-info-field restaurant-field-wide"><label for="restaurant-address">Rua, número e complemento</label><input class="form-control" id="restaurant-address" name="address" maxlength="300" value="<?=adm_h(Cms::setting('restaurant_address')?:$defaults['address'])?>" required></div><div class="restaurant-info-field"><label for="restaurant-district">Bairro</label><input class="form-control" id="restaurant-district" name="district" maxlength="300" value="<?=adm_h(Cms::setting('restaurant_district')?:$defaults['district'])?>" required></div><div class="restaurant-info-field restaurant-field-wide"><label for="restaurant-hours">Horário de atendimento</label><input class="form-control" id="restaurant-hours" name="hours" maxlength="300" value="<?=adm_h(Cms::setting('restaurant_hours')?:$defaults['hours'])?>" required><small>Ex.: Todos os dias, das 10h30 às 15h</small></div><div class="restaurant-info-field restaurant-field-wide"><label for="restaurant-maps">Link de localização no Google Maps <span class="restaurant-optional">Opcional</span></label><input class="form-control" id="restaurant-maps" name="maps" maxlength="300" type="url" placeholder="https://maps.google.com/..." value="<?=adm_h(Cms::setting('restaurant_maps'))?>"></div></div></section>
-<section class="restaurant-info-section"><div class="restaurant-info-section-heading"><span class="restaurant-info-section-icon"><i class="bi bi-chat-square-text"></i></span><div><h2>Canais de contato</h2><p>Como os clientes encontram e entram em contato com a equipe.</p></div></div><div class="restaurant-info-fields"><div class="restaurant-info-field"><label for="restaurant-phone">Telefone de contato</label><input class="form-control" id="restaurant-phone" name="phone" maxlength="300" value="<?=adm_h(Cms::setting('restaurant_phone')?:$defaults['phone'])?>"></div><div class="restaurant-info-field"><label for="restaurant-whatsapp">WhatsApp com DDI</label><input class="form-control" id="restaurant-whatsapp" name="whatsapp" maxlength="15" inputmode="numeric" placeholder="5532987112340" value="<?=adm_h(Cms::setting('restaurant_whatsapp')?:$defaults['whatsapp'])?>"><small>Somente números, incluindo 55.</small></div><div class="restaurant-info-field restaurant-field-wide"><label for="restaurant-instagram">Instagram <span class="restaurant-optional">Opcional</span></label><input class="form-control" id="restaurant-instagram" name="instagram" maxlength="300" type="url" placeholder="https://instagram.com/..." value="<?=adm_h(Cms::setting('restaurant_instagram'))?>"></div></div></section>
+<section class="restaurant-info-section"><div class="restaurant-info-section-heading"><span class="restaurant-info-section-icon"><i class="bi bi-shop"></i></span><div><h2>Dados principais</h2><p>Informações que identificam o restaurante.</p></div></div><div class="restaurant-info-fields"><div class="restaurant-info-field restaurant-field-wide"><label for="restaurant-name">Nome do restaurante</label><input class="form-control" id="restaurant-name" name="name" maxlength="300" value="<?=adm_h(Cms::setting('restaurant_name') ?: $defaults['name'])?>" required></div><div class="restaurant-info-field"><label for="restaurant-city">Cidade e estado</label><input class="form-control" id="restaurant-city" name="city" maxlength="300" value="<?=adm_h(Cms::setting('restaurant_city') ?: $defaults['city'])?>" required></div></div></section>
+<section class="restaurant-info-section"><div class="restaurant-info-section-heading"><span class="restaurant-info-section-icon"><i class="bi bi-geo-alt"></i></span><div><h2>Localização e funcionamento</h2><p>Endereço e horários exibidos aos visitantes.</p></div></div><div class="restaurant-info-fields"><div class="restaurant-info-field restaurant-field-wide"><label for="restaurant-address">Rua, número e complemento</label><input class="form-control" id="restaurant-address" name="address" maxlength="300" value="<?=adm_h(Cms::setting('restaurant_address') ?: $defaults['address'])?>" required></div><div class="restaurant-info-field"><label for="restaurant-district">Bairro</label><input class="form-control" id="restaurant-district" name="district" maxlength="300" value="<?=adm_h(Cms::setting('restaurant_district') ?: $defaults['district'])?>" required></div><div class="restaurant-info-field restaurant-field-wide"><label for="restaurant-hours">Horário de atendimento</label><input class="form-control" id="restaurant-hours" name="hours" maxlength="300" value="<?=adm_h(Cms::setting('restaurant_hours') ?: $defaults['hours'])?>" required><small>Ex.: Todos os dias, das 10h30 às 15h</small></div><div class="restaurant-info-field restaurant-field-wide"><label for="restaurant-maps">Link de localização no Google Maps <span class="restaurant-optional">Opcional</span></label><input class="form-control" id="restaurant-maps" name="maps" maxlength="300" type="url" placeholder="https://maps.google.com/..." value="<?=adm_h(Cms::setting('restaurant_maps'))?>"></div></div></section>
+<section class="restaurant-info-section"><div class="restaurant-info-section-heading"><span class="restaurant-info-section-icon"><i class="bi bi-chat-square-text"></i></span><div><h2>Canais de contato</h2><p>Como os clientes encontram e entram em contato com a equipe.</p></div></div><div class="restaurant-info-fields"><div class="restaurant-info-field"><label for="restaurant-phone">Telefone de contato</label><input class="form-control" id="restaurant-phone" name="phone" maxlength="300" value="<?=adm_h(Cms::setting('restaurant_phone') ?: $defaults['phone'])?>"></div><div class="restaurant-info-field"><label for="restaurant-whatsapp">WhatsApp com DDI</label><input class="form-control" id="restaurant-whatsapp" name="whatsapp" maxlength="15" inputmode="numeric" placeholder="5532987112340" value="<?=adm_h(Cms::setting('restaurant_whatsapp') ?: $defaults['whatsapp'])?>"><small>Somente números, incluindo 55.</small></div><div class="restaurant-info-field restaurant-field-wide"><label for="restaurant-instagram">Instagram <span class="restaurant-optional">Opcional</span></label><input class="form-control" id="restaurant-instagram" name="instagram" maxlength="300" type="url" placeholder="https://instagram.com/..." value="<?=adm_h(Cms::setting('restaurant_instagram'))?>"></div></div></section>
 <div class="restaurant-info-actions"><span><i class="bi bi-info-circle"></i> As alterações serão exibidas nas áreas integradas do site.</span><button type="submit" class="btn btn-bia"><i class="bi bi-check2-circle me-2"></i> Salvar alterações</button></div>
 </form></div><?php adm_end();

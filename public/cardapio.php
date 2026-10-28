@@ -1,1 +1,2 @@
-<?php header('Location: /cardapio');exit;
+<?php header('Location: /cardapio');
+exit;

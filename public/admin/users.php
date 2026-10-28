@@ -1,29 +1,77 @@
 <?php
 declare(strict_types=1);
 require __DIR__.'/includes/cms-boot.php';
-use App\Db;use App\Staff;
-$role=Staff::role();$managerOnly=$role==='manager';
-if($managerOnly){$active='employees';$title='Funcionários';}else{Staff::requireAdmin();$active='users';$title='Usuários';}
-if($_SERVER['REQUEST_METHOD']==='POST'){cms_csrf();try{
- $action=(string)($_POST['action']??'');$id=filter_var($_POST['id']??0,FILTER_VALIDATE_INT)?:0;
- if($action==='save'){
-  $targetRole=$managerOnly?'employee':(string)($_POST['role']??'customer');
-  if($managerOnly&&$id){$q=Db::pdo()->prepare("SELECT a.role FROM admins a WHERE a.customer_id=?");$q->execute([$id]);if($q->fetchColumn()!=='employee')throw new DomainException('O gestor só pode editar funcionários');}
-  Staff::manage((int)$staff['id'],$id,(string)($_POST['email']??''),$targetRole,(string)($_POST['password']??''));cms_notice('Usuário salvo com sucesso.');
- }elseif($action==='delete'){
-  if(!$id)throw new DomainException('Usuário inválido');
-  if($managerOnly){$q=Db::pdo()->prepare('SELECT role FROM admins WHERE customer_id=?');$q->execute([$id]);if($q->fetchColumn()!=='employee')throw new DomainException('O gestor só pode excluir funcionários');}
-  Staff::remove((int)$staff['id'],$id);cms_notice('Usuário excluído.');
- }else throw new DomainException('Ação inválida');
- }catch(Throwable $e){cms_notice($e instanceof DomainException?$e->getMessage():'Não foi possível salvar.','danger');}}
-$search=trim((string)($_GET['q']??''));if(mb_strlen($search)>100)$search=mb_substr($search,0,100);
-$db=Db::pdo();$sql='SELECT c.id,c.email,c.created_at,COALESCE(a.role,\'customer\') role FROM customer_accounts c LEFT JOIN admins a ON a.customer_id=c.id WHERE 1=1';
-$args=[];if($managerOnly)$sql.=" AND a.role='employee'";if($search!==''){$sql.=' AND c.email LIKE ?';$args[]='%'.$search.'%';}
-$sql.=' ORDER BY c.id DESC LIMIT 300';$q=$db->prepare($sql);$q->execute($args);$users=$q->fetchAll();
-$labels=['customer'=>'Cliente','employee'=>'Funcionário','manager'=>'Gestor','admin'=>'Admin'];
-adm_start($title,$active);cms_feedback();?>
-<div class="d-flex flex-wrap gap-3 align-items-center justify-content-between mb-4"><div><span class="page-kicker">CONTROLE DE ACESSOS</span><h1 class="page-title"><?=$title?></h1><p class="page-subtitle"><?=$managerOnly?'Cadastre e gerencie apenas os funcionários da equipe.':'Crie contas, altere perfis de acesso e revogue permissões.'?></p></div><button type="button" class="btn btn-bia" data-user-new><i class="bi bi-person-plus me-2"></i>Novo <?=$managerOnly?'funcionário':'usuário'?></button></div>
-<section class="content-card"><div class="content-heading"><h2>Contas cadastradas</h2><span class="small text-secondary"><?=count($users)?> exibidas</span></div><form method="get" class="p-3 d-flex gap-2 flex-wrap"><input type="search" name="q" value="<?=adm_h($search)?>" placeholder="Buscar por e-mail" class="form-control" style="max-width:350px"><button class="btn btn-outline-secondary">Buscar</button></form><div class="table-responsive"><table class="table align-middle"><thead><tr><th>E-mail</th><th>Perfil</th><th>Cadastro</th><th>Ações</th></tr></thead><tbody><?php foreach($users as $user):?><tr><td><?=adm_h($user['email'])?></td><td><?=adm_h($labels[$user['role']]??$user['role'])?></td><td><?=adm_h(date('d/m/Y',strtotime($user['created_at'])))?></td><td><div class="d-flex gap-2"><button type="button" class="btn btn-sm btn-outline-secondary" data-user-edit data-id="<?=adm_h($user['id'])?>" data-email="<?=adm_h($user['email'])?>" data-role="<?=adm_h($user['role'])?>"><i class="bi bi-pencil-square"></i> Editar</button><form method="post" onsubmit="return confirm('Excluir esta conta e seus dados de cadastro? Esta ação não pode ser desfeita.');"><input type="hidden" name="csrf" value="<?=adm_h($csrf)?>"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="<?=adm_h($user['id'])?>"><button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Excluir</button></form></div></td></tr><?php endforeach;?></tbody></table><?php if(!$users):?><div class="empty-state">Nenhum usuário encontrado.</div><?php endif;?></div></section>
-<dialog id="user-dialog" class="lunch-admin-dialog" aria-labelledby="user-modal-title"><div class="lunch-dialog-head"><h2 id="user-modal-title">Novo usuário</h2><button type="button" data-user-close aria-label="Fechar"><i class="bi bi-x-lg"></i></button></div><form method="post" id="user-form"><input type="hidden" name="csrf" value="<?=adm_h($csrf)?>"><input type="hidden" name="action" value="save"><input type="hidden" name="id" value="0" id="user-id"><label class="form-label">E-mail</label><input class="form-control mb-3" type="email" name="email" id="user-email" maxlength="190" autocomplete="off" required><?php if(!$managerOnly):?><label class="form-label">Tipo de usuário</label><select class="form-select mb-3" name="role" id="user-role"><?php foreach($labels as $value=>$label):?><option value="<?=adm_h($value)?>"><?=adm_h($label)?></option><?php endforeach;?></select><?php else:?><p class="small text-secondary">O perfil criado será <strong>Funcionário</strong>.</p><?php endif;?><label class="form-label" id="user-password-label">Senha</label><input class="form-control mb-2" name="password" id="user-password" type="password" minlength="10" maxlength="128" autocomplete="new-password"><p class="small text-secondary" id="user-password-hint">Obrigatória ao criar. Mínimo de 10 caracteres.</p><div class="lunch-dialog-footer mt-4"><button class="btn btn-outline-secondary" type="button" data-user-close>Cancelar</button><button class="btn btn-bia">Salvar usuário</button></div></form></dialog>
+use App\Db;
+use App\Staff;
+
+$role = Staff::role();
+$managerOnly = $role === 'manager';
+if ($managerOnly) {
+    $active = 'employees';
+    $title = 'Funcionários';
+} else {
+    Staff::requireAdmin();
+    $active = 'users';
+    $title = 'Usuários';
+}
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    cms_csrf();
+    try {
+        $action = (string)($_POST['action'] ?? '');
+        $id = filter_var($_POST['id'] ?? 0, FILTER_VALIDATE_INT) ?: 0;
+        if ($action === 'save') {
+            $targetRole = $managerOnly ? 'employee' : (string)($_POST['role'] ?? 'customer');
+            if ($managerOnly && $id) {
+                $q = Db::pdo()->prepare('SELECT a.role FROM admins a WHERE a.customer_id=?');
+                $q->execute([$id]);
+                if ($q->fetchColumn() !== 'employee') {
+                    throw new DomainException('O gestor só pode editar funcionários');
+                }
+            }
+            Staff::manage((int)$staff['id'], $id, (string)($_POST['email'] ?? ''), $targetRole, (string)($_POST['password'] ?? ''));
+            cms_notice('Usuário salvo com sucesso.');
+        } elseif ($action === 'delete') {
+            if (!$id) {
+                throw new DomainException('Usuário inválido');
+            }
+            if ($managerOnly) {
+                $q = Db::pdo()->prepare('SELECT role FROM admins WHERE customer_id=?');
+                $q->execute([$id]);
+                if ($q->fetchColumn() !== 'employee') {
+                    throw new DomainException('O gestor só pode excluir funcionários');
+                }
+            }
+            Staff::remove((int)$staff['id'], $id);
+            cms_notice('Usuário excluído.');
+        } else {
+            throw new DomainException('Ação inválida');
+        }
+    } catch (Throwable $e) {
+        cms_notice($e instanceof DomainException ? $e->getMessage() : 'Não foi possível salvar.', 'danger');
+    }
+}
+$search = trim((string)($_GET['q'] ?? ''));
+if (mb_strlen($search) > 100) {
+    $search = mb_substr($search, 0, 100);
+}
+$db = Db::pdo();
+$sql = 'SELECT c.id,c.email,c.created_at,COALESCE(a.role,\'customer\') role FROM customer_accounts c LEFT JOIN admins a ON a.customer_id=c.id WHERE 1=1';
+$args = [];
+if ($managerOnly) {
+    $sql .= " AND a.role='employee'";
+}if ($search !== '') {
+    $sql .= ' AND c.email LIKE ?';
+    $args[] = '%'.$search.'%';
+}
+$sql .= ' ORDER BY c.id DESC LIMIT 300';
+$q = $db->prepare($sql);
+$q->execute($args);
+$users = $q->fetchAll();
+$labels = ['customer' => 'Cliente','employee' => 'Funcionário','manager' => 'Gestor','admin' => 'Admin'];
+adm_start($title, $active);
+cms_feedback();?>
+<div class="d-flex flex-wrap gap-3 align-items-center justify-content-between mb-4"><div><span class="page-kicker">CONTROLE DE ACESSOS</span><h1 class="page-title"><?=$title?></h1><p class="page-subtitle"><?=$managerOnly ? 'Cadastre e gerencie apenas os funcionários da equipe.' : 'Crie contas, altere perfis de acesso e revogue permissões.'?></p></div><button type="button" class="btn btn-bia" data-user-new><i class="bi bi-person-plus me-2"></i>Novo <?=$managerOnly ? 'funcionário' : 'usuário'?></button></div>
+<section class="content-card"><div class="content-heading"><h2>Contas cadastradas</h2><span class="small text-secondary"><?=count($users)?> exibidas</span></div><form method="get" class="p-3 d-flex gap-2 flex-wrap"><input type="search" name="q" value="<?=adm_h($search)?>" placeholder="Buscar por e-mail" class="form-control" style="max-width:350px"><button class="btn btn-outline-secondary">Buscar</button></form><div class="table-responsive"><table class="table align-middle"><thead><tr><th>E-mail</th><th>Perfil</th><th>Cadastro</th><th>Ações</th></tr></thead><tbody><?php foreach ($users as $user):?><tr><td><?=adm_h($user['email'])?></td><td><?=adm_h($labels[$user['role']] ?? $user['role'])?></td><td><?=adm_h(date('d/m/Y', strtotime($user['created_at'])))?></td><td><div class="d-flex gap-2"><button type="button" class="btn btn-sm btn-outline-secondary" data-user-edit data-id="<?=adm_h($user['id'])?>" data-email="<?=adm_h($user['email'])?>" data-role="<?=adm_h($user['role'])?>"><i class="bi bi-pencil-square"></i> Editar</button><form method="post" onsubmit="return confirm('Excluir esta conta e seus dados de cadastro? Esta ação não pode ser desfeita.');"><input type="hidden" name="csrf" value="<?=adm_h($csrf)?>"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="<?=adm_h($user['id'])?>"><button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Excluir</button></form></div></td></tr><?php endforeach;?></tbody></table><?php if (!$users):?><div class="empty-state">Nenhum usuário encontrado.</div><?php endif;?></div></section>
+<dialog id="user-dialog" class="lunch-admin-dialog" aria-labelledby="user-modal-title"><div class="lunch-dialog-head"><h2 id="user-modal-title">Novo usuário</h2><button type="button" data-user-close aria-label="Fechar"><i class="bi bi-x-lg"></i></button></div><form method="post" id="user-form"><input type="hidden" name="csrf" value="<?=adm_h($csrf)?>"><input type="hidden" name="action" value="save"><input type="hidden" name="id" value="0" id="user-id"><label class="form-label">E-mail</label><input class="form-control mb-3" type="email" name="email" id="user-email" maxlength="190" autocomplete="off" required><?php if (!$managerOnly):?><label class="form-label">Tipo de usuário</label><select class="form-select mb-3" name="role" id="user-role"><?php foreach ($labels as $value => $label):?><option value="<?=adm_h($value)?>"><?=adm_h($label)?></option><?php endforeach;?></select><?php else:?><p class="small text-secondary">O perfil criado será <strong>Funcionário</strong>.</p><?php endif;?><label class="form-label" id="user-password-label">Senha</label><input class="form-control mb-2" name="password" id="user-password" type="password" minlength="10" maxlength="128" autocomplete="new-password"><p class="small text-secondary" id="user-password-hint">Obrigatória ao criar. Mínimo de 10 caracteres.</p><div class="lunch-dialog-footer mt-4"><button class="btn btn-outline-secondary" type="button" data-user-close>Cancelar</button><button class="btn btn-bia">Salvar usuário</button></div></form></dialog>
 <script src="/assets/js/admin-users.js?v=1" defer></script>
 <?php adm_end();

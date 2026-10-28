@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 // Development router for: php -S localhost:8000 -t public public/router.php
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '/';

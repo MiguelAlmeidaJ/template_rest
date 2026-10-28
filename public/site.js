@@ -1,1 +1,67 @@
-const $=s=>document.querySelector(s);const money=n=>(n/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});async function request(url,options){const r=await fetch(url,options);const j=await r.json();if(!r.ok)throw Error(j.error||'Falha');return j}async function load(){try{const p=await request('/api/products');$('#products').replaceChildren(...p.map(x=>{const d=document.createElement('div');d.className='card';const h=document.createElement('h3');h.textContent=x.name;const desc=document.createElement('p');desc.textContent=x.description||'';const price=document.createElement('strong');price.textContent=money(x.price_cents);d.append(h,desc,price);return d}))}catch(e){$('#products').textContent=e.message}}async function slots(){try{const s=await request('/api/reservations/slots?date='+encodeURIComponent($('#date').value));$('#time').replaceChildren(...s.filter(x=>x.available>0).map(x=>{const o=document.createElement('option');o.value=x.time.substring(0,5);o.textContent=x.time.substring(0,5)+' — '+x.available+' lugares';return o}))}catch(e){$('#result').textContent=e.message}}$('#date').min=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);$('#date').addEventListener('change',slots);$('#reservation').addEventListener('submit',async e=>{e.preventDefault();const data=Object.fromEntries(new FormData(e.target));data.guests=Number(data.guests);try{const result=await request('/api/reservations',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});$('#result').textContent='Solicitação enviada! Número da reserva: '+result.reservation_id;await slots()}catch(err){$('#result').textContent=err.message}});load();
+const $ = (s) => document.querySelector(s);
+const money = (n) => (n / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+async function request(url, options) {
+  const r = await fetch(url, options);
+  const j = await r.json();
+  if (!r.ok) throw Error(j.error || 'Falha');
+  return j;
+}
+async function load() {
+  try {
+    const p = await request('/api/products');
+    $('#products').replaceChildren(
+      ...p.map((x) => {
+        const d = document.createElement('div');
+        d.className = 'card';
+        const h = document.createElement('h3');
+        h.textContent = x.name;
+        const desc = document.createElement('p');
+        desc.textContent = x.description || '';
+        const price = document.createElement('strong');
+        price.textContent = money(x.price_cents);
+        d.append(h, desc, price);
+        return d;
+      }),
+    );
+  } catch (e) {
+    $('#products').textContent = e.message;
+  }
+}
+async function slots() {
+  try {
+    const s = await request('/api/reservations/slots?date=' + encodeURIComponent($('#date').value));
+    $('#time').replaceChildren(
+      ...s
+        .filter((x) => x.available > 0)
+        .map((x) => {
+          const o = document.createElement('option');
+          o.value = x.time.substring(0, 5);
+          o.textContent = x.time.substring(0, 5) + ' — ' + x.available + ' lugares';
+          return o;
+        }),
+    );
+  } catch (e) {
+    $('#result').textContent = e.message;
+  }
+}
+$('#date').min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
+  .toISOString()
+  .slice(0, 10);
+$('#date').addEventListener('change', slots);
+$('#reservation').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target));
+  data.guests = Number(data.guests);
+  try {
+    const result = await request('/api/reservations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    $('#result').textContent = 'Solicitação enviada! Número da reserva: ' + result.reservation_id;
+    await slots();
+  } catch (err) {
+    $('#result').textContent = err.message;
+  }
+});
+load();

@@ -1,1 +1,194 @@
-const $=s=>document.querySelector(s);const money=n=>(Number(n||0)/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});const cart=new Map();let products=[];const api=async(path,options={})=>{const r=await fetch(path,options);const j=await r.json();if(!r.ok)throw Error(j.error||'Falha na requisição');return j};const post=(url,data)=>api(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});function el(tag,text,className){const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(className)e.className=className;return e}async function initMenu(){try{products=await api('/api/products');const root=$('#products');root.replaceChildren(...products.map(p=>{const c=el('article',undefined,'food-card');const img=el('img',undefined,'food-image');img.alt=p.name;img.loading='lazy';const idx=(products.indexOf(p)%4)+1;const k='dish'+idx;setRestaurantImage(img,'/assets/images/'+k+'.jpg',RestaurantMedia.fallbacks[k]);const body=el('div',undefined,'food-content');const cat=el('span',p.category,'menu-category');body.append(cat,el('h3',p.name),el('p',p.description||''),el('p',money(p.price_cents),'price'));c.append(img,body);const b=el('button','Adicionar');b.addEventListener('click',()=>{cart.set(p.id,(cart.get(p.id)||0)+1);renderCart()});body.append(b);return c}));renderCart()}catch(e){$('#products').textContent=e.message}}function renderCart(){const root=$('#cart-list');if(!root)return;root.replaceChildren();let total=0;for(const [id,qty] of cart){const p=products.find(x=>Number(x.id)===Number(id));if(!p)continue;total+=qty*p.price_cents;const line=el('div',undefined,'line');line.append(el('span',p.name+' · '+money(p.price_cents)));const controls=el('div',undefined,'qty');const minus=el('button','−');minus.setAttribute('aria-label','Remover um '+p.name);minus.onclick=()=>{if(qty<=1)cart.delete(id);else cart.set(id,qty-1);renderCart()};const plus=el('button','+');plus.setAttribute('aria-label','Adicionar um '+p.name);plus.onclick=()=>{if(qty<30)cart.set(id,qty+1);renderCart()};controls.append(minus,el('span',String(qty)),plus);line.append(controls);root.append(line)}if(!cart.size)root.append(el('p','Adicione um prato para começar.','muted'));$('#cart-subtotal').textContent=money(total);const btn=$('#checkout-button');if(btn)btn.disabled=!cart.size}async function initCheckout(){await initMenu();let payment;try{payment=await api('/api/payments/options');$('#manual-method-wrap').hidden=payment.mode!=='manual';$('#payment-help').textContent=payment.mode==='manual'?'Pague na entrega ou retirada.':'Checkout online configurado.';}catch(e){$('#payment-help').textContent=e.message;return;}$('#fulfillment').onchange=()=>{$('#delivery-fields').hidden=$('#fulfillment').value!=='delivery'};$('#order-form').onsubmit=async e=>{e.preventDefault();if(!cart.size)return;const data=Object.fromEntries(new FormData(e.target));data.items=Array.from(cart,([product_id,quantity])=>({product_id,quantity}));if(data.fulfillment!=='delivery'){delete data.address;delete data.neighborhood}if(payment.mode==='online')delete data.manual_payment_method;const out=$('#order-result');try{const order=await post('/api/orders',data);out.textContent='Pedido #'+order.order_id+' registrado! Total: '+money(order.total_cents)+'. '+(order.payment_mode==='manual'?'Pagamento na entrega/retirada; aguardando confirmação pelo restaurante.':'Aguardando pagamento online.');if(order.payment_mode==='online'){const b=el('button','Pagar online');b.onclick=async()=>{try{const r=await post('/api/payments/checkout',{order_id:order.order_id});if(r.checkout_url){const u=new URL(r.checkout_url);if(u.protocol!=='https:')throw Error('URL insegura');window.location.assign(u.href)}else out.textContent=r.message||'Pagamento indisponível'}catch(err){out.textContent=err.message}};out.append(b)}cart.clear();renderCart()}catch(err){out.textContent=err.message}}}function initReservations(){const date=$('#date');date.min=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);date.onchange=async()=>{try{const slots=await api('/api/reservations/slots?date='+encodeURIComponent(date.value));const sel=$('#time');sel.replaceChildren(...slots.filter(x=>Number(x.available)>0).map(x=>{const opt=el('option',x.time.slice(0,5)+' · '+x.available+' lugares');opt.value=x.time.slice(0,5);return opt}));if(!sel.options.length)sel.append(el('option','Sem horários cadastrados'))}catch(e){$('#reservation-result').textContent=e.message}};$('#reservation-form').onsubmit=async e=>{e.preventDefault();const data=Object.fromEntries(new FormData(e.target));data.guests=Number(data.guests);try{const result=await post('/api/reservations',data);$('#reservation-result').textContent='Reserva #'+result.reservation_id+' solicitada! Aguarde confirmação do restaurante.';date.onchange()}catch(err){$('#reservation-result').textContent=err.message}}}document.addEventListener('DOMContentLoaded',()=>{if($('#order-form'))initCheckout();if($('#reservation-form'))initReservations()});
+const $ = (s) => document.querySelector(s);
+const money = (n) =>
+  (Number(n || 0) / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+const cart = new Map();
+let products = [];
+const api = async (path, options = {}) => {
+  const r = await fetch(path, options);
+  const j = await r.json();
+  if (!r.ok) throw Error(j.error || 'Falha na requisição');
+  return j;
+};
+const post = (url, data) =>
+  api(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+function el(tag, text, className) {
+  const e = document.createElement(tag);
+  if (text !== undefined) e.textContent = text;
+  if (className) e.className = className;
+  return e;
+}
+async function initMenu() {
+  try {
+    products = await api('/api/products');
+    const root = $('#products');
+    root.replaceChildren(
+      ...products.map((p) => {
+        const c = el('article', undefined, 'food-card');
+        const img = el('img', undefined, 'food-image');
+        img.alt = p.name;
+        img.loading = 'lazy';
+        const idx = (products.indexOf(p) % 4) + 1;
+        const k = 'dish' + idx;
+        setRestaurantImage(img, '/assets/images/' + k + '.jpg', RestaurantMedia.fallbacks[k]);
+        const body = el('div', undefined, 'food-content');
+        const cat = el('span', p.category, 'menu-category');
+        body.append(
+          cat,
+          el('h3', p.name),
+          el('p', p.description || ''),
+          el('p', money(p.price_cents), 'price'),
+        );
+        c.append(img, body);
+        const b = el('button', 'Adicionar');
+        b.addEventListener('click', () => {
+          cart.set(p.id, (cart.get(p.id) || 0) + 1);
+          renderCart();
+        });
+        body.append(b);
+        return c;
+      }),
+    );
+    renderCart();
+  } catch (e) {
+    $('#products').textContent = e.message;
+  }
+}
+function renderCart() {
+  const root = $('#cart-list');
+  if (!root) return;
+  root.replaceChildren();
+  let total = 0;
+  for (const [id, qty] of cart) {
+    const p = products.find((x) => Number(x.id) === Number(id));
+    if (!p) continue;
+    total += qty * p.price_cents;
+    const line = el('div', undefined, 'line');
+    line.append(el('span', p.name + ' · ' + money(p.price_cents)));
+    const controls = el('div', undefined, 'qty');
+    const minus = el('button', '−');
+    minus.setAttribute('aria-label', 'Remover um ' + p.name);
+    minus.onclick = () => {
+      if (qty <= 1) cart.delete(id);
+      else cart.set(id, qty - 1);
+      renderCart();
+    };
+    const plus = el('button', '+');
+    plus.setAttribute('aria-label', 'Adicionar um ' + p.name);
+    plus.onclick = () => {
+      if (qty < 30) cart.set(id, qty + 1);
+      renderCart();
+    };
+    controls.append(minus, el('span', String(qty)), plus);
+    line.append(controls);
+    root.append(line);
+  }
+  if (!cart.size) root.append(el('p', 'Adicione um prato para começar.', 'muted'));
+  $('#cart-subtotal').textContent = money(total);
+  const btn = $('#checkout-button');
+  if (btn) btn.disabled = !cart.size;
+}
+async function initCheckout() {
+  await initMenu();
+  let payment;
+  try {
+    payment = await api('/api/payments/options');
+    $('#manual-method-wrap').hidden = payment.mode !== 'manual';
+    $('#payment-help').textContent =
+      payment.mode === 'manual' ? 'Pague na entrega ou retirada.' : 'Checkout online configurado.';
+  } catch (e) {
+    $('#payment-help').textContent = e.message;
+    return;
+  }
+  $('#fulfillment').onchange = () => {
+    $('#delivery-fields').hidden = $('#fulfillment').value !== 'delivery';
+  };
+  $('#order-form').onsubmit = async (e) => {
+    e.preventDefault();
+    if (!cart.size) return;
+    const data = Object.fromEntries(new FormData(e.target));
+    data.items = Array.from(cart, ([product_id, quantity]) => ({ product_id, quantity }));
+    if (data.fulfillment !== 'delivery') {
+      delete data.address;
+      delete data.neighborhood;
+    }
+    if (payment.mode === 'online') delete data.manual_payment_method;
+    const out = $('#order-result');
+    try {
+      const order = await post('/api/orders', data);
+      out.textContent =
+        'Pedido #' +
+        order.order_id +
+        ' registrado! Total: ' +
+        money(order.total_cents) +
+        '. ' +
+        (order.payment_mode === 'manual'
+          ? 'Pagamento na entrega/retirada; aguardando confirmação pelo restaurante.'
+          : 'Aguardando pagamento online.');
+      if (order.payment_mode === 'online') {
+        const b = el('button', 'Pagar online');
+        b.onclick = async () => {
+          try {
+            const r = await post('/api/payments/checkout', { order_id: order.order_id });
+            if (r.checkout_url) {
+              const u = new URL(r.checkout_url);
+              if (u.protocol !== 'https:') throw Error('URL insegura');
+              window.location.assign(u.href);
+            } else out.textContent = r.message || 'Pagamento indisponível';
+          } catch (err) {
+            out.textContent = err.message;
+          }
+        };
+        out.append(b);
+      }
+      cart.clear();
+      renderCart();
+    } catch (err) {
+      out.textContent = err.message;
+    }
+  };
+}
+function initReservations() {
+  const date = $('#date');
+  date.min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 10);
+  date.onchange = async () => {
+    try {
+      const slots = await api('/api/reservations/slots?date=' + encodeURIComponent(date.value));
+      const sel = $('#time');
+      sel.replaceChildren(
+        ...slots
+          .filter((x) => Number(x.available) > 0)
+          .map((x) => {
+            const opt = el('option', x.time.slice(0, 5) + ' · ' + x.available + ' lugares');
+            opt.value = x.time.slice(0, 5);
+            return opt;
+          }),
+      );
+      if (!sel.options.length) sel.append(el('option', 'Sem horários cadastrados'));
+    } catch (e) {
+      $('#reservation-result').textContent = e.message;
+    }
+  };
+  $('#reservation-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(e.target));
+    data.guests = Number(data.guests);
+    try {
+      const result = await post('/api/reservations', data);
+      $('#reservation-result').textContent =
+        'Reserva #' + result.reservation_id + ' solicitada! Aguarde confirmação do restaurante.';
+      date.onchange();
+    } catch (err) {
+      $('#reservation-result').textContent = err.message;
+    }
+  };
+}
+document.addEventListener('DOMContentLoaded', () => {
+  if ($('#order-form')) initCheckout();
+  if ($('#reservation-form')) initReservations();
+});

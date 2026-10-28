@@ -54,7 +54,7 @@ adm_start('Detalhes do cliente', 'customers');
                     'Referência' => $customer['reference_point'] ?: 'Não informada',
                     'Cadastro' => date('d/m/Y H:i', strtotime($customer['created_at'])),
                 ];
-                ?>
+?>
                 <?php foreach ($details as $label => $value): ?>
                     <dt><?= adm_h($label) ?></dt>
                     <dd><?= adm_h($value) ?></dd>

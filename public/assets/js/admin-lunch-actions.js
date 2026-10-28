@@ -1,1 +1,54 @@
-document.addEventListener('DOMContentLoaded',()=>{const dialogs=[...document.querySelectorAll('.lunch-admin-dialog')];document.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>document.getElementById(b.dataset.open).showModal()));document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>b.closest('dialog').close()));dialogs.forEach(d=>d.addEventListener('click',e=>{if(e.target===d)d.close()}));const list=JSON.parse(document.querySelector('#dish-existing').textContent),name=document.querySelector('#new-dish-name'),msg=document.querySelector('#dish-match'),submit=document.querySelector('#new-dish-submit');const norm=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().replace(/\s+/g,' ').toLocaleLowerCase('pt-BR');name.addEventListener('input',()=>{const key=norm(name.value);const existing=key?list.find(x=>norm(x.name)===key):null;submit.disabled=!!existing;msg.textContent=existing?'Este prato já existe e está '+(existing.active?'disponível.':'desativado. Ative-o no cardápio publicado.'):'Nenhum prato idêntico encontrado. A busca inclui pratos desativados.';msg.classList.toggle('text-danger',!!existing)});const mode=()=>{const byCat=document.querySelector('[name=limit_mode]:checked')?.value==='category';document.querySelector('#category-limit-fields').hidden=!byCat;document.querySelector('#total-limit-fields').hidden=byCat};document.querySelectorAll('[name=limit_mode]').forEach(x=>x.addEventListener('change',mode));mode();const price=document.querySelector('#price-reais');price.addEventListener('blur',()=>{const s=price.value.replace(/[^\d,]/g,'').replace(',','.');const n=Number(s);if(Number.isFinite(n)&&n>0)price.value=n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})});});
+document.addEventListener('DOMContentLoaded', () => {
+  const dialogs = [...document.querySelectorAll('.lunch-admin-dialog')];
+  document
+    .querySelectorAll('[data-open]')
+    .forEach((b) =>
+      b.addEventListener('click', () => document.getElementById(b.dataset.open).showModal()),
+    );
+  document
+    .querySelectorAll('[data-close]')
+    .forEach((b) => b.addEventListener('click', () => b.closest('dialog').close()));
+  dialogs.forEach((d) =>
+    d.addEventListener('click', (e) => {
+      if (e.target === d) d.close();
+    }),
+  );
+  const list = JSON.parse(document.querySelector('#dish-existing').textContent),
+    name = document.querySelector('#new-dish-name'),
+    msg = document.querySelector('#dish-match'),
+    submit = document.querySelector('#new-dish-submit');
+  const norm = (s) =>
+    s
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim()
+      .replace(/\s+/g, ' ')
+      .toLocaleLowerCase('pt-BR');
+  name.addEventListener('input', () => {
+    const key = norm(name.value);
+    const existing = key ? list.find((x) => norm(x.name) === key) : null;
+    submit.disabled = !!existing;
+    msg.textContent = existing
+      ? 'Este prato já existe e está ' +
+        (existing.active ? 'disponível.' : 'desativado. Ative-o no cardápio publicado.')
+      : 'Nenhum prato idêntico encontrado. A busca inclui pratos desativados.';
+    msg.classList.toggle('text-danger', !!existing);
+  });
+  const mode = () => {
+    const byCat = document.querySelector('[name=limit_mode]:checked')?.value === 'category';
+    document.querySelector('#category-limit-fields').hidden = !byCat;
+    document.querySelector('#total-limit-fields').hidden = byCat;
+  };
+  document.querySelectorAll('[name=limit_mode]').forEach((x) => x.addEventListener('change', mode));
+  mode();
+  const price = document.querySelector('#price-reais');
+  price.addEventListener('blur', () => {
+    const s = price.value.replace(/[^\d,]/g, '').replace(',', '.');
+    const n = Number(s);
+    if (Number.isFinite(n) && n > 0)
+      price.value = n.toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+  });
+});

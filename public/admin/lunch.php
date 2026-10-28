@@ -1,50 +1,151 @@
 <?php
 declare(strict_types=1);
 require __DIR__.'/includes/cms-boot.php';
-use App\Db;use App\Lunch;
-if($_SERVER['REQUEST_METHOD']==='POST'){cms_csrf();try{
- $action=$_POST['action']??'';
- if($action==='add'){$name=trim((string)($_POST['name']??''));$category=trim((string)($_POST['category']??''));if(mb_strlen($name)<2||mb_strlen($name)>140||mb_strlen($category)<2||mb_strlen($category)>80)throw new DomainException('Nome ou categoria inválidos');$dup=Db::pdo()->prepare('SELECT name,active FROM daily_menu_items WHERE LOWER(TRIM(name))=LOWER(?) LIMIT 1');$dup->execute([$name]);if($existing=$dup->fetch())throw new DomainException('Prato já cadastrado: '.$existing['name'].' ('.($existing['active']?'disponível':'desativado').'). Use a busca para encontrá-lo.');$q=Db::pdo()->prepare('INSERT INTO daily_menu_items(name,category,by_weight) VALUES(?,?,?)');$q->execute([$name,$category,isset($_POST['by_weight'])?1:0]);Lunch::touchMenu();cms_notice('Item adicionado ao cardápio do dia.');}
- elseif($action==='toggle'){$id=filter_var($_POST['id']??null,FILTER_VALIDATE_INT);if(!$id)throw new DomainException('Item inválido');$q=Db::pdo()->prepare('UPDATE daily_menu_items SET active=NOT active WHERE id=?');$q->execute([$id]);Lunch::touchMenu();cms_notice('Disponibilidade atualizada.');}
- elseif($action==='edit'){$id=filter_var($_POST['id']??null,FILTER_VALIDATE_INT);$name=trim((string)($_POST['name']??''));$category=trim((string)($_POST['category']??''));if(!$id||mb_strlen($name)<2||mb_strlen($name)>140||mb_strlen($category)<2||mb_strlen($category)>80)throw new DomainException('Prato ou categoria inválidos');$q=Db::pdo()->prepare('UPDATE daily_menu_items SET name=?,category=?,by_weight=? WHERE id=?');$q->execute([$name,$category,isset($_POST['by_weight'])?1:0,$id]);Lunch::touchMenu();cms_notice('Prato atualizado em todas as páginas.');}
- elseif($action==='batch') {
-  $records=json_decode((string)($_POST['changes']??''),true);
-  if(!is_array($records)||!array_is_list($records)||count($records)<1||count($records)>150)throw new DomainException('Nenhuma alteração válida recebida');
-  $categories=['Acompanhamentos','Carnes','Saladas','Tortas e assados'];
-  $updates=[];$ids=[];
-  foreach($records as $record){
-   if(!is_array($record))throw new DomainException('Dados inválidos');
-   $id=filter_var($record['id']??null,FILTER_VALIDATE_INT);
-   $name=trim(preg_replace('/^\\xEF\\xBB\\xBF/', '',(string)($record['name']??'')));
-   $category=trim((string)($record['category']??''));
-   if(!$id||!mb_check_encoding($name,'UTF-8')||isset($ids[$id])||mb_strlen($name,'UTF-8')<2||mb_strlen($name,'UTF-8')>140||!in_array($category,$categories,true))throw new DomainException('Verifique os nomes e categorias antes de salvar');
-   $ids[$id]=true;$updates[]=[$name,$category,!empty($record['by_weight'])?1:0,!empty($record['active'])?1:0,$id];
-  }
-  $db=Db::pdo();$db->beginTransaction();
-  try{$query=$db->prepare('UPDATE daily_menu_items SET name=?,category=?,by_weight=?,active=? WHERE id=?');
-   foreach($updates as $update)$query->execute($update);
-   Lunch::touchMenu();$db->commit();
-  }catch(Throwable $e){$db->rollBack();throw $e;}
-  if(($_SERVER['HTTP_X_REQUESTED_WITH']??'')==='XMLHttpRequest'){
-   header('Content-Type: application/json; charset=utf-8');echo json_encode(['ok'=>true,'count'=>count($updates),'updated_at'=>Lunch::menuDate()],JSON_UNESCAPED_UNICODE);exit;
-  }
-  cms_notice(count($updates).' prato(s) atualizado(s).');
- }
- elseif($action==='settings'){$raw=trim((string)($_POST['price_reais']??''));$raw=str_replace('.','',$raw);if(!preg_match('/^\\d{1,5},\\d{2}$/',$raw))throw new DomainException('Preço inválido. Exemplo: 20,00');[$reais,$centavos]=explode(',',$raw);$price=(int)$reais*100+(int)$centavos;$max=filter_var($_POST['max_choices']??null,FILTER_VALIDATE_INT);$mode=(string)($_POST['limit_mode']??'');if($price<100||$price>100000||!$max||$max>30||!in_array($mode,['total','category'],true))throw new DomainException('Preço ou limite inválidos');$limits=[];foreach(['Acompanhamentos','Carnes','Saladas','Tortas e assados'] as $cat){$n=filter_var($_POST['category_limits'][$cat]??null,FILTER_VALIDATE_INT);if($n===false||$n<0||$n>30)throw new DomainException('Limite inválido para '.$cat);$limits[$cat]=$n;}if($mode==='category'&&!array_sum($limits))throw new DomainException('Informe pelo menos um item permitido por categoria');$q=Db::pdo()->prepare('UPDATE lunch_settings SET price_cents=?,max_choices=?,limit_mode=?,category_limits=?,orders_enabled=? WHERE id=1');$q->execute([$price,$max,$mode,json_encode($limits,JSON_UNESCAPED_UNICODE),isset($_POST['orders_enabled'])?1:0]);cms_notice('Configurações salvas.');}
- elseif($action==='paid'){$id=filter_var($_POST['id']??null,FILTER_VALIDATE_INT);if(!$id)throw new DomainException('Pedido inválido');$q=Db::pdo()->prepare("UPDATE lunch_orders SET payment_status='paid' WHERE id=? AND payment_status='pending' AND status<>'cancelled'");$q->execute([$id]);if(!$q->rowCount())throw new DomainException('Não foi possível registrar o pagamento');cms_notice('Pagamento recebido e registrado.');}
- elseif($action==='status'){$id=filter_var($_POST['id']??null,FILTER_VALIDATE_INT);$status=(string)($_POST['status']??'');if(!$id||!in_array($status,['pending','accepted','preparing','out_for_delivery','delivered','cancelled'],true))throw new DomainException('Status inválido');$q=Db::pdo()->prepare('UPDATE lunch_orders SET status=? WHERE id=?');$q->execute([$status,$id]);cms_notice('Status do pedido atualizado.');}
- else throw new DomainException('Ação inválida');
- }catch(Throwable $e){error_log((string)$e);$message=$e instanceof DomainException?$e->getMessage():'Erro ao salvar';if(($_SERVER['HTTP_X_REQUESTED_WITH']??'')==='XMLHttpRequest'){header('Content-Type: application/json; charset=utf-8');http_response_code(422);echo json_encode(['ok'=>false,'error'=>$message],JSON_UNESCAPED_UNICODE);exit;}cms_notice($message,'danger');}}
-$s=Lunch::settings();$items=Db::pdo()->query('SELECT * FROM daily_menu_items ORDER BY active DESC,sort_order,id')->fetchAll();$menuDate=Lunch::menuDate();
-adm_start('Quentinhas','lunch');cms_feedback();?>
+use App\Db;
+use App\Lunch;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    cms_csrf();
+    try {
+        $action = $_POST['action'] ?? '';
+        if ($action === 'add') {
+            $name = trim((string)($_POST['name'] ?? ''));
+            $category = trim((string)($_POST['category'] ?? ''));
+            if (mb_strlen($name) < 2 || mb_strlen($name) > 140 || mb_strlen($category) < 2 || mb_strlen($category) > 80) {
+                throw new DomainException('Nome ou categoria inválidos');
+            }$dup = Db::pdo()->prepare('SELECT name,active FROM daily_menu_items WHERE LOWER(TRIM(name))=LOWER(?) LIMIT 1');
+            $dup->execute([$name]);
+            if ($existing = $dup->fetch()) {
+                throw new DomainException('Prato já cadastrado: '.$existing['name'].' ('.($existing['active'] ? 'disponível' : 'desativado').'). Use a busca para encontrá-lo.');
+            }$q = Db::pdo()->prepare('INSERT INTO daily_menu_items(name,category,by_weight) VALUES(?,?,?)');
+            $q->execute([$name,$category,isset($_POST['by_weight']) ? 1 : 0]);
+            Lunch::touchMenu();
+            cms_notice('Item adicionado ao cardápio do dia.');
+        } elseif ($action === 'toggle') {
+            $id = filter_var($_POST['id'] ?? null, FILTER_VALIDATE_INT);
+            if (!$id) {
+                throw new DomainException('Item inválido');
+            }$q = Db::pdo()->prepare('UPDATE daily_menu_items SET active=NOT active WHERE id=?');
+            $q->execute([$id]);
+            Lunch::touchMenu();
+            cms_notice('Disponibilidade atualizada.');
+        } elseif ($action === 'edit') {
+            $id = filter_var($_POST['id'] ?? null, FILTER_VALIDATE_INT);
+            $name = trim((string)($_POST['name'] ?? ''));
+            $category = trim((string)($_POST['category'] ?? ''));
+            if (!$id || mb_strlen($name) < 2 || mb_strlen($name) > 140 || mb_strlen($category) < 2 || mb_strlen($category) > 80) {
+                throw new DomainException('Prato ou categoria inválidos');
+            }$q = Db::pdo()->prepare('UPDATE daily_menu_items SET name=?,category=?,by_weight=? WHERE id=?');
+            $q->execute([$name,$category,isset($_POST['by_weight']) ? 1 : 0,$id]);
+            Lunch::touchMenu();
+            cms_notice('Prato atualizado em todas as páginas.');
+        } elseif ($action === 'batch') {
+            $records = json_decode((string)($_POST['changes'] ?? ''), true);
+            if (!is_array($records) || !array_is_list($records) || count($records) < 1 || count($records) > 150) {
+                throw new DomainException('Nenhuma alteração válida recebida');
+            }
+            $categories = ['Acompanhamentos','Carnes','Saladas','Tortas e assados'];
+            $updates = [];
+            $ids = [];
+            foreach ($records as $record) {
+                if (!is_array($record)) {
+                    throw new DomainException('Dados inválidos');
+                }
+                $id = filter_var($record['id'] ?? null, FILTER_VALIDATE_INT);
+                $name = trim(preg_replace('/^\\xEF\\xBB\\xBF/', '', (string)($record['name'] ?? '')));
+                $category = trim((string)($record['category'] ?? ''));
+                if (!$id || !mb_check_encoding($name, 'UTF-8') || isset($ids[$id]) || mb_strlen($name, 'UTF-8') < 2 || mb_strlen($name, 'UTF-8') > 140 || !in_array($category, $categories, true)) {
+                    throw new DomainException('Verifique os nomes e categorias antes de salvar');
+                }
+                $ids[$id] = true;
+                $updates[] = [$name,$category,!empty($record['by_weight']) ? 1 : 0,!empty($record['active']) ? 1 : 0,$id];
+            }
+            $db = Db::pdo();
+            $db->beginTransaction();
+            try {
+                $query = $db->prepare('UPDATE daily_menu_items SET name=?,category=?,by_weight=?,active=? WHERE id=?');
+                foreach ($updates as $update) {
+                    $query->execute($update);
+                }
+                Lunch::touchMenu();
+                $db->commit();
+            } catch (Throwable $e) {
+                $db->rollBack();
+                throw $e;
+            }
+            if (($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'XMLHttpRequest') {
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode(['ok' => true,'count' => count($updates),'updated_at' => Lunch::menuDate()], JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+            cms_notice(count($updates).' prato(s) atualizado(s).');
+        } elseif ($action === 'settings') {
+            $raw = trim((string)($_POST['price_reais'] ?? ''));
+            $raw = str_replace('.', '', $raw);
+            if (!preg_match('/^\\d{1,5},\\d{2}$/', $raw)) {
+                throw new DomainException('Preço inválido. Exemplo: 20,00');
+            }[$reais,$centavos] = explode(',', $raw);
+            $price = (int)$reais * 100 + (int)$centavos;
+            $max = filter_var($_POST['max_choices'] ?? null, FILTER_VALIDATE_INT);
+            $mode = (string)($_POST['limit_mode'] ?? '');
+            if ($price < 100 || $price > 100000 || !$max || $max > 30 || !in_array($mode, ['total','category'], true)) {
+                throw new DomainException('Preço ou limite inválidos');
+            }$limits = [];
+            foreach (['Acompanhamentos','Carnes','Saladas','Tortas e assados'] as $cat) {
+                $n = filter_var($_POST['category_limits'][$cat] ?? null, FILTER_VALIDATE_INT);
+                if ($n === false || $n < 0 || $n > 30) {
+                    throw new DomainException('Limite inválido para '.$cat);
+                }$limits[$cat] = $n;
+            }if ($mode === 'category' && !array_sum($limits)) {
+                throw new DomainException('Informe pelo menos um item permitido por categoria');
+            }$q = Db::pdo()->prepare('UPDATE lunch_settings SET price_cents=?,max_choices=?,limit_mode=?,category_limits=?,orders_enabled=? WHERE id=1');
+            $q->execute([$price,$max,$mode,json_encode($limits, JSON_UNESCAPED_UNICODE),isset($_POST['orders_enabled']) ? 1 : 0]);
+            cms_notice('Configurações salvas.');
+        } elseif ($action === 'paid') {
+            $id = filter_var($_POST['id'] ?? null, FILTER_VALIDATE_INT);
+            if (!$id) {
+                throw new DomainException('Pedido inválido');
+            }$q = Db::pdo()->prepare("UPDATE lunch_orders SET payment_status='paid' WHERE id=? AND payment_status='pending' AND status<>'cancelled'");
+            $q->execute([$id]);
+            if (!$q->rowCount()) {
+                throw new DomainException('Não foi possível registrar o pagamento');
+            }cms_notice('Pagamento recebido e registrado.');
+        } elseif ($action === 'status') {
+            $id = filter_var($_POST['id'] ?? null, FILTER_VALIDATE_INT);
+            $status = (string)($_POST['status'] ?? '');
+            if (!$id || !in_array($status, ['pending','accepted','preparing','out_for_delivery','delivered','cancelled'], true)) {
+                throw new DomainException('Status inválido');
+            }$q = Db::pdo()->prepare('UPDATE lunch_orders SET status=? WHERE id=?');
+            $q->execute([$status,$id]);
+            cms_notice('Status do pedido atualizado.');
+        } else {
+            throw new DomainException('Ação inválida');
+        }
+    } catch (Throwable $e) {
+        error_log((string)$e);
+        $message = $e instanceof DomainException ? $e->getMessage() : 'Erro ao salvar';
+        if (($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'XMLHttpRequest') {
+            header('Content-Type: application/json; charset=utf-8');
+            http_response_code(422);
+            echo json_encode(['ok' => false,'error' => $message], JSON_UNESCAPED_UNICODE);
+            exit;
+        }cms_notice($message, 'danger');
+    }
+}
+$s = Lunch::settings();
+$items = Db::pdo()->query('SELECT * FROM daily_menu_items ORDER BY active DESC,sort_order,id')->fetchAll();
+$menuDate = Lunch::menuDate();
+adm_start('Quentinhas', 'lunch');
+cms_feedback();?>
 <div class="mb-4"><span class="page-kicker">OPERAÇÃO</span><h1 class="page-title">Quentinhas e cardápio do dia</h1><p class="page-subtitle">Atualize pratos e disponibilidade. Se não fizer alterações, o último cardápio continua valendo. Última atualização: <?=adm_h($menuDate)?>.</p></div>
 <div class="lunch-admin-actions mb-4"><button type="button" class="lunch-action-button" data-open="new-dish-dialog"><i class="bi bi-plus-circle"></i><span><strong>Adicionar novo prato</strong><small>Cadastre um prato que ainda não existe</small></span><i class="bi bi-chevron-right"></i></button><button type="button" class="lunch-action-button" data-open="lunch-settings-dialog"><i class="bi bi-sliders"></i><span><strong>Configurações de pedido</strong><small>Preço e limites de escolhas</small></span><i class="bi bi-chevron-right"></i></button></div>
 <dialog class="lunch-admin-dialog" id="new-dish-dialog"><div class="lunch-dialog-head"><h2>Adicionar novo prato</h2><button type="button" data-close aria-label="Fechar"><i class="bi bi-x-lg"></i></button></div><form method="post"><input type="hidden" name="csrf" value="<?=adm_h($csrf)?>"><input type="hidden" name="action" value="add"><label class="form-label">Nome do prato</label><input class="form-control mb-2" id="new-dish-name" name="name" maxlength="140" required placeholder="Ex.: Arroz branco"><p class="small mb-3" id="dish-match" aria-live="polite">Verificaremos se o prato já existe, mesmo que esteja desativado.</p><label class="form-label">Categoria</label><select name="category" class="form-select mb-3"><option value="Acompanhamentos">Acompanhamentos</option><option value="Carnes">Carnes</option><option value="Saladas">Saladas</option><option value="Tortas e assados">Tortas e assados</option></select><label class="d-flex gap-2 mb-4"><input type="checkbox" name="by_weight"> Somente por peso (não entra na quentinha)</label><div class="lunch-dialog-footer"><button type="button" data-close class="btn btn-outline-secondary">Cancelar</button><button class="btn btn-bia" id="new-dish-submit">Adicionar prato</button></div></form></dialog>
-<dialog class="lunch-admin-dialog" id="lunch-settings-dialog"><div class="lunch-dialog-head"><h2>Configurações de pedido</h2><button type="button" data-close aria-label="Fechar"><i class="bi bi-x-lg"></i></button></div><form method="post"><input type="hidden" name="csrf" value="<?=adm_h($csrf)?>"><input type="hidden" name="action" value="settings"><label class="form-label">Preço da quentinha (R$)</label><div class="lunch-currency"><span>R$</span><input id="price-reais" name="price_reais" inputmode="decimal" value="<?=number_format((int)$s['price_cents']/100,2,',','.')?>" required></div><h3 class="h6 mt-4">Limites de escolha</h3><label class="d-block mb-2"><input type="radio" name="limit_mode" value="total" <?=$s['limit_mode']==='total'?'checked':''?>> Limite total por quentinha</label><label class="d-block mb-3"><input type="radio" name="limit_mode" value="category" <?=$s['limit_mode']==='category'?'checked':''?>> Limite por categoria</label><div id="total-limit-fields" class="mb-3"><label class="form-label">Máximo de escolhas por quentinha</label><input class="form-control" name="max_choices" type="number" min="1" max="30" value="<?=adm_h($s['max_choices'])?>" required></div><div id="category-limit-fields" class="lunch-category-fields mb-4"><p class="small text-muted">Use 0 para desabilitar escolhas nessa categoria.</p><?php $limits=json_decode((string)($s['category_limits']??'{}'),true)?:[];foreach(['Acompanhamentos','Carnes','Saladas','Tortas e assados'] as $cat):?><label><span><?=adm_h($cat)?></span><input class="form-control" name="category_limits[<?=adm_h($cat)?>]" type="number" min="0" max="30" value="<?=adm_h($limits[$cat]??0)?>" required></label><?php endforeach;?></div><label class="d-flex gap-2 mb-4"><input type="checkbox" name="orders_enabled" <?=$s['orders_enabled']?'checked':''?>> Aceitar pedidos online</label><div class="lunch-dialog-footer"><button type="button" data-close class="btn btn-outline-secondary">Cancelar</button><button class="btn btn-bia">Salvar configurações</button></div></form></dialog><script type="application/json" id="dish-existing"><?=json_encode(array_map(fn($item)=>['name'=>$item['name'],'active'=>(bool)$item['active']],$items),JSON_UNESCAPED_UNICODE|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT)?></script><script src="/assets/js/admin-lunch-actions.js?v=1" defer></script>
+<dialog class="lunch-admin-dialog" id="lunch-settings-dialog"><div class="lunch-dialog-head"><h2>Configurações de pedido</h2><button type="button" data-close aria-label="Fechar"><i class="bi bi-x-lg"></i></button></div><form method="post"><input type="hidden" name="csrf" value="<?=adm_h($csrf)?>"><input type="hidden" name="action" value="settings"><label class="form-label">Preço da quentinha (R$)</label><div class="lunch-currency"><span>R$</span><input id="price-reais" name="price_reais" inputmode="decimal" value="<?=number_format((int)$s['price_cents'] / 100, 2, ',', '.')?>" required></div><h3 class="h6 mt-4">Limites de escolha</h3><label class="d-block mb-2"><input type="radio" name="limit_mode" value="total" <?=$s['limit_mode'] === 'total' ? 'checked' : ''?>> Limite total por quentinha</label><label class="d-block mb-3"><input type="radio" name="limit_mode" value="category" <?=$s['limit_mode'] === 'category' ? 'checked' : ''?>> Limite por categoria</label><div id="total-limit-fields" class="mb-3"><label class="form-label">Máximo de escolhas por quentinha</label><input class="form-control" name="max_choices" type="number" min="1" max="30" value="<?=adm_h($s['max_choices'])?>" required></div><div id="category-limit-fields" class="lunch-category-fields mb-4"><p class="small text-muted">Use 0 para desabilitar escolhas nessa categoria.</p><?php $limits = json_decode((string)($s['category_limits'] ?? '{}'), true) ?: [];
+foreach (['Acompanhamentos','Carnes','Saladas','Tortas e assados'] as $cat):?><label><span><?=adm_h($cat)?></span><input class="form-control" name="category_limits[<?=adm_h($cat)?>]" type="number" min="0" max="30" value="<?=adm_h($limits[$cat] ?? 0)?>" required></label><?php endforeach;?></div><label class="d-flex gap-2 mb-4"><input type="checkbox" name="orders_enabled" <?=$s['orders_enabled'] ? 'checked' : ''?>> Aceitar pedidos online</label><div class="lunch-dialog-footer"><button type="button" data-close class="btn btn-outline-secondary">Cancelar</button><button class="btn btn-bia">Salvar configurações</button></div></form></dialog><script type="application/json" id="dish-existing"><?=json_encode(array_map(fn ($item) => ['name' => $item['name'],'active' => (bool)$item['active']], $items), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT)?></script><script src="/assets/js/admin-lunch-actions.js?v=1" defer></script>
 <section class="content-card mb-4 menu-manager" id="menu-manager">
 <div class="content-heading menu-heading"><div><h2>Cardápio publicado</h2><p>Encontre e ajuste vários pratos antes de salvar. A publicação mantém o cardápio anterior caso não haja mudanças.</p></div><div class="menu-save-box"><span class="menu-unsaved" id="menu-unsaved">Nenhuma alteração pendente</span><button type="button" class="btn btn-bia" id="menu-save" disabled><i class="bi bi-check2-circle"></i> Salvar alterações <span id="menu-count"></span></button></div></div>
-<div class="menu-filters"><label><i class="bi bi-search"></i><input id="menu-search" type="search" placeholder="Buscar prato por nome..." autocomplete="off" aria-label="Buscar pratos"></label><select id="menu-category" aria-label="Filtrar por categoria"><option value="">Todas as categorias</option><?php foreach(['Acompanhamentos','Carnes','Saladas','Tortas e assados'] as $category):?><option value="<?=adm_h($category)?>"><?=adm_h($category)?></option><?php endforeach;?></select><select id="menu-availability" aria-label="Filtrar por disponibilidade"><option value="">Todas as disponibilidades</option><option value="1">Disponíveis</option><option value="0">Ocultos</option></select><select id="menu-kind" aria-label="Filtrar por tipo"><option value="">Todos os tipos</option><option value="0">Quentinhas</option><option value="1">Somente por peso</option></select></div>
+<div class="menu-filters"><label><i class="bi bi-search"></i><input id="menu-search" type="search" placeholder="Buscar prato por nome..." autocomplete="off" aria-label="Buscar pratos"></label><select id="menu-category" aria-label="Filtrar por categoria"><option value="">Todas as categorias</option><?php foreach (['Acompanhamentos','Carnes','Saladas','Tortas e assados'] as $category):?><option value="<?=adm_h($category)?>"><?=adm_h($category)?></option><?php endforeach;?></select><select id="menu-availability" aria-label="Filtrar por disponibilidade"><option value="">Todas as disponibilidades</option><option value="1">Disponíveis</option><option value="0">Ocultos</option></select><select id="menu-kind" aria-label="Filtrar por tipo"><option value="">Todos os tipos</option><option value="0">Quentinhas</option><option value="1">Somente por peso</option></select></div>
 <div class="menu-results"><span id="menu-visible-count"><?=count($items)?> pratos encontrados</span><button type="button" class="menu-clear-filters" id="menu-clear-filters">Limpar filtros</button><span id="menu-save-feedback" role="status" aria-live="polite"></span></div>
-<div class="table-responsive"><table class="table align-middle menu-table"><thead><tr><th>Prato</th><th>Categoria</th><th>Somente por peso</th><th>Disponível</th></tr></thead><tbody><?php foreach($items as $item):?><tr class="menu-row" data-id="<?=adm_h($item['id'])?>"><td><input type="text" class="form-control menu-name" aria-label="Nome do prato" maxlength="140" value="<?=adm_h($item['name'])?>" required></td><td><select class="form-select menu-category"><?php foreach(['Acompanhamentos','Carnes','Saladas','Tortas e assados'] as $category):?><option value="<?=adm_h($category)?>" <?=$item['category']===$category?'selected':''?>><?=adm_h($category)?></option><?php endforeach;?></select></td><td><label class="menu-switch"><input class="menu-weight" type="checkbox" <?=$item['by_weight']?'checked':''?>><span>Por peso *</span></label></td><td><label class="menu-switch"><input class="menu-active" type="checkbox" <?=$item['active']?'checked':''?>><span class="menu-state"><?=$item['active']?'Sim':'Não'?></span></label></td></tr><?php endforeach;?></tbody></table></div><div id="menu-empty" class="menu-empty" hidden>Nenhum prato corresponde aos filtros. Experimente outra busca.</div></section>
+<div class="table-responsive"><table class="table align-middle menu-table"><thead><tr><th>Prato</th><th>Categoria</th><th>Somente por peso</th><th>Disponível</th></tr></thead><tbody><?php foreach ($items as $item):?><tr class="menu-row" data-id="<?=adm_h($item['id'])?>"><td><input type="text" class="form-control menu-name" aria-label="Nome do prato" maxlength="140" value="<?=adm_h($item['name'])?>" required></td><td><select class="form-select menu-category"><?php foreach (['Acompanhamentos','Carnes','Saladas','Tortas e assados'] as $category):?><option value="<?=adm_h($category)?>" <?=$item['category'] === $category ? 'selected' : ''?>><?=adm_h($category)?></option><?php endforeach;?></select></td><td><label class="menu-switch"><input class="menu-weight" type="checkbox" <?=$item['by_weight'] ? 'checked' : ''?>><span>Por peso *</span></label></td><td><label class="menu-switch"><input class="menu-active" type="checkbox" <?=$item['active'] ? 'checked' : ''?>><span class="menu-state"><?=$item['active'] ? 'Sim' : 'Não'?></span></label></td></tr><?php endforeach;?></tbody></table></div><div id="menu-empty" class="menu-empty" hidden>Nenhum prato corresponde aos filtros. Experimente outra busca.</div></section>
 <script src="/assets/js/admin-menu.js?v=1" defer></script>
 <?php adm_end();

@@ -1,1 +1,37 @@
-document.addEventListener('DOMContentLoaded',()=>{const dlg=document.querySelector('#user-dialog');if(!dlg)return;const id=document.querySelector('#user-id'),email=document.querySelector('#user-email'),role=document.querySelector('#user-role'),password=document.querySelector('#user-password'),title=document.querySelector('#user-modal-title'),hint=document.querySelector('#user-password-hint');function open(user){id.value=user?.id||'0';email.value=user?.email||'';if(role)role.value=user?.role||'customer';password.value='';password.required=!user;title.textContent=user?'Editar usuário':'Novo usuário';hint.textContent=user?'Deixe em branco para manter a senha atual.':'Obrigatória ao criar. Mínimo de 10 caracteres.';dlg.showModal();email.focus()}document.querySelector('[data-user-new]')?.addEventListener('click',()=>open(null));document.querySelectorAll('[data-user-edit]').forEach(b=>b.addEventListener('click',()=>open({id:b.dataset.id,email:b.dataset.email,role:b.dataset.role})));document.querySelectorAll('[data-user-close]').forEach(b=>b.addEventListener('click',()=>dlg.close()));dlg.addEventListener('click',e=>{if(e.target===dlg)dlg.close()})});
+document.addEventListener('DOMContentLoaded', () => {
+  const dlg = document.querySelector('#user-dialog');
+  if (!dlg) return;
+  const id = document.querySelector('#user-id'),
+    email = document.querySelector('#user-email'),
+    role = document.querySelector('#user-role'),
+    password = document.querySelector('#user-password'),
+    title = document.querySelector('#user-modal-title'),
+    hint = document.querySelector('#user-password-hint');
+  function open(user) {
+    id.value = user?.id || '0';
+    email.value = user?.email || '';
+    if (role) role.value = user?.role || 'customer';
+    password.value = '';
+    password.required = !user;
+    title.textContent = user ? 'Editar usuário' : 'Novo usuário';
+    hint.textContent = user
+      ? 'Deixe em branco para manter a senha atual.'
+      : 'Obrigatória ao criar. Mínimo de 10 caracteres.';
+    dlg.showModal();
+    email.focus();
+  }
+  document.querySelector('[data-user-new]')?.addEventListener('click', () => open(null));
+  document
+    .querySelectorAll('[data-user-edit]')
+    .forEach((b) =>
+      b.addEventListener('click', () =>
+        open({ id: b.dataset.id, email: b.dataset.email, role: b.dataset.role }),
+      ),
+    );
+  document
+    .querySelectorAll('[data-user-close]')
+    .forEach((b) => b.addEventListener('click', () => dlg.close()));
+  dlg.addEventListener('click', (e) => {
+    if (e.target === dlg) dlg.close();
+  });
+});

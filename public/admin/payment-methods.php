@@ -1,7 +1,24 @@
 <?php
 declare(strict_types=1);
 require __DIR__.'/includes/cms-boot.php';
-use App\Db;use App\Lunch;
-if($_SERVER['REQUEST_METHOD']==='POST'){cms_csrf();try{$pix=isset($_POST['pix'])?1:0;$card=isset($_POST['card'])?1:0;if(!$pix&&!$card)throw new DomainException('Deixe pelo menos uma forma de pagamento ativa');$q=Db::pdo()->prepare('UPDATE lunch_settings SET pix_enabled=?,card_enabled=? WHERE id=1');$q->execute([$pix,$card]);cms_notice('Formas de pagamento atualizadas.');}catch(Throwable $e){cms_notice($e instanceof DomainException?$e->getMessage():'Erro ao salvar','danger');}}
-$s=Lunch::settings();adm_start('Formas de pagamento','payment-methods');cms_feedback();?>
-<div class="mb-4"><span class="page-kicker">CONFIGURAÇÕES</span><h1 class="page-title">Formas de pagamento</h1><p class="page-subtitle">Escolha quais opções estarão disponíveis na finalização das quentinhas.</p></div><section class="content-card p-4" style="max-width:720px"><form method="post"><input type="hidden" name="csrf" value="<?=adm_h($csrf)?>"><label class="d-block mb-4"><input type="checkbox" name="pix" <?=$s['pix_enabled']?'checked':''?>> <strong>Pix na entrega</strong><p class="text-secondary small">Recebimento e confirmação manual pela equipe.</p></label><label class="d-block mb-4"><input type="checkbox" name="card" <?=$s['card_enabled']?'checked':''?>> <strong>Cartão na maquininha</strong><p class="text-secondary small">Pagamento realizado no momento da entrega.</p></label><button class="btn btn-bia">Salvar formas de pagamento</button></form></section><?php adm_end();
+use App\Db;
+use App\Lunch;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    cms_csrf();
+    try {
+        $pix = isset($_POST['pix']) ? 1 : 0;
+        $card = isset($_POST['card']) ? 1 : 0;
+        if (!$pix && !$card) {
+            throw new DomainException('Deixe pelo menos uma forma de pagamento ativa');
+        }$q = Db::pdo()->prepare('UPDATE lunch_settings SET pix_enabled=?,card_enabled=? WHERE id=1');
+        $q->execute([$pix,$card]);
+        cms_notice('Formas de pagamento atualizadas.');
+    } catch (Throwable $e) {
+        cms_notice($e instanceof DomainException ? $e->getMessage() : 'Erro ao salvar', 'danger');
+    }
+}
+$s = Lunch::settings();
+adm_start('Formas de pagamento', 'payment-methods');
+cms_feedback();?>
+<div class="mb-4"><span class="page-kicker">CONFIGURAÇÕES</span><h1 class="page-title">Formas de pagamento</h1><p class="page-subtitle">Escolha quais opções estarão disponíveis na finalização das quentinhas.</p></div><section class="content-card p-4" style="max-width:720px"><form method="post"><input type="hidden" name="csrf" value="<?=adm_h($csrf)?>"><label class="d-block mb-4"><input type="checkbox" name="pix" <?=$s['pix_enabled'] ? 'checked' : ''?>> <strong>Pix na entrega</strong><p class="text-secondary small">Recebimento e confirmação manual pela equipe.</p></label><label class="d-block mb-4"><input type="checkbox" name="card" <?=$s['card_enabled'] ? 'checked' : ''?>> <strong>Cartão na maquininha</strong><p class="text-secondary small">Pagamento realizado no momento da entrega.</p></label><button class="btn btn-bia">Salvar formas de pagamento</button></form></section><?php adm_end();
