@@ -30,7 +30,7 @@ final class Lunch {
   $address=trim((string)($data['address']??''));$neighborhood=trim((string)($data['neighborhood']??''));$reference=trim((string)($data['reference_point']??''));
   $boxes=$data['boxes']??[];
   if(mb_strlen($name)<2||mb_strlen($name)>150||strlen($phone)<10||strlen($phone)>13||mb_strlen($address)<8||mb_strlen($address)>350||mb_strlen($neighborhood)<2||mb_strlen($neighborhood)>120||mb_strlen($reference)<2||mb_strlen($reference)>350||!is_array($boxes)||count($boxes)<1||count($boxes)>20||!array_is_list($boxes))throw new DomainException('Confira nome, telefone, endereço, referência e quantidade de quentinhas');
-  $db=Db::pdo();$available=[];
+  $db=Db::pdo();$customerId=\App\Customer::id()?:null;$available=[];
   foreach(self::items() as $item)$available[(int)$item['id']]=$item['name'];
   $mode=$s['limit_mode']??'total';$limits=json_decode((string)($s['category_limits']??'{}'),true)?:[];
   $categoryById=[];foreach(self::items() as $item)$categoryById[(int)$item['id']]=$item['category'];
@@ -50,8 +50,8 @@ final class Lunch {
   $unit=(int)$s['price_cents'];$total=$unit*count($normalized);
   $db->beginTransaction();
   try{
-   $q=$db->prepare('INSERT INTO lunch_orders(customer_name,customer_phone,address,neighborhood,reference_point,payment_method,quantity,unit_price_cents,total_cents) VALUES(?,?,?,?,?,?,?,?,?)');
-   $q->execute([$name,$phone,$address,$neighborhood,$reference,$method,count($normalized),$unit,$total]);
+   $q=$db->prepare('INSERT INTO lunch_orders(customer_id,customer_name,customer_phone,address,neighborhood,reference_point,payment_method,quantity,unit_price_cents,total_cents) VALUES(?,?,?,?,?,?,?,?,?,?)');
+   $q->execute([$customerId,$name,$phone,$address,$neighborhood,$reference,$method,count($normalized),$unit,$total]);
    $orderId=(int)$db->lastInsertId();
    $boxInsert=$db->prepare('INSERT INTO lunch_order_boxes(order_id,box_number,box_name) VALUES(?,?,?)');
    $itemInsert=$db->prepare('INSERT INTO lunch_order_choices(box_id,menu_item_id,item_name) VALUES(?,?,?)');
