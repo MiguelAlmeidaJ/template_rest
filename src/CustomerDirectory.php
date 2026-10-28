@@ -32,7 +32,7 @@ final class CustomerDirectory
     public static function paginate(string $search, string $filter, int $requestedPage): array
     {
         $db = Db::pdo();
-        $conditions = [];
+        $conditions = ['staff.id IS NULL'];
         $parameters = [];
 
         if ($search !== '') {
@@ -50,6 +50,7 @@ final class CustomerDirectory
         $from = <<<'SQL'
             FROM customer_accounts c
             LEFT JOIN customer_addresses a ON a.customer_id = c.id
+            LEFT JOIN admins staff ON staff.customer_id = c.id
             LEFT JOIN (
                 SELECT
                     customer_id,
@@ -86,7 +87,12 @@ final class CustomerDirectory
         return [
             'customers' => $query->fetchAll(),
             'total' => $total,
-            'registered' => (int) $db->query('SELECT COUNT(*) FROM customer_accounts')->fetchColumn(),
+            'registered' => (int) $db->query(<<<'SQL'
+                SELECT COUNT(*)
+                FROM customer_accounts c
+                LEFT JOIN admins staff ON staff.customer_id = c.id
+                WHERE staff.id IS NULL
+                SQL)->fetchColumn(),
             'page' => $page,
             'pages' => $pages,
         ];
@@ -101,7 +107,8 @@ final class CustomerDirectory
                 a.neighborhood, a.reference_point
             FROM customer_accounts c
             LEFT JOIN customer_addresses a ON a.customer_id = c.id
-            WHERE c.id = ?
+            LEFT JOIN admins staff ON staff.customer_id = c.id
+            WHERE c.id = ? AND staff.id IS NULL
             SQL);
 
         $query->execute([$customerId]);
