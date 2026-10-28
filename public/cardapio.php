@@ -1,2 +1,4 @@
-<?php header('Location: /cardapio');
+<?php
+
+header('Location: /cardapio');
 exit;

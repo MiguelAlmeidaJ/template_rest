@@ -11,6 +11,9 @@ final class Customer
     public static function boot(): void
     {
         if (session_status() !== PHP_SESSION_ACTIVE) {
+            if (headers_sent($file, $line)) {
+                throw new \RuntimeException('A sessão do cliente precisa iniciar antes do HTML: ' . $file . ':' . $line);
+            }
             session_name('bia_customer');
             session_set_cookie_params(['httponly' => true,'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off','samesite' => 'Lax']);
             session_start();

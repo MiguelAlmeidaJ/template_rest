@@ -170,6 +170,6 @@ final class Modules
             throw new DomainException('Gateway online desativado');
         }
         $gateway = $settings['provider'] === 'mercadopago' ? new \App\Payments\MercadoPago() : new \App\Payments\PagBank();
-        return $gateway->createCheckout($id,(int)$o['total_cents']);
+        return $gateway->createCheckout($id, (int)$o['total_cents']);
     }
 }
