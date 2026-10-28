@@ -224,13 +224,6 @@ button {
   gap: 12px;
   margin-top: 34px;
 }
-.hero-note {
-  margin-top: 68px;
-  display: flex;
-  gap: 32px;
-  font-size: 12px;
-  color: #f3eadb;
-}
 .section {
   padding: 100px 0;
 }
@@ -574,11 +567,6 @@ button {
   }
   .display {
     font-size: 52px;
-  }
-  .hero-note {
-    margin-top: 44px;
-    gap: 15px;
-    flex-direction: column;
   }
   .section {
     padding: 65px 0;
@@ -1835,7 +1823,7 @@ body {
   background: #fffaf5;
   color: #212121;
   border-top: 1px solid #eee5dc;
-  padding: clamp(3rem, 5vw, 4.5rem) 0 1.25rem;
+  padding: clamp(1.5rem, 3.5vw, 3rem) 0 1.25rem;
 }
 .footer-light .footer-cols {
   grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.7fr) minmax(0, 1fr);

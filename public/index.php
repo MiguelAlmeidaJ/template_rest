@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require dirname(__DIR__).'/src/bootstrap.php';
+require dirname(__DIR__) . '/src/bootstrap.php';
 use App\Api;
 use App\Modules;
 
@@ -31,6 +31,7 @@ try {
   </div>
 </section>
 <?php bia_footer();
+
         exit;
     }
     if ($path === '/api/lunch/orders' && $method === 'POST') {
@@ -58,6 +59,6 @@ try {
 } catch (DomainException $e) {
     Api::send(['error' => $e->getMessage()], 422);
 } catch (Throwable $e) {
-    error_log((string)$e);
+    error_log((string) $e);
     Api::send(['error' => 'Erro interno'], 500);
 }
