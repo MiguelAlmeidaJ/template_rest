@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   update();
-  const timer = setInterval(update, 20000);
+  const timer = setInterval(update, 7000);
   window.addEventListener('pagehide', () => {
     stopped = true;
     clearInterval(timer);

@@ -34,7 +34,7 @@ final class Staff
             return !in_array($script, $restricted, true);
         }
         if ($role === 'employee') {
-            return in_array($script, ['index.php','lunch.php','lunch-orders.php','lunch-chat.php','chats.php','notifications.php','alerts-status.php'], true);
+            return in_array($script, ['index.php','lunch.php','lunch-orders.php','lunch-order.php','order-feed.php','lunch-chat.php','chats.php','notifications.php','alerts-status.php'], true);
         }
         return false;
     }
