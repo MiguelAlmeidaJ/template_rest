@@ -30,17 +30,11 @@ try {
     if ($path === '/api/products' && $method === 'GET') {
         Api::send(Modules::products());
     }
-    if ($path === '/api/reservations/slots' && $method === 'GET') {
-        Api::send(Modules::slots((string)($_GET['date'] ?? '')));
-    }
     if ($path === '/api/delivery/quote' && $method === 'POST') {
         Api::send(Modules::delivery(Api::input()));
     }
     if ($path === '/api/orders' && $method === 'POST') {
         Api::send(Modules::order(Api::input()), 201);
-    }
-    if ($path === '/api/reservations' && $method === 'POST') {
-        Api::send(Modules::reservation(Api::input()), 201);
     }
     if ($path === '/api/payments/checkout' && $method === 'POST') {
         Api::send(Modules::checkout(Api::input()));

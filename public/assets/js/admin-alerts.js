@@ -22,14 +22,14 @@ document.addEventListener('DOMContentLoaded', () => {
         el.parentElement.setAttribute(
           'aria-label',
           n
-            ? n + ' notificações ' + (el === chat ? 'de mensagens' : 'de pedidos e reservas')
+            ? n + ' notificações ' + (el === chat ? 'de mensagens' : 'de pedidos')
             : el === chat
               ? 'Mensagens dos clientes'
-              : 'Notificações de pedidos e reservas',
+              : 'Notificações de pedidos',
         );
       };
       show(chat, c.messages);
-      show(alerts, (c.orders || 0) + (c.reservations || 0));
+      show(alerts, c.orders || 0);
     } catch (e) {
       /* silent network failure */
     }
