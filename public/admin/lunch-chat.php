@@ -15,6 +15,10 @@ if (!$order) {
     http_response_code(404);
     exit('Pedido não encontrado');
 }
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    header('Location: /admin/lunch-order.php?id=' . $id . '#order-chat-section');
+    exit;
+}
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     cms_csrf();
     $body = trim((string)($_POST['body'] ?? ''));
