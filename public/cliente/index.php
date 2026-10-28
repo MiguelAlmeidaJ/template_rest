@@ -38,25 +38,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $q = Db::pdo()->prepare('INSERT INTO customer_addresses(customer_id,recipient,phone,address,neighborhood,reference_point) VALUES(?,?,?,?,?,?) ON DUPLICATE KEY UPDATE recipient=VALUES(recipient),phone=VALUES(phone),address=VALUES(address),neighborhood=VALUES(neighborhood),reference_point=VALUES(reference_point)');
             $q->execute([$id,...$values]);
             $notice = 'Endereço salvo com sucesso.';
-         } elseif ($action === 'profile') {
-            $name=trim((string)($_POST['full_name']??''));
-            $phone=preg_replace('/\\D/','',(string)($_POST['phone']??''));
-            $cpf=preg_replace('/\\D/','',(string)($_POST['cpf']??''));
-            if (mb_strlen($name)<2 || mb_strlen($name)>150 || ($phone!=='' && (strlen($phone)<10 || strlen($phone)>11)) || ($cpf!=='' && strlen($cpf)!==11)) {
+        } elseif ($action === 'profile') {
+            $name = trim((string)($_POST['full_name'] ?? ''));
+            $phone = preg_replace('/\\D/', '', (string)($_POST['phone'] ?? ''));
+            $cpf = preg_replace('/\\D/', '', (string)($_POST['cpf'] ?? ''));
+            if (mb_strlen($name) < 2 || mb_strlen($name) > 150 || ($phone !== '' && (strlen($phone) < 10 || strlen($phone) > 11)) || ($cpf !== '' && strlen($cpf) !== 11)) {
                 throw new DomainException('Confira nome, telefone e CPF.');
             }
-            if ($cpf!=='') {
-                if (preg_match('/^(\\d)\\1{10}$/',$cpf)) throw new DomainException('CPF inválido.');
-                for ($digit=9;$digit<11;$digit++) {
-                    $sum=0;
-                    for ($i=0;$i<$digit;$i++) $sum+=(int)$cpf[$i]*($digit+1-$i);
-                    $check=($sum*10)%11;
-                    if (($check===10?0:$check)!==(int)$cpf[$digit]) throw new DomainException('CPF inválido.');
+            if ($cpf !== '') {
+                if (preg_match('/^(\\d)\\1{10}$/', $cpf)) {
+                    throw new DomainException('CPF inválido.');
+                }
+                for ($digit = 9;$digit < 11;$digit++) {
+                    $sum = 0;
+                    for ($i = 0;$i < $digit;$i++) {
+                        $sum += (int)$cpf[$i] * ($digit + 1 - $i);
+                    }
+                    $check = ($sum * 10) % 11;
+                    if (($check === 10 ? 0 : $check) !== (int)$cpf[$digit]) {
+                        throw new DomainException('CPF inválido.');
+                    }
                 }
             }
-            $stmt=Db::pdo()->prepare('UPDATE customer_accounts SET full_name=?,phone=?,cpf=? WHERE id=?');
-            $stmt->execute([$name,$phone,$cpf?:null,$id]);
-            $notice='Informações atualizadas.';
+            $stmt = Db::pdo()->prepare('UPDATE customer_accounts SET full_name=?,phone=?,cpf=? WHERE id=?');
+            $stmt->execute([$name,$phone,$cpf ?: null,$id]);
+            $notice = 'Informações atualizadas.';
         } elseif ($action === 'message') {
             $order = filter_var($_POST['order_id'] ?? null, FILTER_VALIDATE_INT);
             $body = trim((string)($_POST['body'] ?? ''));
@@ -158,20 +164,22 @@ bia_header('Minha conta', '');?><div class="shell section customer-page"><span c
 <script src="/assets/js/customer-access.js?v=1" defer></script>
 <?php else: ?>
 <?php
-$tab = (string) ($_GET['tab'] ?? 'pedidos');
-if (!in_array($tab, ['pedidos','padrao','enderecos','perfil'], true)) $tab = 'pedidos';
-$profileQuery = Db::pdo()->prepare('SELECT email, full_name, phone, cpf FROM customer_accounts WHERE id=?');
-$profileQuery->execute([$id]);
-$profile = $profileQuery->fetch() ?: [];
-?>
+    $tab = (string) ($_GET['tab'] ?? 'pedidos');
+    if (!in_array($tab, ['pedidos','padrao','enderecos','perfil'], true)) {
+        $tab = 'pedidos';
+    }
+    $profileQuery = Db::pdo()->prepare('SELECT email, full_name, phone, cpf FROM customer_accounts WHERE id=?');
+    $profileQuery->execute([$id]);
+    $profile = $profileQuery->fetch() ?: [];
+    ?>
 <div class="customer-dashboard">
   <aside class="customer-dashboard-nav" aria-label="Menu da minha conta">
     <div class="customer-dashboard-identity"><span class="customer-dashboard-avatar"><i class="bi bi-person" aria-hidden="true"></i></span><div><strong><?=bia_esc($profile['full_name'] ?: 'Minha conta')?></strong><small><?=bia_esc($profile['email'] ?? '')?></small></div></div>
     <nav>
-      <a class="<?=$tab==='pedidos'?'active':''?>" href="/cliente/?tab=pedidos"><i class="bi bi-bag-check"></i> Pedidos</a>
-      <a class="<?=$tab==='padrao'?'active':''?>" href="/cliente/?tab=padrao"><i class="bi bi-bookmark-heart"></i> Cardápio padrão</a>
-      <a class="<?=$tab==='enderecos'?'active':''?>" href="/cliente/?tab=enderecos"><i class="bi bi-geo-alt"></i> Endereços</a>
-      <a class="<?=$tab==='perfil'?'active':''?>" href="/cliente/?tab=perfil"><i class="bi bi-person-gear"></i> Informações do usuário</a>
+      <a class="<?=$tab === 'pedidos' ? 'active' : ''?>" href="/cliente/?tab=pedidos"><i class="bi bi-bag-check"></i> Pedidos</a>
+      <a class="<?=$tab === 'padrao' ? 'active' : ''?>" href="/cliente/?tab=padrao"><i class="bi bi-bookmark-heart"></i> Cardápio padrão</a>
+      <a class="<?=$tab === 'enderecos' ? 'active' : ''?>" href="/cliente/?tab=enderecos"><i class="bi bi-geo-alt"></i> Endereços</a>
+      <a class="<?=$tab === 'perfil' ? 'active' : ''?>" href="/cliente/?tab=perfil"><i class="bi bi-person-gear"></i> Informações do usuário</a>
     </nav>
     <form method="post"><input type="hidden" name="csrf" value="<?=bia_esc(Customer::csrf())?>"><input type="hidden" name="action" value="logout"><button class="customer-dashboard-logout" type="submit"><i class="bi bi-box-arrow-right"></i> Sair da conta</button></form>
   </aside>
@@ -181,17 +189,17 @@ $profile = $profileQuery->fetch() ?: [];
     <?php if (!$orders): ?><div class="customer-dashboard-empty"><i class="bi bi-bag"></i><h3>Você ainda não fez pedidos.</h3><p>Escolha os pratos do dia e monte sua primeira quentinha.</p><a href="/pedido/">Conhecer o cardápio</a></div><?php endif; ?>
     <div class="customer-dashboard-orders">
       <?php foreach ($orders as $order): ?>
-        <article class="customer-dashboard-order <?=$selectedOrder && (int)$selectedOrder['id']===(int)$order['id']?'selected':''?>">
-          <div><strong>Pedido #<?=bia_esc($order['id'])?></strong><small><?=bia_esc(date('d/m/Y H:i',strtotime($order['created_at'])))?> · <?=bia_esc($order['quantity'])?> quentinha(s)</small></div>
+        <article class="customer-dashboard-order <?=$selectedOrder && (int)$selectedOrder['id'] === (int)$order['id'] ? 'selected' : ''?>">
+          <div><strong>Pedido #<?=bia_esc($order['id'])?></strong><small><?=bia_esc(date('d/m/Y H:i', strtotime($order['created_at'])))?> · <?=bia_esc($order['quantity'])?> quentinha(s)</small></div>
           <span class="customer-order-status"><?=bia_esc($statusLabels[$order['status']] ?? $order['status'])?></span>
-          <strong class="customer-order-total">R$ <?=number_format((int)$order['total_cents']/100,2,',','.')?></strong>
+          <strong class="customer-order-total">R$ <?=number_format((int)$order['total_cents'] / 100, 2, ',', '.')?></strong>
           <a href="/cliente/?tab=pedidos&amp;order=<?= (int)$order['id']?>#conversa">Acompanhar <i class="bi bi-arrow-right"></i></a>
         </article>
       <?php endforeach; ?>
     </div>
     <?php if ($selectedOrder): ?>
       <section class="customer-panel" id="conversa"><h3>Pedido #<?=bia_esc($selectedOrder['id'])?> · <?=bia_esc($statusLabels[$selectedOrder['status']] ?? $selectedOrder['status'])?></h3><p>Converse com a equipe sobre este pedido.</p>
-        <div class="customer-chat"><?php if (!$messages): ?><p>Ainda não há mensagens.</p><?php endif; ?><?php foreach ($messages as $message): ?><article class="<?=$message['sender']==='customer'?'from-customer':'from-restaurant'?>"><strong><?=$message['sender']==='customer'?'Você':'Restaurante da Bia'?></strong><p><?=nl2br(bia_esc($message['body']))?></p><small><?=bia_esc($message['created_at'])?></small></article><?php endforeach; ?></div>
+        <div class="customer-chat"><?php if (!$messages): ?><p>Ainda não há mensagens.</p><?php endif; ?><?php foreach ($messages as $message): ?><article class="<?=$message['sender'] === 'customer' ? 'from-customer' : 'from-restaurant'?>"><strong><?=$message['sender'] === 'customer' ? 'Você' : 'Restaurante da Bia'?></strong><p><?=nl2br(bia_esc($message['body']))?></p><small><?=bia_esc($message['created_at'])?></small></article><?php endforeach; ?></div>
         <form method="post"><input type="hidden" name="csrf" value="<?=bia_esc(Customer::csrf())?>"><input type="hidden" name="action" value="message"><input type="hidden" name="order_id" value="<?= (int)$selectedOrder['id']?>"><label>Mensagem<textarea name="body" rows="3" maxlength="2000" required></textarea></label><button type="submit" class="btn">Enviar mensagem</button></form>
       </section>
     <?php endif; ?>
@@ -202,7 +210,7 @@ $profile = $profileQuery->fetch() ?: [];
   <?php elseif ($tab === 'enderecos'): ?>
     <div class="customer-dashboard-heading"><div><span class="eyebrow">ONDE ENTREGAR</span><h2>Meus endereços</h2><p>Cadastre e gerencie até 10 endereços para selecionar na hora de pedir.</p></div><button type="button" class="btn" id="customer-new-address"><i class="bi bi-plus-lg"></i> Novo endereço</button></div>
     <?php if (!$extraAddresses): ?><div class="customer-dashboard-empty"><i class="bi bi-geo-alt"></i><h3>Nenhum endereço cadastrado.</h3><p>Cadastre sua casa, trabalho ou outro local de entrega.</p></div><?php endif; ?>
-    <div class="customer-preference-list"><?php foreach ($extraAddresses as $entry): ?><div class="customer-preference-row"><div><strong><?=bia_esc($entry['label'])?> <?=$entry['is_default']?'· Principal':''?></strong><small><?=bia_esc($entry['address'])?>, <?=bia_esc($entry['number'] ?: 's/n')?><?= $entry['complement']?', '.bia_esc($entry['complement']):''?> · <?=bia_esc($entry['neighborhood'])?></small><small>Referência: <?=bia_esc($entry['reference_point'] ?: 'Não informada')?></small></div><div class="customer-preference-actions"><button type="button" data-address-edit="<?= (int)$entry['id']?>">Editar</button><button type="button" data-address-delete="<?= (int)$entry['id']?>">Excluir</button></div></div><?php endforeach; ?></div>
+    <div class="customer-preference-list"><?php foreach ($extraAddresses as $entry): ?><div class="customer-preference-row"><div><strong><?=bia_esc($entry['label'])?> <?=$entry['is_default'] ? '· Principal' : ''?></strong><small><?=bia_esc($entry['address'])?>, <?=bia_esc($entry['number'] ?: 's/n')?><?= $entry['complement'] ? ', '.bia_esc($entry['complement']) : ''?> · <?=bia_esc($entry['neighborhood'])?></small><small>Referência: <?=bia_esc($entry['reference_point'] ?: 'Não informada')?></small></div><div class="customer-preference-actions"><button type="button" data-address-edit="<?= (int)$entry['id']?>">Editar</button><button type="button" data-address-delete="<?= (int)$entry['id']?>">Excluir</button></div></div><?php endforeach; ?></div>
   <?php else: ?>
     <div class="customer-dashboard-heading"><div><span class="eyebrow">DADOS PESSOAIS</span><h2>Informações do usuário</h2><p>Mantenha seus dados atualizados para agilizar a entrega.</p></div></div>
     <form method="post" class="customer-profile-form">
