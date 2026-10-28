@@ -244,6 +244,6 @@ bia_header('Minha conta', '');?><div class="shell section customer-page"><span c
 </form>
 </dialog>
 <script type="application/json" id="customer-preferences-data"><?=json_encode(['addresses' => $extraAddresses,'csrf' => Customer::csrf()], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE)?></script>
-<script src="/assets/js/customer-preferences.js?v=1" defer></script>
+<script src="/assets/js/customer-preferences.js?v=2" defer></script>
 <?php endif; ?>
 <?php bia_footer();

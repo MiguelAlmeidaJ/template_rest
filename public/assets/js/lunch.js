@@ -542,6 +542,18 @@ document.addEventListener('DOMContentLoaded', () => {
     );
   });
   refreshPreferences();
+  if (addresses.length) {
+    const preferred = addresses.find((entry) => Number(entry.is_default) === 1) || addresses[0];
+    document.querySelector('#lunch-address-select').value = String(preferred.id);
+    applyAddress(preferred);
+  }
+  if (account.favorite_to_load) {
+    const favoriteSelect = document.querySelector('#lunch-favorite-select');
+    if (favorites.some((entry) => Number(entry.id) === Number(account.favorite_to_load))) {
+      favoriteSelect.value = String(account.favorite_to_load);
+      favoriteSelect.dispatchEvent(new Event('change'));
+    }
+  }
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
