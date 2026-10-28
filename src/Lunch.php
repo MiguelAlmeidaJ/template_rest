@@ -4,7 +4,7 @@ namespace App;
 use DomainException;
 final class Lunch {
  public static function settings():array {
-  $s=Db::pdo()->query('SELECT price_cents,max_choices,pix_enabled,card_enabled,orders_enabled FROM lunch_settings WHERE id=1')->fetch();
+  $s=Db::pdo()->query('SELECT price_cents,max_choices,limit_mode,category_limits,pix_enabled,card_enabled,orders_enabled FROM lunch_settings WHERE id=1')->fetch();
   if(!$s)throw new DomainException('Execute a migração das quentinhas');
   return $s;
  }
@@ -32,12 +32,19 @@ final class Lunch {
   if(mb_strlen($name)<2||mb_strlen($name)>150||strlen($phone)<10||strlen($phone)>13||mb_strlen($address)<8||mb_strlen($address)>350||mb_strlen($neighborhood)<2||mb_strlen($neighborhood)>120||mb_strlen($reference)<2||mb_strlen($reference)>350||!is_array($boxes)||count($boxes)<1||count($boxes)>20||!array_is_list($boxes))throw new DomainException('Confira nome, telefone, endereço, referência e quantidade de quentinhas');
   $db=Db::pdo();$available=[];
   foreach(self::items() as $item)$available[(int)$item['id']]=$item['name'];
-  $normalized=[];
+  $mode=$s['limit_mode']??'total';$limits=json_decode((string)($s['category_limits']??'{}'),true)?:[];
+  $categoryById=[];foreach(self::items() as $item)$categoryById[(int)$item['id']]=$item['category'];
+  $normalized=[];$boxNames=[];
   foreach($boxes as $box){
+   if(!is_array($box))throw new DomainException('Quentinha inválida');
+   $boxName=trim((string)($box['name']??''));
+   if(!mb_check_encoding($boxName,'UTF-8')||mb_strlen($boxName)<2||mb_strlen($boxName)>80)throw new DomainException('Informe um nome de 2 a 80 caracteres para cada quentinha');
+   $boxNames[]=$boxName;
    $chosen=$box['items']??[];
-   if(!is_array($chosen)||!array_is_list($chosen)||count($chosen)<1||count($chosen)>(int)$s['max_choices'])throw new DomainException('Seleções da quentinha inválidas');
+   if(!is_array($chosen)||!array_is_list($chosen)||count($chosen)<1||($mode==='total'&&count($chosen)>(int)$s['max_choices']))throw new DomainException('Seleções da quentinha inválidas');
    $ids=[];
    foreach($chosen as $id){$id=filter_var($id,FILTER_VALIDATE_INT);if(!$id||!isset($available[$id])||isset($ids[$id]))throw new DomainException('Item repetido ou indisponível no cardápio');$ids[$id]=$available[$id];}
+   if($mode==='category'){$counts=[];foreach(array_keys($ids) as $id){$cat=$categoryById[$id];$counts[$cat]=($counts[$cat]??0)+1;}foreach($counts as $cat=>$count){if($count>(int)($limits[$cat]??0))throw new DomainException('Limite da categoria '.$cat.' excedido');}}
    $normalized[]=$ids;
   }
   $unit=(int)$s['price_cents'];$total=$unit*count($normalized);
@@ -46,9 +53,9 @@ final class Lunch {
    $q=$db->prepare('INSERT INTO lunch_orders(customer_name,customer_phone,address,neighborhood,reference_point,payment_method,quantity,unit_price_cents,total_cents) VALUES(?,?,?,?,?,?,?,?,?)');
    $q->execute([$name,$phone,$address,$neighborhood,$reference,$method,count($normalized),$unit,$total]);
    $orderId=(int)$db->lastInsertId();
-   $boxInsert=$db->prepare('INSERT INTO lunch_order_boxes(order_id,box_number) VALUES(?,?)');
+   $boxInsert=$db->prepare('INSERT INTO lunch_order_boxes(order_id,box_number,box_name) VALUES(?,?,?)');
    $itemInsert=$db->prepare('INSERT INTO lunch_order_choices(box_id,menu_item_id,item_name) VALUES(?,?,?)');
-   foreach($normalized as $index=>$items){$boxInsert->execute([$orderId,$index+1]);$boxId=(int)$db->lastInsertId();foreach($items as $id=>$item)$itemInsert->execute([$boxId,$id,$item]);}
+   foreach($normalized as $index=>$items){$boxInsert->execute([$orderId,$index+1,$boxNames[$index]]);$boxId=(int)$db->lastInsertId();foreach($items as $id=>$item)$itemInsert->execute([$boxId,$id,$item]);}
    $db->commit();return ['order_id'=>$orderId,'total_cents'=>$total,'quantity'=>count($normalized),'status'=>'pending','payment_status'=>'pending'];
   }catch(\Throwable $e){if($db->inTransaction())$db->rollBack();throw $e;}
  }
