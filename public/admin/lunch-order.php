@@ -4,11 +4,14 @@ require __DIR__ . '/includes/cms-boot.php';
 use App\Db;
 
 $id = filter_var($_GET['id'] ?? null, FILTER_VALIDATE_INT);
-if (!$id) { header('Location: /admin/lunch-orders.php'); exit; }
+if (!$id) {
+    header('Location: /admin/lunch-orders.php');
+    exit;
+}
 $db = Db::pdo();
 $statuses = [
-    'pending'=>'Novo pedido','accepted'=>'Novo pedido','preparing'=>'Em preparação',
-    'out_for_delivery'=>'Saindo para entrega','delivered'=>'Pedido entregue','cancelled'=>'Cancelado',
+    'pending' => 'Novo pedido','accepted' => 'Novo pedido','preparing' => 'Em preparação',
+    'out_for_delivery' => 'Saindo para entrega','delivered' => 'Pedido entregue','cancelled' => 'Cancelado',
 ];
 $error = '';
 $notice = '';
@@ -18,37 +21,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $action = (string) ($_POST['action'] ?? '');
         if ($action === 'status') {
             $status = (string) ($_POST['status'] ?? '');
-            if (!in_array($status, ['pending','preparing','out_for_delivery','delivered','cancelled'], true)) throw new DomainException('Status inválido.');
-            $stmt=$db->prepare('UPDATE lunch_orders SET status=? WHERE id=?');
+            if (!in_array($status, ['pending','preparing','out_for_delivery','delivered','cancelled'], true)) {
+                throw new DomainException('Status inválido.');
+            }
+            $stmt = $db->prepare('UPDATE lunch_orders SET status=? WHERE id=?');
             $stmt->execute([$status,$id]);
-            $notice='Etapa do pedido atualizada.';
+            $notice = 'Etapa do pedido atualizada.';
         } elseif ($action === 'paid') {
-            $stmt=$db->prepare("UPDATE lunch_orders SET payment_status='paid' WHERE id=? AND status<>'cancelled'");
+            $stmt = $db->prepare("UPDATE lunch_orders SET payment_status='paid' WHERE id=? AND status<>'cancelled'");
             $stmt->execute([$id]);
-            $notice='Pagamento confirmado.';
+            $notice = 'Pagamento confirmado.';
         } else {
             throw new DomainException('Ação inválida.');
         }
-    } catch (DomainException $exception) { $error=$exception->getMessage(); }
-    catch (Throwable $exception) { error_log((string)$exception); $error='Não foi possível atualizar o pedido.'; }
+    } catch (DomainException $exception) {
+        $error = $exception->getMessage();
+    } catch (Throwable $exception) {
+        error_log((string)$exception);
+        $error = 'Não foi possível atualizar o pedido.';
+    }
 }
-$stmt=$db->prepare('SELECT * FROM lunch_orders WHERE id=?');
+$stmt = $db->prepare('SELECT * FROM lunch_orders WHERE id=?');
 $stmt->execute([$id]);
-$order=$stmt->fetch();
-if (!$order) { http_response_code(404); exit('Pedido não encontrado.'); }
-$stmt=$db->prepare('SELECT b.id,b.box_number,b.box_name,c.item_name FROM lunch_order_boxes b LEFT JOIN lunch_order_choices c ON c.box_id=b.id WHERE b.order_id=? ORDER BY b.box_number,c.id');
+$order = $stmt->fetch();
+if (!$order) {
+    http_response_code(404);
+    exit('Pedido não encontrado.');
+}
+$stmt = $db->prepare('SELECT b.id,b.box_number,b.box_name,c.item_name FROM lunch_order_boxes b LEFT JOIN lunch_order_choices c ON c.box_id=b.id WHERE b.order_id=? ORDER BY b.box_number,c.id');
 $stmt->execute([$id]);
-$boxes=[];
+$boxes = [];
 foreach ($stmt->fetchAll() as $row) {
-    $boxNumber=(int)$row['box_number'];
-    $boxes[$boxNumber]['name']=$row['box_name'];
-    if ($row['item_name']!==null) $boxes[$boxNumber]['items'][]=$row['item_name'];
+    $boxNumber = (int)$row['box_number'];
+    $boxes[$boxNumber]['name'] = $row['box_name'];
+    if ($row['item_name'] !== null) {
+        $boxes[$boxNumber]['items'][] = $row['item_name'];
+    }
 }
 adm_start('Pedido #'.$id, 'lunch-orders');
 ?>
 <div class="order-detail-top">
   <a href="/admin/lunch-orders.php" class="order-back"><i class="bi bi-arrow-left"></i> Voltar aos pedidos</a>
-  <div class="order-detail-title"><div><span class="page-kicker">DETALHES DO PEDIDO</span><h1 class="page-title">Pedido #<?=(int)$id?></h1><p class="page-subtitle">Registrado em <?=adm_h(date('d/m/Y às H:i',strtotime($order['created_at'])))?></p></div><span class="orders-state orders-state-<?=adm_h($order['status'])?>"><?=adm_h($statuses[$order['status']]??$order['status'])?></span></div>
+  <div class="order-detail-title"><div><span class="page-kicker">DETALHES DO PEDIDO</span><h1 class="page-title">Pedido #<?=(int)$id?></h1><p class="page-subtitle">Registrado em <?=adm_h(date('d/m/Y às H:i', strtotime($order['created_at'])))?></p></div><span class="orders-state orders-state-<?=adm_h($order['status'])?>"><?=adm_h($statuses[$order['status']] ?? $order['status'])?></span></div>
 </div>
 <?php if ($notice): ?><div class="alert alert-success"><?=adm_h($notice)?></div><?php endif; ?>
 <?php if ($error): ?><div class="alert alert-danger"><?=adm_h($error)?></div><?php endif; ?>
@@ -56,8 +70,8 @@ adm_start('Pedido #'.$id, 'lunch-orders');
   <div class="order-detail-primary">
     <section class="content-card order-detail-card">
       <h2><i class="bi bi-basket"></i> Montagem das quentinhas</h2>
-      <?php foreach ($boxes as $number=>$box): ?>
-      <article class="order-detail-box"><div class="order-detail-box-title"><strong>Quentinha <?=(int)$number?></strong><span><?=adm_h($box['name'])?></span></div><p><?=adm_h(implode(' · ',$box['items']??[]))?></p></article>
+      <?php foreach ($boxes as $number => $box): ?>
+      <article class="order-detail-box"><div class="order-detail-box-title"><strong>Quentinha <?=(int)$number?></strong><span><?=adm_h($box['name'])?></span></div><p><?=adm_h(implode(' · ', $box['items'] ?? []))?></p></article>
       <?php endforeach; ?>
     </section>
     <section class="content-card order-detail-card">
@@ -91,9 +105,11 @@ adm_start('Pedido #'.$id, 'lunch-orders');
         <input type="hidden" name="action" value="status">
         <label for="order-status">Situação atual</label>
         <select id="order-status" class="form-select" name="status">
-          <?php foreach ($statuses as $value=>$label): ?>
-          <?php if ($value==='accepted') continue; ?>
-          <option value="<?=adm_h($value)?>" <?=($order['status']===$value||($value==='pending'&&$order['status']==='accepted'))?'selected':''?>><?=adm_h($label)?></option>
+          <?php foreach ($statuses as $value => $label): ?>
+          <?php if ($value === 'accepted') {
+              continue;
+          } ?>
+          <option value="<?=adm_h($value)?>" <?=($order['status'] === $value || ($value === 'pending' && $order['status'] === 'accepted')) ? 'selected' : ''?>><?=adm_h($label)?></option>
           <?php endforeach; ?>
         </select>
         <button type="submit" class="btn btn-bia">Atualizar status</button>
@@ -101,8 +117,8 @@ adm_start('Pedido #'.$id, 'lunch-orders');
     </section>
     <section class="content-card order-detail-card">
       <h2>Pagamento</h2>
-      <div class="order-detail-facts"><div><small>Forma</small><strong><?=$order['payment_method']==='pix'?'Pix':'Cartão na entrega'?></strong></div><div><small>Situação</small><strong><?=$order['payment_status']==='paid'?'Pago':'Pendente'?></strong></div><div><small>Quantidade</small><strong><?=(int)$order['quantity']?></strong></div><div><small>Valor total</small><strong class="order-total">R$ <?=number_format((int)$order['total_cents']/100,2,',','.')?></strong></div></div>
-      <?php if ($order['payment_status']!=='paid'&&$order['status']!=='cancelled'): ?>
+      <div class="order-detail-facts"><div><small>Forma</small><strong><?=$order['payment_method'] === 'pix' ? 'Pix' : 'Cartão na entrega'?></strong></div><div><small>Situação</small><strong><?=$order['payment_status'] === 'paid' ? 'Pago' : 'Pendente'?></strong></div><div><small>Quantidade</small><strong><?=(int)$order['quantity']?></strong></div><div><small>Valor total</small><strong class="order-total">R$ <?=number_format((int)$order['total_cents'] / 100, 2, ',', '.')?></strong></div></div>
+      <?php if ($order['payment_status'] !== 'paid' && $order['status'] !== 'cancelled'): ?>
       <form method="post" class="mt-3" onsubmit="return confirm('O pagamento foi realmente recebido?')"><input type="hidden" name="csrf" value="<?=adm_h($csrf)?>"><input type="hidden" name="action" value="paid"><button type="submit" class="btn btn-outline-secondary w-100">Confirmar recebimento</button></form>
       <?php endif; ?>
     </section>
