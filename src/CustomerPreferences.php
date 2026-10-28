@@ -11,7 +11,7 @@ final class CustomerPreferences
     public static function addresses(int $customerId): array
     {
         $query = Db::pdo()->prepare(
-            'SELECT id,label,recipient,phone,address,neighborhood,reference_point,is_default
+            'SELECT id,label,recipient,phone,address,number,complement,neighborhood,reference_point,is_default
              FROM customer_delivery_addresses WHERE customer_id=? ORDER BY is_default DESC,id DESC'
         );
         $query->execute([$customerId]);
@@ -29,7 +29,7 @@ final class CustomerPreferences
 
     public static function saveAddress(int $customerId, array $data): void
     {
-        $fields = ['label' => 70,'recipient' => 150,'phone' => 24,'address' => 350,'neighborhood' => 120,'reference_point' => 350];
+        $fields = ['label' => 70,'recipient' => 150,'phone' => 24,'address' => 350,'neighborhood' => 120,'reference_point' => 350,'number' => 20,'complement' => 120];
         $values = [];
         foreach ($fields as $key => $limit) {
             $value = trim((string)($data[$key] ?? ''));
@@ -54,7 +54,7 @@ final class CustomerPreferences
             }
             if ($id) {
                 $query = $db->prepare(
-                    'UPDATE customer_delivery_addresses SET label=?,recipient=?,phone=?,address=?,neighborhood=?,reference_point=? WHERE id=? AND customer_id=?'
+                    'UPDATE customer_delivery_addresses SET label=?,recipient=?,phone=?,address=?,neighborhood=?,reference_point=?,number=?,complement=? WHERE id=? AND customer_id=?'
                 );
                 $query->execute([...array_values($values),$id,$customerId]);
                 if (!$query->rowCount()) {
@@ -66,8 +66,8 @@ final class CustomerPreferences
                 }
             } else {
                 $query = $db->prepare(
-                    'INSERT INTO customer_delivery_addresses(customer_id,label,recipient,phone,address,neighborhood,reference_point)
-                     VALUES(?,?,?,?,?,?,?)'
+                    'INSERT INTO customer_delivery_addresses(customer_id,label,recipient,phone,address,neighborhood,reference_point,number,complement)
+                     VALUES(?,?,?,?,?,?,?,?,?)'
                 );
                 $query->execute([$customerId,...array_values($values)]);
                 $id = (int)$db->lastInsertId();

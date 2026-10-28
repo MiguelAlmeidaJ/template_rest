@@ -37,6 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'address',
         'neighborhood',
         'reference_point',
+        'number',
+        'complement',
       ]) {
         form.elements[key].value = selected[key] || '';
       }
