@@ -26,7 +26,10 @@ final class Staff
         if ($role === 'admin') {
             return true;
         }
-        $restricted = ['pages.php','users.php'];
+        if (in_array($script, ['profile.php', 'logout.php'], true)) {
+            return in_array($role, ['manager', 'employee'], true);
+        }
+        $restricted = ['pages.php', 'users.php', 'payment-methods.php', 'payments.php'];
         if ($role === 'manager') {
             return !in_array($script, $restricted, true);
         }

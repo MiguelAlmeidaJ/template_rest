@@ -2185,3 +2185,30 @@ small {
     display: none;
   }
 }
+
+/* Admin account menu and password management */
+.admin-account-dropdown{position:relative}
+.admin-account-trigger{display:grid;place-items:center;width:2.75rem;height:2.75rem;border:1px solid #e5eae4;border-radius:50%;background:#fff;color:#2d6835;cursor:pointer;transition:background .15s,border-color .15s}
+.admin-account-trigger:hover,.admin-account-trigger[aria-expanded=true]{background:#fff1e5;border-color:#f98017}
+.admin-account-trigger .bi{font-size:1.5rem;line-height:1}
+.admin-account-trigger:focus-visible{outline:3px solid #f98017;outline-offset:2px}
+.admin-account-menu{position:absolute;right:0;top:calc(100% + .65rem);width:min(19rem,calc(100vw - 2rem));padding:.55rem;border:1px solid #e5eae4;border-radius:.8rem;background:white;box-shadow:0 1rem 2.5rem #253b301c;z-index:80}
+.admin-account-menu[hidden]{display:none!important}
+.admin-account-info{padding:.75rem .85rem 1rem;border-bottom:1px solid #edf0eb;margin-bottom:.4rem}
+.admin-account-info span{display:block;font-size:.72rem;color:#8a948b;margin-bottom:.2rem}
+.admin-account-info strong{display:block;font-size:.79rem;color:#253e2b;overflow-wrap:anywhere}
+.admin-account-menu>a,.admin-account-menu form button{display:flex;align-items:center;gap:.8rem;width:100%;padding:.8rem .85rem;border:0;border-radius:.5rem;background:transparent;text-align:left;font:600 .84rem 'Montserrat',Arial,sans-serif;color:#304a37;text-decoration:none;cursor:pointer}
+.admin-account-menu>a:hover,.admin-account-menu form button:hover{background:#f4f7f2}
+.admin-account-menu form{margin:0}
+.admin-account-menu form button{color:#9c332b}
+.admin-profile-page{max-width:45rem}
+.admin-profile-card{padding:clamp(1.5rem,3vw,2.5rem)}
+.admin-profile-heading{display:flex;align-items:center;gap:1rem;margin-bottom:1.7rem;padding-bottom:1.25rem;border-bottom:1px solid #e8eee8}
+.admin-profile-heading h2{font-size:1.1rem;margin:0 0 .2rem}
+.admin-profile-heading p{margin:0;color:#778177;font-size:.8rem}
+.admin-profile-icon{display:grid;place-items:center;width:3rem;height:3rem;background:#fff0e2;color:#ed7815;border-radius:.75rem;font-size:1.4rem}
+.admin-profile-form{display:grid;gap:.7rem}
+.admin-profile-form label{font-weight:700;font-size:.84rem;margin-top:.35rem}
+.admin-profile-form input{min-height:2.85rem}
+.admin-profile-form small{font-size:.77rem;color:#778177}
+.admin-profile-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:.7rem;margin-top:1.2rem}
