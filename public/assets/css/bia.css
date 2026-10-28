@@ -1953,7 +1953,7 @@ body {
 /* Home order invitation: authentic food photography and editorial hierarchy */
 .home-order-feature {
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
   min-height: 22rem;
   overflow: hidden;
   border: 1px solid #ebdfd3;
@@ -1969,18 +1969,21 @@ body {
 }
 .home-order-copy .eyebrow {
   color: #bc1c23;
-  font-size: .72rem;
-  letter-spacing: .15em;
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
 }
 .home-order-copy h2 {
   color: #273c2b;
-  font: 700 clamp(1.8rem, 3vw, 2.85rem)/1.2 'Open Sans', Arial, sans-serif;
-  letter-spacing: -.035em;
-  margin: 1rem 0 .95rem;
+  font:
+    700 clamp(1.8rem, 3vw, 2.85rem) / 1.2 "Open Sans",
+    Arial,
+    sans-serif;
+  letter-spacing: -0.035em;
+  margin: 1rem 0 0.95rem;
 }
 .home-order-copy p {
   color: #667067;
-  font-size: .94rem;
+  font-size: 0.94rem;
   line-height: 1.8;
   max-width: 30rem;
   margin: 0;
@@ -1996,8 +1999,8 @@ body {
   background: #f98017;
   color: #212121;
   border-color: #f98017;
-  padding: .95rem 1.3rem;
-  border-radius: .55rem;
+  padding: 0.95rem 1.3rem;
+  border-radius: 0.55rem;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -2008,9 +2011,9 @@ body {
 .home-order-menu-link {
   display: inline-flex;
   align-items: center;
-  gap: .6rem;
+  gap: 0.6rem;
   color: #2d6835;
-  font-size: .84rem;
+  font-size: 0.84rem;
   font-weight: 700;
 }
 .home-order-menu-link:hover {
@@ -2029,12 +2032,26 @@ body {
   object-fit: cover;
 }
 @media (max-width: 800px) {
-  .home-order-feature { grid-template-columns: 1fr; }
-  .home-order-copy { padding: 2.1rem; }
-  .home-order-media .home-order-photo { height: 15rem; min-height: 0; }
+  .home-order-feature {
+    grid-template-columns: 1fr;
+  }
+  .home-order-copy {
+    padding: 2.1rem;
+  }
+  .home-order-media .home-order-photo {
+    height: 15rem;
+    min-height: 0;
+  }
 }
 @media (max-width: 480px) {
-  .home-order-copy { padding: 1.6rem; }
-  .home-order-copy h2 { font-size: 1.75rem; }
-  .home-order-actions { align-items: flex-start; flex-direction: column; }
+  .home-order-copy {
+    padding: 1.6rem;
+  }
+  .home-order-copy h2 {
+    font-size: 1.75rem;
+  }
+  .home-order-actions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }
