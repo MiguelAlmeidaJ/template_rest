@@ -10,7 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
       return '(' + digits.slice(0, 2) + ') ' + local.slice(0, split) + '-' + local.slice(split);
     };
     phone.value = maskPhone(phone.value);
-    phone.addEventListener('input', () => { phone.value = maskPhone(phone.value); });
+    phone.addEventListener('input', () => {
+      phone.value = maskPhone(phone.value);
+    });
   }
 
   const config = JSON.parse(document.querySelector('#lunch-config').textContent);
