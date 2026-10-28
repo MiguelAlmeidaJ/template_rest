@@ -67,5 +67,5 @@ try {
     respond(422, ['ok' => false,'error' => $e->getMessage()]);
 } catch (Throwable $e) {
     error_log((string)$e);
-    respond(500,['ok' => false,'error' => 'Não foi possível concluir a solicitação.']);
+    respond(500, ['ok' => false,'error' => 'Não foi possível concluir a solicitação.']);
 }

@@ -35,13 +35,13 @@ bia_header('Faça seu pedido', '');?>
 para salvar suas informações.
 <?php endif; ?>
 </div><h2>Seu pedido</h2>
-<div class="lunch-favorites-toolbar" id="lunch-favorites-toolbar" <?=$customerId?'':'hidden'?>>
+<div class="lunch-favorites-toolbar" id="lunch-favorites-toolbar" <?=$customerId ? '' : 'hidden'?>>
   <label for="lunch-favorite-select">Montagens salvas</label>
   <select id="lunch-favorite-select"><option value="">Selecione um pedido padrão...</option></select>
   <button type="button" id="lunch-save-favorite" class="btn btn-outline-secondary btn-sm"><i class="bi bi-bookmark-plus"></i> Salvar montagem atual</button>
 </div><?php if ($error):?><p class="lunch-message"><?=bia_esc($error)?></p><?php elseif (!(int)$settings['orders_enabled']):?><p class="lunch-message">Pedidos online temporariamente indisponíveis.</p><?php elseif (!$items):?><p class="lunch-message">Estamos preparando o cardápio do dia. Volte em breve!</p><?php else:?>
 <p class="lead"><?php if (($settings['limit_mode'] ?? 'total') === 'category'):?>Cada categoria tem seu próprio limite de escolha, indicado abaixo.<?php else:?>Selecione até <?= (int)$settings['max_choices']?> opções por quentinha.<?php endif;?></p><form id="lunch-form"><div class="lunch-count"><span>Quantidade de quentinhas</span><div class="lunch-counter"><button type="button" id="lunch-minus" aria-label="Diminuir">−</button><output id="lunch-quantity">1</output><button type="button" id="lunch-plus" aria-label="Aumentar">+</button></div></div><div id="lunch-groups" class="lunch-groups" hidden><div class="lunch-groups-title"><strong>Como deseja montar as quentinhas?</strong><p>Organize as unidades iguais em grupos. Cada grupo terá uma montagem única.</p></div><div id="lunch-group-list"></div><button type="button" id="lunch-add-group" class="lunch-add-group"><i class="bi bi-plus-circle"></i> Criar montagem diferente</button></div><div id="lunch-tabs" class="lunch-tabs" hidden><div id="lunch-tabs-nav" class="lunch-tabs-nav" role="tablist" aria-label="Montagens de quentinhas"></div></div><div id="lunch-boxes" class="lunch-boxes-panels"></div><h3>Informações para entrega</h3>
-<div class="lunch-address-toolbar" id="lunch-address-toolbar" <?=$customerId?'':'hidden'?>>
+<div class="lunch-address-toolbar" id="lunch-address-toolbar" <?=$customerId ? '' : 'hidden'?>>
   <label for="lunch-address-select">Usar endereço cadastrado</label>
   <select id="lunch-address-select"><option value="">Preencher manualmente</option></select>
   <button type="button" class="btn btn-outline-secondary btn-sm" id="lunch-save-address">Salvar este endereço</button>

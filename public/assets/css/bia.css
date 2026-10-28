@@ -2147,23 +2147,122 @@ body {
 }
 
 /* Checkout personalization */
-.lunch-favorites-toolbar,.lunch-address-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:.65rem;padding:1rem;border:1px solid #e2ebe1;border-radius:.75rem;background:#f6faf5;margin:1rem 0}
-.lunch-favorites-toolbar[hidden],.lunch-address-toolbar[hidden]{display:none!important}
-.lunch-favorites-toolbar label,.lunch-address-toolbar label{font-size:.8rem;font-weight:700;color:#2d6835}
-.lunch-favorites-toolbar select,.lunch-address-toolbar select{min-width:12rem;flex:1;padding:.7rem;border:1px solid #d5dfd3;border-radius:.5rem;background:white}
-.lunch-inline-link{border:0;background:transparent;color:#2d6835;text-decoration:underline;font:inherit;font-weight:700;cursor:pointer;padding:0}
-.lunch-geolocation{display:flex;align-items:center;flex-wrap:wrap;gap:.6rem;margin:.7rem 0 1.4rem;font-size:.83rem}
-.lunch-geolocation span{color:#687569}
-.lunch-account-dialog{max-width:min(94vw,28rem);width:100%;border:1px solid #e4ebe1;border-radius:1rem;padding:1.5rem;box-shadow:0 1.5rem 3rem #182a1c35}
-.lunch-account-dialog::backdrop{background:#13271d99}
-.lunch-account-head{display:flex;justify-content:space-between;gap:1rem}
-.lunch-account-head h2{margin:0;font-size:1.35rem}
-.lunch-account-head p{color:#687569;font-size:.82rem;margin:.4rem 0 1rem}
-.lunch-account-head button{align-self:flex-start;border:0;background:transparent;cursor:pointer}
-.lunch-account-switch{display:flex;gap:.4rem;border-bottom:1px solid #e5e9e3;margin-bottom:1rem}
-.lunch-account-switch button{border:0;border-bottom:2px solid transparent;padding:.85rem;cursor:pointer;background:transparent;color:#63726a}
-.lunch-account-switch button.active{color:#2d6835;border-color:#f98017;font-weight:700}
-#lunch-account-form{display:grid;gap:.55rem}
-#lunch-account-form label{font-size:.85rem;font-weight:700}
-#lunch-account-form input{padding:.8rem;border:1px solid #dbe4da;border-radius:.5rem}
-.lunch-account-help{font-size:.75rem;color:#687569}
+.lunch-favorites-toolbar,
+.lunch-address-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 1rem;
+  border: 1px solid #e2ebe1;
+  border-radius: 0.75rem;
+  background: #f6faf5;
+  margin: 1rem 0;
+}
+.lunch-favorites-toolbar[hidden],
+.lunch-address-toolbar[hidden] {
+  display: none !important;
+}
+.lunch-favorites-toolbar label,
+.lunch-address-toolbar label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #2d6835;
+}
+.lunch-favorites-toolbar select,
+.lunch-address-toolbar select {
+  min-width: 12rem;
+  flex: 1;
+  padding: 0.7rem;
+  border: 1px solid #d5dfd3;
+  border-radius: 0.5rem;
+  background: white;
+}
+.lunch-inline-link {
+  border: 0;
+  background: transparent;
+  color: #2d6835;
+  text-decoration: underline;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+}
+.lunch-geolocation {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 0.7rem 0 1.4rem;
+  font-size: 0.83rem;
+}
+.lunch-geolocation span {
+  color: #687569;
+}
+.lunch-account-dialog {
+  max-width: min(94vw, 28rem);
+  width: 100%;
+  border: 1px solid #e4ebe1;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 1.5rem 3rem #182a1c35;
+}
+.lunch-account-dialog::backdrop {
+  background: #13271d99;
+}
+.lunch-account-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.lunch-account-head h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+.lunch-account-head p {
+  color: #687569;
+  font-size: 0.82rem;
+  margin: 0.4rem 0 1rem;
+}
+.lunch-account-head button {
+  align-self: flex-start;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.lunch-account-switch {
+  display: flex;
+  gap: 0.4rem;
+  border-bottom: 1px solid #e5e9e3;
+  margin-bottom: 1rem;
+}
+.lunch-account-switch button {
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: 0.85rem;
+  cursor: pointer;
+  background: transparent;
+  color: #63726a;
+}
+.lunch-account-switch button.active {
+  color: #2d6835;
+  border-color: #f98017;
+  font-weight: 700;
+}
+#lunch-account-form {
+  display: grid;
+  gap: 0.55rem;
+}
+#lunch-account-form label {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+#lunch-account-form input {
+  padding: 0.8rem;
+  border: 1px solid #dbe4da;
+  border-radius: 0.5rem;
+}
+.lunch-account-help {
+  font-size: 0.75rem;
+  color: #687569;
+}

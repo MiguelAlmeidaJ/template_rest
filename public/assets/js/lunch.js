@@ -294,9 +294,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const previousAddress = addressSelect.value;
     addressSelect.replaceChildren(new Option('Preencher manualmente', ''));
     addresses.forEach((address) => {
-      addressSelect.add(new Option(address.label + (Number(address.is_default) ? ' · principal' : ''), String(address.id)));
+      addressSelect.add(
+        new Option(
+          address.label + (Number(address.is_default) ? ' · principal' : ''),
+          String(address.id),
+        ),
+      );
     });
-    if (addresses.some((item) => String(item.id) === previousAddress)) addressSelect.value = previousAddress;
+    if (addresses.some((item) => String(item.id) === previousAddress))
+      addressSelect.value = previousAddress;
     const favoriteSelect = document.querySelector('#lunch-favorite-select');
     favoriteSelect.replaceChildren(new Option('Selecione um pedido padrão...', ''));
     favorites.forEach((item) => favoriteSelect.add(new Option(item.name, String(item.id))));
@@ -313,7 +319,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function applyAddress(address) {
     const map = deliveryFields();
     Object.keys(map).forEach((key) => {
-      const inputName = key === 'recipient' ? 'customer_name' : key === 'phone' ? 'customer_phone' : key;
+      const inputName =
+        key === 'recipient' ? 'customer_name' : key === 'phone' ? 'customer_phone' : key;
       form.elements[inputName].value = address[key] || '';
     });
     if (phone) phone.dispatchEvent(new Event('input', { bubbles: true }));
@@ -327,9 +334,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (label === null) return;
     const defaultChoice = confirm('Deseja definir este endereço como principal?');
     try {
-      await customerAction('save_address', { ...deliveryFields(), label, is_default: defaultChoice ? '1' : '0' });
+      await customerAction('save_address', {
+        ...deliveryFields(),
+        label,
+        is_default: defaultChoice ? '1' : '0',
+      });
       feedback.textContent = 'Endereço salvo na sua conta.';
-    } catch (error) { feedback.textContent = error.message; }
+    } catch (error) {
+      feedback.textContent = error.message;
+    }
   });
   document.querySelector('#lunch-save-favorite')?.addEventListener('click', async () => {
     const name = prompt('Nome da montagem (ex.: Minha quentinha de sempre):');
@@ -343,17 +356,25 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       await customerAction('save_favorite', { name, boxes });
       feedback.textContent = 'Pedido padrão salvo na sua conta.';
-    } catch (error) { feedback.textContent = error.message; }
+    } catch (error) {
+      feedback.textContent = error.message;
+    }
   });
   document.querySelector('#lunch-favorite-select')?.addEventListener('change', (event) => {
     const found = favorites.find((item) => String(item.id) === event.target.value);
     if (!found) return;
-    const stored = typeof found.boxes_json === 'string' ? JSON.parse(found.boxes_json) : found.boxes_json;
+    const stored =
+      typeof found.boxes_json === 'string' ? JSON.parse(found.boxes_json) : found.boxes_json;
     const allowed = new Set(items.map((item) => Number(item.id)));
-    const valid = stored.filter((box) => Array.isArray(box.items)).map((box) => ({
-      id: nextId++, count: 1, name: box.name || 'Minha quentinha',
-      items: box.items.map(Number).filter((id) => allowed.has(id)),
-    })).filter((box) => box.items.length);
+    const valid = stored
+      .filter((box) => Array.isArray(box.items))
+      .map((box) => ({
+        id: nextId++,
+        count: 1,
+        name: box.name || 'Minha quentinha',
+        items: box.items.map(Number).filter((id) => allowed.has(id)),
+      }))
+      .filter((box) => box.items.length);
     if (!valid.length) {
       feedback.textContent = 'Os pratos deste pedido padrão não estão disponíveis hoje.';
       return;
@@ -362,19 +383,27 @@ document.addEventListener('DOMContentLoaded', () => {
     qty = valid.length;
     activeGroupId = groups[0].id;
     render();
-    feedback.textContent = valid.length < stored.length
-      ? 'Alguns pratos não estão disponíveis e foram ignorados. Confira a montagem.'
-      : 'Montagem carregada. Confira os pratos antes de confirmar.';
+    feedback.textContent =
+      valid.length < stored.length
+        ? 'Alguns pratos não estão disponíveis e foram ignorados. Confira a montagem.'
+        : 'Montagem carregada. Confira os pratos antes de confirmar.';
   });
   const dialog = document.querySelector('#lunch-account-dialog');
   let accountMode = 'register';
-  document.querySelector('#lunch-open-account')?.addEventListener('click', () => dialog.showModal());
+  document
+    .querySelector('#lunch-open-account')
+    ?.addEventListener('click', () => dialog.showModal());
   document.querySelector('#lunch-close-account')?.addEventListener('click', () => dialog.close());
-  document.querySelectorAll('[data-account-mode]').forEach((button) => button.addEventListener('click', () => {
-    accountMode = button.dataset.accountMode;
-    document.querySelectorAll('[data-account-mode]').forEach((tab) => tab.classList.toggle('active', tab === button));
-    document.querySelector('#lunch-account-submit').textContent = accountMode === 'register' ? 'Criar minha conta' : 'Entrar na minha conta';
-  }));
+  document.querySelectorAll('[data-account-mode]').forEach((button) =>
+    button.addEventListener('click', () => {
+      accountMode = button.dataset.accountMode;
+      document
+        .querySelectorAll('[data-account-mode]')
+        .forEach((tab) => tab.classList.toggle('active', tab === button));
+      document.querySelector('#lunch-account-submit').textContent =
+        accountMode === 'register' ? 'Criar minha conta' : 'Entrar na minha conta';
+    }),
+  );
   document.querySelector('#lunch-account-form')?.addEventListener('submit', async (event) => {
     event.preventDefault();
     const submit = document.querySelector('#lunch-account-submit');
@@ -390,7 +419,9 @@ document.addEventListener('DOMContentLoaded', () => {
       feedback.textContent = 'Conta conectada. Sua montagem foi preservada.';
     } catch (error) {
       document.querySelector('#lunch-account-feedback').textContent = error.message;
-    } finally { submit.disabled = false; }
+    } finally {
+      submit.disabled = false;
+    }
   });
   document.querySelector('#lunch-find-address')?.addEventListener('click', () => {
     const status = document.querySelector('#lunch-location-feedback');
@@ -399,23 +430,34 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     status.textContent = 'Solicitando permissão de localização...';
-    navigator.geolocation.getCurrentPosition(async ({ coords }) => {
-      try {
-        // OpenStreetMap Nominatim: used only after the customer explicitly requests a lookup.
-        const response = await fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=18&addressdetails=1&lat=' +
-          encodeURIComponent(coords.latitude) + '&lon=' + encodeURIComponent(coords.longitude));
-        if (!response.ok) throw Error('Endereço não encontrado.');
-        const found = await response.json();
-        const a = found.address || {};
-        form.elements.address.value = [a.road || a.pedestrian || a.street, a.house_number].filter(Boolean).join(', ');
-        form.elements.neighborhood.value = a.suburb || a.neighbourhood || a.city_district || '';
-        status.textContent = 'Endereço aproximado. Confira número, complemento e referência antes de pedir.';
-      } catch (error) {
-        status.textContent = 'Não foi possível identificar a rua. Preencha manualmente.';
-      }
-    }, () => {
-      status.textContent = 'Permissão negada ou localização indisponível. Digite o endereço.';
-    }, { enableHighAccuracy: false, timeout: 12000 });
+    navigator.geolocation.getCurrentPosition(
+      async ({ coords }) => {
+        try {
+          // OpenStreetMap Nominatim: used only after the customer explicitly requests a lookup.
+          const response = await fetch(
+            'https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=18&addressdetails=1&lat=' +
+              encodeURIComponent(coords.latitude) +
+              '&lon=' +
+              encodeURIComponent(coords.longitude),
+          );
+          if (!response.ok) throw Error('Endereço não encontrado.');
+          const found = await response.json();
+          const a = found.address || {};
+          form.elements.address.value = [a.road || a.pedestrian || a.street, a.house_number]
+            .filter(Boolean)
+            .join(', ');
+          form.elements.neighborhood.value = a.suburb || a.neighbourhood || a.city_district || '';
+          status.textContent =
+            'Endereço aproximado. Confira número, complemento e referência antes de pedir.';
+        } catch (error) {
+          status.textContent = 'Não foi possível identificar a rua. Preencha manualmente.';
+        }
+      },
+      () => {
+        status.textContent = 'Permissão negada ou localização indisponível. Digite o endereço.';
+      },
+      { enableHighAccuracy: false, timeout: 12000 },
+    );
   });
   refreshPreferences();
 
