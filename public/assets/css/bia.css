@@ -2350,17 +2350,98 @@ body {
 }
 
 /* Restaurant-styled feedback dialog, replacing browser prompts and alerts */
-.lunch-notice-dialog{position:fixed;inset:0;margin:auto;width:min(92vw,26rem);max-height:85vh;overflow:auto;padding:2rem;border:1px solid #e5e9e0;border-radius:1rem;background:#fffaf5;box-shadow:0 1.5rem 5rem #17251e40;color:#233b2b}
-.lunch-notice-dialog::backdrop{background:#152a1c8c;backdrop-filter:blur(3px)}
-.lunch-notice-icon{display:grid;place-items:center;width:3.2rem;height:3.2rem;border-radius:50%;background:#fff0e2;color:#f98017;font-size:1.55rem;margin-bottom:1rem}
-.lunch-notice-dialog h2{font:700 1.28rem 'Open Sans',Arial,sans-serif;margin:0 0 .7rem}
-.lunch-notice-dialog p{font:.9rem/1.65 'Montserrat',Arial,sans-serif;color:#67746a;margin:0 0 1.5rem}
-.lunch-notice-close{position:absolute;right:1.1rem;top:1.1rem;background:transparent;border:0;color:#627267;cursor:pointer}
-.lunch-notice-actions{display:flex;gap:.7rem;justify-content:flex-end}
-.lunch-notice-actions button{border-radius:.5rem;padding:.8rem 1.15rem;font-weight:700;font-size:.83rem;cursor:pointer}
-.lunch-notice-primary{background:#f98017;color:#212121;border:1px solid #f98017}
-.lunch-notice-secondary{background:transparent;color:#37513c;border:1px solid #d7dfd5}
-#lunch-notice-input-wrap[hidden],#lunch-notice-cancel[hidden]{display:none}
-#lunch-notice-input-wrap{margin-bottom:1.3rem}
-#lunch-notice-input-wrap label{display:block;font-size:.8rem;font-weight:700;margin-bottom:.45rem}
-#lunch-notice-input{width:100%;border:1px solid #d9e1d8;border-radius:.5rem;padding:.85rem;font:inherit}
+.lunch-notice-dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(92vw, 26rem);
+  max-height: 85vh;
+  overflow: auto;
+  padding: 2rem;
+  border: 1px solid #e5e9e0;
+  border-radius: 1rem;
+  background: #fffaf5;
+  box-shadow: 0 1.5rem 5rem #17251e40;
+  color: #233b2b;
+}
+.lunch-notice-dialog::backdrop {
+  background: #152a1c8c;
+  backdrop-filter: blur(3px);
+}
+.lunch-notice-icon {
+  display: grid;
+  place-items: center;
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 50%;
+  background: #fff0e2;
+  color: #f98017;
+  font-size: 1.55rem;
+  margin-bottom: 1rem;
+}
+.lunch-notice-dialog h2 {
+  font:
+    700 1.28rem "Open Sans",
+    Arial,
+    sans-serif;
+  margin: 0 0 0.7rem;
+}
+.lunch-notice-dialog p {
+  font:
+    0.9rem/1.65 "Montserrat",
+    Arial,
+    sans-serif;
+  color: #67746a;
+  margin: 0 0 1.5rem;
+}
+.lunch-notice-close {
+  position: absolute;
+  right: 1.1rem;
+  top: 1.1rem;
+  background: transparent;
+  border: 0;
+  color: #627267;
+  cursor: pointer;
+}
+.lunch-notice-actions {
+  display: flex;
+  gap: 0.7rem;
+  justify-content: flex-end;
+}
+.lunch-notice-actions button {
+  border-radius: 0.5rem;
+  padding: 0.8rem 1.15rem;
+  font-weight: 700;
+  font-size: 0.83rem;
+  cursor: pointer;
+}
+.lunch-notice-primary {
+  background: #f98017;
+  color: #212121;
+  border: 1px solid #f98017;
+}
+.lunch-notice-secondary {
+  background: transparent;
+  color: #37513c;
+  border: 1px solid #d7dfd5;
+}
+#lunch-notice-input-wrap[hidden],
+#lunch-notice-cancel[hidden] {
+  display: none;
+}
+#lunch-notice-input-wrap {
+  margin-bottom: 1.3rem;
+}
+#lunch-notice-input-wrap label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-bottom: 0.45rem;
+}
+#lunch-notice-input {
+  width: 100%;
+  border: 1px solid #d9e1d8;
+  border-radius: 0.5rem;
+  padding: 0.85rem;
+  font: inherit;
+}

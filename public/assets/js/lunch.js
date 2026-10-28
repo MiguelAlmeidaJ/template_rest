@@ -54,17 +54,25 @@ document.addEventListener('DOMContentLoaded', () => {
       noticeConfirm.addEventListener('click', ok, { once: true, signal: controller.signal });
       noticeCancel.addEventListener('click', cancel, { once: true, signal: controller.signal });
       noticeClose.addEventListener('click', cancel, { once: true, signal: controller.signal });
-      noticeDialog.addEventListener('cancel', (event) => {
-        event.preventDefault();
-        cancel();
-      }, { once: true, signal: controller.signal });
-      noticeDialog.addEventListener('close', () => {
-        controller.abort();
-        if (!completed) {
-          completed = true;
-          resolve(type === 'notice' ? true : null);
-        }
-      }, { once: true, signal: controller.signal });
+      noticeDialog.addEventListener(
+        'cancel',
+        (event) => {
+          event.preventDefault();
+          cancel();
+        },
+        { once: true, signal: controller.signal },
+      );
+      noticeDialog.addEventListener(
+        'close',
+        () => {
+          controller.abort();
+          if (!completed) {
+            completed = true;
+            resolve(type === 'notice' ? true : null);
+          }
+        },
+        { once: true, signal: controller.signal },
+      );
       if (type === 'prompt') noticeInput.focus();
       else noticeConfirm.focus();
     });
@@ -391,9 +399,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (selected) applyAddress(selected);
   });
   document.querySelector('#lunch-save-address')?.addEventListener('click', async () => {
-    const label = await askText('Salvar endereço', 'Como deseja identificar este endereço?', 'Ex.: Casa, Trabalho', 'Casa');
+    const label = await askText(
+      'Salvar endereço',
+      'Como deseja identificar este endereço?',
+      'Ex.: Casa, Trabalho',
+      'Casa',
+    );
     if (label === null) return;
-    const defaultChoice = await askConfirm('Endereço principal', 'Deseja usar este endereço como principal em novos pedidos?');
+    const defaultChoice = await askConfirm(
+      'Endereço principal',
+      'Deseja usar este endereço como principal em novos pedidos?',
+    );
     if (defaultChoice === null) return;
     try {
       await customerAction('save_address', {
@@ -407,7 +423,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   document.querySelector('#lunch-save-favorite')?.addEventListener('click', async () => {
-    const name = await askText('Salvar pedido padrão', 'Dê um nome para reconhecer esta montagem na próxima compra.', 'Ex.: Minha quentinha de sempre');
+    const name = await askText(
+      'Salvar pedido padrão',
+      'Dê um nome para reconhecer esta montagem na próxima compra.',
+      'Ex.: Minha quentinha de sempre',
+    );
     if (name === null) return;
     const boxes = groups.flatMap((g) =>
       Array.from({ length: g.count }, (_, index) => ({
