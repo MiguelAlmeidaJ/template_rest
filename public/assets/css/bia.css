@@ -2043,3 +2043,61 @@ body {
     flex-direction: column;
   }
 }
+
+/* Home amenities — a quiet information strip rather than a separate feature section */
+.home-amenities {
+  padding-block: clamp(1.2rem, 2.5vw, 1.85rem);
+}
+.home-amenities-list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: center;
+  gap: 1rem;
+  list-style: none;
+  padding: 1.25rem 0;
+  margin: 0;
+  border-top: 1px solid #e7dfd6;
+  border-bottom: 1px solid #e7dfd6;
+}
+.home-amenities-list li {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: .75rem;
+  min-width: 0;
+  color: #405647;
+  font-family: "Montserrat", Arial, sans-serif;
+  font-size: .8rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.home-amenities-list li + li {
+  border-left: 1px solid #e7dfd6;
+}
+.home-amenities-list .bi {
+  flex: none;
+  font-size: 1.2rem;
+  line-height: 1;
+  color: #2d6835;
+}
+@media (max-width: 790px) {
+  .home-amenities-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.1rem .8rem;
+  }
+  .home-amenities-list li {
+    justify-content: flex-start;
+  }
+  .home-amenities-list li + li {
+    border-left: 0;
+  }
+}
+@media (max-width: 440px) {
+  .home-amenities-list li {
+    font-size: .74rem;
+    gap: .45rem;
+  }
+  .home-amenities-list .bi {
+    font-size: 1.05rem;
+  }
+}
