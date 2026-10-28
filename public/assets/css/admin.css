@@ -72,3 +72,16 @@
 .menu-save-box .btn:disabled{opacity:.5;cursor:not-allowed}
 @media(max-width:1100px){.menu-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.menu-filters>label{grid-column:span 2}}
 @media(max-width:650px){.menu-filters{grid-template-columns:1fr}.menu-filters>label{grid-column:auto}.menu-table{min-width:680px}.menu-save-box{width:100%}.menu-save-box .btn{margin-left:auto}}
+
+.lunch-admin-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.25rem}
+.lunch-action-button{display:flex;align-items:center;gap:1rem;text-align:left;background:white;border:1px solid #e4e8e2;border-radius:.85rem;padding:1.7rem;box-shadow:0 .35rem 1rem #152b1908;color:#212121}
+.lunch-action-button>i:first-child{font-size:1.65rem;color:#f98017}
+.lunch-action-button>span{flex:1}.lunch-action-button strong,.lunch-action-button small{display:block}.lunch-action-button strong{font-size:1rem}.lunch-action-button small{font-size:.78rem;color:#737a74;margin-top:.3rem}.lunch-action-button:hover{border-color:#f98017}
+.lunch-admin-dialog{width:min(92vw,38rem);max-height:88vh;overflow:auto;border:1px solid #e7e8e1;border-radius:1rem;padding:1.7rem;background:#fff;box-shadow:0 1.2rem 4rem #0003}
+.lunch-admin-dialog::backdrop{background:#14221988;backdrop-filter:blur(3px)}
+.lunch-dialog-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}.lunch-dialog-head h2{font-size:1.35rem;margin:0}.lunch-dialog-head button{border:0;background:transparent;padding:.35rem}
+.lunch-dialog-footer{display:flex;justify-content:flex-end;gap:.7rem;padding-top:1rem;border-top:1px solid #eee}
+.lunch-currency{display:flex;align-items:center;border:1px solid #d9ded8;border-radius:.6rem;overflow:hidden}.lunch-currency span{padding:.75rem;background:#f2f6f1;font-weight:700}.lunch-currency input{flex:1;min-width:0;padding:.75rem;border:0;outline:0;font:inherit}
+.lunch-category-fields{display:grid;gap:.75rem}.lunch-category-fields label{display:flex;justify-content:space-between;align-items:center;gap:1rem}.lunch-category-fields input{width:6rem;flex-shrink:0}
+.lunch-category-fields[hidden],#total-limit-fields[hidden]{display:none!important}
+@media(max-width:650px){.lunch-admin-actions{grid-template-columns:1fr}.lunch-action-button{padding:1.25rem}}
