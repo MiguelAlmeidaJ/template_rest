@@ -69,6 +69,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 $id = Customer::id();
 $address = $id ? Customer::address($id) : [];
+$extraAddresses = $id ? \App\CustomerPreferences::addresses($id) : [];
+$savedFavorites = $id ? \App\CustomerPreferences::favorites($id) : [];
 $orders = $id ? Customer::orders($id) : [];
 $statusLabels = ['pending' => 'Novo pedido','accepted' => 'Novo pedido','preparing' => 'Em preparação','out_for_delivery' => 'Saindo para entrega','delivered' => 'Pedido entregue','cancelled' => 'Cancelado'];
 $selected = filter_var($_GET['order'] ?? null, FILTER_VALIDATE_INT);
@@ -137,4 +139,59 @@ bia_header('Minha conta', '');?><div class="shell section customer-page"><span c
 <script src="/assets/js/customer-access.js?v=1" defer></script>
 <?php else:?><div class="customer-toolbar"><p>Acompanhe seus pedidos e mantenha seu endereço atualizado.</p><form method="post"><input type="hidden" name="csrf" value="<?=bia_esc(Customer::csrf())?>"><input type="hidden" name="action" value="logout"><button type="submit" class="customer-link">Sair da conta</button></form></div><div class="customer-layout"><div><section class="customer-panel"><h2>Meus pedidos</h2><?php if (!$orders):?><p>Você ainda não tem pedidos vinculados à sua conta.</p><?php endif;?><?php foreach ($orders as $order):?><div class="customer-order"><div><strong>Pedido #<?=bia_esc((string)$order['id'])?></strong><span><?=bia_esc($statusLabels[$order['status']] ?? $order['status'])?></span><small><?=bia_esc($order['quantity'])?> quentinha(s) · R$ <?=number_format($order['total_cents'] / 100, 2, ',', '.')?></small></div><a href="?order=<?=bia_esc($order['id'])?>">Acompanhar e conversar ↗</a></div><?php endforeach;?><a class="btn" href="/pedido/">Fazer novo pedido</a></section>
 <?php if ($selectedOrder):?><section class="customer-panel" id="mensagens"><h2>Conversa sobre o pedido #<?=bia_esc((string)$selected)?></h2><p>Envie mensagens diretamente ao restaurante. As respostas aparecem aqui ao atualizar a página.</p><div class="customer-chat"><?php if (!$messages):?><p>Ainda não há mensagens neste pedido.</p><?php endif;?><?php foreach ($messages as $message):?><article class="<?=$message['sender'] === 'customer' ? 'from-customer' : 'from-restaurant'?>"><strong><?=$message['sender'] === 'customer' ? 'Você' : 'Restaurante da Bia'?></strong><p><?=nl2br(bia_esc($message['body']))?></p><small><?=bia_esc($message['created_at'])?></small></article><?php endforeach;?></div><form method="post"><input type="hidden" name="csrf" value="<?=bia_esc(Customer::csrf())?>"><input type="hidden" name="action" value="message"><input type="hidden" name="order_id" value="<?=bia_esc((string)$selected)?>"><label>Mensagem<textarea name="body" rows="3" maxlength="2000" required></textarea></label><button class="btn">Enviar mensagem</button></form></section><?php endif;?></div>
-<section class="customer-panel"><h2>Endereço padrão de entrega</h2><form method="post"><input type="hidden" name="csrf" value="<?=bia_esc(Customer::csrf())?>"><input type="hidden" name="action" value="address"><?php foreach (['recipient' => 'Nome de quem recebe','phone' => 'WhatsApp','address' => 'Rua, número e complemento','neighborhood' => 'Bairro','reference_point' => 'Ponto de referência'] as $key => $label):?><label><?=bia_esc($label)?><input name="<?=$key?>" value="<?=bia_esc((string)($address[$key] ?? ''))?>" maxlength="<?=$key === 'address' ? 350 : ($key === 'reference_point' ? 350 : 150)?>"></label><?php endforeach;?><button class="btn">Salvar endereço</button></form><p class="customer-hint">Seus dados salvos poderão preencher automaticamente o próximo pedido.</p></section></div><?php endif;?></div><?php bia_footer();
+<section class="customer-panel customer-addresses-panel">
+<h2>Meus endereços</h2>
+<p>Cadastre até 10 endereços e escolha um como principal para seus próximos pedidos.</p>
+<div id="customer-address-list" class="customer-preference-list">
+<?php foreach ($extraAddresses as $entry): ?>
+  <div class="customer-preference-row">
+    <div><strong><?=bia_esc($entry['label'])?><?php if ($entry['is_default']): ?> · Principal<?php endif; ?></strong>
+    <small><?=bia_esc($entry['address'])?> · <?=bia_esc($entry['neighborhood'])?></small></div>
+    <div class="customer-preference-actions">
+      <button type="button" data-address-edit="<?=bia_esc((string)$entry['id'])?>">Editar</button>
+      <button type="button" data-address-delete="<?=bia_esc((string)$entry['id'])?>">Excluir</button>
+    </div>
+  </div>
+<?php endforeach; ?>
+</div>
+<button type="button" class="btn btn-outline-secondary" id="customer-new-address"><i class="bi bi-plus"></i> Adicionar endereço</button>
+</section>
+<section class="customer-panel">
+<h2>Meus pedidos padrão</h2>
+<p>Monte uma quentinha na página de pedidos e salve a combinação para usar novamente.</p>
+<div class="customer-preference-list">
+<?php foreach ($savedFavorites as $favorite): ?>
+<div class="customer-preference-row">
+  <div><strong><?=bia_esc($favorite['name'])?></strong></div>
+  <div class="customer-preference-actions">
+    <a href="/pedido/">Montar novamente</a>
+    <button type="button" data-favorite-delete="<?=bia_esc((string)$favorite['id'])?>">Excluir</button>
+  </div>
+</div>
+<?php endforeach; ?>
+<?php if (!$savedFavorites): ?><p>Nenhum pedido padrão salvo.</p><?php endif; ?>
+</div>
+<a class="btn btn-outline-secondary" href="/pedido/">Montar quentinha</a>
+</section></div><?php endif;?></div><?php if ($id): ?>
+<dialog id="customer-address-dialog" class="customer-address-dialog" aria-labelledby="customer-address-title">
+<h2 id="customer-address-title">Cadastrar endereço</h2>
+<form id="customer-address-form">
+  <input type="hidden" name="id" value="">
+  <label>Identificação<input name="label" placeholder="Casa, Trabalho..." maxlength="70" required></label>
+  <label>Quem vai receber?<input name="recipient" maxlength="150" required></label>
+  <label>WhatsApp<input name="phone" type="tel" maxlength="24" required></label>
+  <label>Rua, número e complemento<input name="address" maxlength="350" required></label>
+  <label>Bairro<input name="neighborhood" maxlength="120" required></label>
+  <label>Ponto de referência<input name="reference_point" maxlength="350"></label>
+  <label class="customer-address-checkbox"><input name="is_default" type="checkbox"> Usar como endereço principal</label>
+  <p id="customer-address-feedback" role="status" aria-live="polite"></p>
+  <div class="customer-address-dialog-buttons">
+    <button type="button" id="customer-address-cancel" class="btn btn-outline-secondary">Cancelar</button>
+    <button class="btn" type="submit">Salvar endereço</button>
+  </div>
+</form>
+</dialog>
+<script type="application/json" id="customer-preferences-data"><?=json_encode(['addresses'=>$extraAddresses,'csrf'=>Customer::csrf()],JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_UNESCAPED_UNICODE)?></script>
+<script src="/assets/js/customer-preferences.js?v=1" defer></script>
+<?php endif; ?>
+<?php bia_footer();
