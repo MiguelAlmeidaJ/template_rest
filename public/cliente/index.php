@@ -64,20 +64,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$name,$phone,$cpf ?: null,$id]);
             $notice = 'Informações atualizadas.';
         } elseif ($action === 'message') {
-            $order = filter_var($_POST['order_id'] ?? null, FILTER_VALIDATE_INT);
-            $body = trim((string)($_POST['body'] ?? ''));
-            if (!$order || mb_strlen($body) < 1 || mb_strlen($body) > 2000) {
-                throw new DomainException('Escreva uma mensagem de até 2.000 caracteres');
-            }
-            $q = Db::pdo()->prepare('SELECT id FROM lunch_orders WHERE id=? AND customer_id=?');
-            $q->execute([$order,$id]);
-            if (!$q->fetch()) {
-                throw new DomainException('Pedido não encontrado');
-            }
-            $q = Db::pdo()->prepare("INSERT INTO lunch_messages(order_id,customer_id,sender,body) VALUES(?,?,'customer',?)");
-            $q->execute([$order,$id,$body]);
-            \App\AdminNotification::create('chat', $order, 'Nova mensagem do cliente', 'Pedido #'.$order.' recebeu uma mensagem', '/admin/lunch-chat.php?order='.$order);
-            $notice = 'Mensagem enviada ao restaurante.';
+            // Redirect legacy form submissions to the live conversation endpoint.
+            throw new DomainException('Atualize a página para usar o novo chat.');
         } else {
             throw new DomainException('Ação inválida');
         }
@@ -229,9 +217,16 @@ if ($id): ?>
       <?php endforeach; ?>
     </div>
     <?php if ($selectedOrder): ?>
-      <section class="customer-panel" id="conversa"><h3>Pedido #<?=bia_esc($selectedOrder['id'])?> · <?=bia_esc($statusLabels[$selectedOrder['status']] ?? $selectedOrder['status'])?></h3><p>Converse com a equipe sobre este pedido.</p>
-        <div class="customer-chat"><?php if (!$messages): ?><p>Ainda não há mensagens.</p><?php endif; ?><?php foreach ($messages as $message): ?><article class="<?=$message['sender'] === 'customer' ? 'from-customer' : 'from-restaurant'?>"><strong><?=$message['sender'] === 'customer' ? 'Você' : 'Restaurante da Bia'?></strong><p><?=nl2br(bia_esc($message['body']))?></p><small><?=bia_esc($message['created_at'])?></small></article><?php endforeach; ?></div>
-        <form method="post"><input type="hidden" name="csrf" value="<?=bia_esc(Customer::csrf())?>"><input type="hidden" name="action" value="message"><input type="hidden" name="order_id" value="<?= (int)$selectedOrder['id']?>"><label>Mensagem<textarea name="body" rows="3" maxlength="2000" required></textarea></label><button type="submit" class="btn">Enviar mensagem</button></form>
+      <section class="customer-panel" id="conversa">
+        <h3>Pedido #<?= (int) $selectedOrder['id'] ?> · <span id="customer-order-status"><?=bia_esc($statusLabels[$selectedOrder['status']] ?? $selectedOrder['status'])?></span></h3>
+        <p>Converse com a equipe sobre este pedido. As mensagens e o andamento são atualizados automaticamente.</p>
+        <div class="customer-chat" data-order-id="<?= (int) $selectedOrder['id'] ?>" aria-live="polite"></div>
+        <form id="customer-chat-form">
+          <input type="hidden" name="csrf" value="<?=bia_esc(Customer::csrf())?>">
+          <label for="customer-chat-body">Mensagem</label>
+          <textarea id="customer-chat-body" name="body" rows="3" maxlength="2000" required></textarea>
+          <div class="customer-chat-submit"><span id="customer-chat-feedback" role="status" aria-live="polite"></span><button type="submit" class="btn">Enviar mensagem</button></div>
+        </form>
       </section>
     <?php endif; ?>
   <?php elseif ($tab === 'padrao'): ?>
@@ -275,7 +270,7 @@ if ($id): ?>
 </form>
 </dialog>
 <script type="application/json" id="customer-preferences-data"><?=json_encode(['addresses' => $extraAddresses,'csrf' => Customer::csrf()], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE)?></script>
-<script src="/assets/js/customer-preferences.js?v=2" defer></script><script src="/assets/js/customer-chat-live.js?v=1" defer></script>
+<script src="/assets/js/customer-preferences.js?v=2" defer></script><script src="/assets/js/customer-chat-live.js?v=2" defer></script>
 <?php endif; ?>
 <?php if ($id): ?>
 </main>
