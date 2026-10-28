@@ -50,5 +50,5 @@ try {
     Api::send(['error' => $e->getMessage()], 422);
 } catch (Throwable $e) {
     error_log((string)$e);
-    Api::send(['error' => 'Erro interno'],500);
+    Api::send(['error' => 'Erro interno'], 500);
 }
