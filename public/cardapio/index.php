@@ -20,8 +20,8 @@ try {
                 <article class="daily-menu-group">
                     <h3><?= bia_esc($category) ?></h3>
                     <ul><?php foreach ($dailyItems as $dish): ?><?php if ($dish['category'] !== $category) {
-                            continue;
-                        } ?>
+                        continue;
+                    } ?>
                             <li><?= bia_esc($dish['name']) ?><?= $dish['by_weight'] ? '<sup title="Vendido por peso">*</sup>' : '' ?>
                             </li><?php endforeach; ?>
                     </ul>
