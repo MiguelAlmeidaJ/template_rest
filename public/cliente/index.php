@@ -19,7 +19,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){try{Customer::check();$action=$_POST['ac
   $order=filter_var($_POST['order_id']??null,FILTER_VALIDATE_INT);$body=trim((string)($_POST['body']??''));
   if(!$order||mb_strlen($body)<1||mb_strlen($body)>2000)throw new DomainException('Escreva uma mensagem de até 2.000 caracteres');
   $q=Db::pdo()->prepare('SELECT id FROM lunch_orders WHERE id=? AND customer_id=?');$q->execute([$order,$id]);if(!$q->fetch())throw new DomainException('Pedido não encontrado');
-  $q=Db::pdo()->prepare("INSERT INTO lunch_messages(order_id,customer_id,sender,body) VALUES(?,?,'customer',?)");$q->execute([$order,$id,$body]);$notice='Mensagem enviada ao restaurante.';
+  $q=Db::pdo()->prepare("INSERT INTO lunch_messages(order_id,customer_id,sender,body) VALUES(?,?,'customer',?)");$q->execute([$order,$id,$body]);\App\AdminNotification::create('chat',$order,'Nova mensagem do cliente','Pedido #'.$order.' recebeu uma mensagem','/admin/lunch-chat.php?order='.$order);$notice='Mensagem enviada ao restaurante.';
  }else throw new DomainException('Ação inválida');
  if(in_array($action,['login','register'],true)&&$next==='pedido'){header('Location: /pedido/');exit;}
  }catch(DomainException $e){$error=$e->getMessage();}catch(Throwable $e){error_log((string)$e);$error='Não foi possível concluir a operação.';}}

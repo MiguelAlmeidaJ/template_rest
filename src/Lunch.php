@@ -56,6 +56,7 @@ final class Lunch {
    $boxInsert=$db->prepare('INSERT INTO lunch_order_boxes(order_id,box_number,box_name) VALUES(?,?,?)');
    $itemInsert=$db->prepare('INSERT INTO lunch_order_choices(box_id,menu_item_id,item_name) VALUES(?,?,?)');
    foreach($normalized as $index=>$items){$boxInsert->execute([$orderId,$index+1,$boxNames[$index]]);$boxId=(int)$db->lastInsertId();foreach($items as $id=>$item)$itemInsert->execute([$boxId,$id,$item]);}
+   \App\AdminNotification::create('order',$orderId,'Novo pedido recebido','Pedido #'.$orderId.' enviado por '.$name,'/admin/lunch-orders.php');
    $db->commit();return ['order_id'=>$orderId,'total_cents'=>$total,'quantity'=>count($normalized),'status'=>'pending','payment_status'=>'pending'];
   }catch(\Throwable $e){if($db->inTransaction())$db->rollBack();throw $e;}
  }

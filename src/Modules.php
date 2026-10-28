@@ -26,7 +26,7 @@ final class Modules {
  if($mode==='delivery'){$address=trim((string)($d['address']??''));if(mb_strlen($address)<8)throw new DomainException('Endereço inválido');$quote=self::delivery(['neighborhood'=>$d['neighborhood']??'','subtotal_cents'=>$subtotal]);$fee=$quote['fee_cents'];$zone=$quote['zone_id'];}
  $q=$db->prepare("INSERT INTO orders(customer_name,customer_phone,fulfillment,address,zone_id,subtotal_cents,delivery_fee_cents,total_cents,payment_mode,manual_payment_method) VALUES(?,?,?,?,?,?,?,?,?,?)");$q->execute([$name,$phone,$mode,$address,$zone,$subtotal,$fee,$subtotal+$fee,$paymentMode,$paymentMode==='manual'?$manualMethod:null]);$id=(int)$db->lastInsertId();
  $q=$db->prepare('INSERT INTO order_items(order_id,product_id,quantity,unit_price_cents) VALUES(?,?,?,?)');foreach($lines as $line)$q->execute([$id,...$line]);
- $db->commit();return ['order_id'=>$id,'total_cents'=>$subtotal+$fee,'payment_status'=>'pending','status'=>'pending','payment_mode'=>$paymentMode];
+ AdminNotification::create('order',$id,'Novo pedido recebido','Pedido #'.$id.' enviado por '.$name,'/admin/');$db->commit();return ['order_id'=>$id,'total_cents'=>$subtotal+$fee,'payment_status'=>'pending','status'=>'pending','payment_mode'=>$paymentMode];
  }catch(\Throwable $e){if($db->inTransaction())$db->rollBack();throw $e;}
  }
  static function slots(string $date):array{
@@ -39,7 +39,7 @@ final class Modules {
  $db=Db::pdo();$db->beginTransaction();
  try{$q=$db->prepare('SELECT id,capacity FROM reservation_slots WHERE date=? AND time=? AND enabled=1 FOR UPDATE');$q->execute([$date,$time]);$slot=$q->fetch();if(!$slot)throw new DomainException('Horário indisponível');
  $q=$db->prepare("SELECT COALESCE(SUM(guests),0) FROM reservations WHERE slot_id=? AND status IN ('pending','confirmed')");$q->execute([$slot['id']]);if((int)$q->fetchColumn()+$guests>(int)$slot['capacity'])throw new DomainException('Sem vagas');
- $q=$db->prepare('INSERT INTO reservations(slot_id,customer_name,customer_phone,guests) VALUES(?,?,?,?)');$q->execute([$slot['id'],$name,$phone,$guests]);$id=(int)$db->lastInsertId();$db->commit();return ['reservation_id'=>$id,'status'=>'pending'];
+ $q=$db->prepare('INSERT INTO reservations(slot_id,customer_name,customer_phone,guests) VALUES(?,?,?,?)');$q->execute([$slot['id'],$name,$phone,$guests]);$id=(int)$db->lastInsertId();AdminNotification::create('reservation',$id,'Nova reserva recebida','Reserva #'.$id.' solicitada por '.$name,'/admin/#reservas');$db->commit();return ['reservation_id'=>$id,'status'=>'pending'];
  }catch(\Throwable $e){if($db->inTransaction())$db->rollBack();throw $e;}
  }
  static function checkout(array $d):array{
