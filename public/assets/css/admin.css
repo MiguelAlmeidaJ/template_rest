@@ -1986,3 +1986,41 @@ small {
   color: #7c857c;
   vertical-align: middle;
 }
+
+/* CMS editor — focused, searchable text fields and modular image tiles */
+.cms-editor-main { min-width: 0; }
+.cms-editor-panel { overflow: hidden; margin-bottom: 1.25rem; }
+.cms-panel-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.cms-panel-header h2 { font-size: 1.25rem; margin: .35rem 0 .25rem; }
+.cms-panel-header p { color: #7a857d; font-size: .79rem; margin: 0; }
+.cms-text-form { min-width: 0; }
+.cms-text-search { display: flex; align-items: center; gap: .75rem; padding: 1rem 1.5rem; border-bottom: 1px solid #edf0eb; }
+.cms-text-search .bi { color: #818e83; }
+.cms-text-search input { flex: 1; min-width: 0; border: 1px solid #dfe6de; border-radius: .55rem; padding: .7rem .85rem; background: white; font-size: .84rem; }
+.cms-text-search>span { font-size: .74rem; color: #7e8980; white-space: nowrap; }
+.cms-text-fields { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 1.25rem 1.5rem; padding: 1.5rem; }
+.cms-text-field { min-width: 0; }
+.cms-text-field[hidden] { display: none !important; }
+.cms-text-field:has(textarea) { grid-column: 1 / -1; }
+.cms-field-title { display: flex; align-items: baseline; justify-content: space-between; gap: .5rem; margin-bottom: .5rem; }
+.cms-field-title label { font-size: .83rem; font-weight: 700; color: #314139; }
+.cms-field-key { font: .68rem/1.3 ui-monospace,monospace; color: #a0aaa1; }
+.cms-text-field input,.cms-text-field textarea { width: 100%; border: 1px solid #dfe6de; border-radius: .55rem; padding: .8rem .9rem; font-size: .84rem; line-height: 1.6; }
+.cms-text-field textarea { resize: vertical; }
+.cms-text-field input:focus,.cms-text-field textarea:focus { border-color: #f98017; box-shadow: 0 0 0 3px #f980171a; }
+.cms-text-footer { position: sticky; bottom: 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1rem 1.5rem; background: #fff; border-top: 1px solid #e8eee6; z-index: 2; }
+.cms-text-footer span { font-size: .8rem; color: #637169; }
+.cms-field-empty { padding: 1.5rem; color: #6b756d; }
+.cms-image-grid-refined { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 1rem; padding: 1.5rem; }
+.cms-image-grid-refined .cms-image-tile { min-width: 0; border: 1px solid #e6eae4; padding: 1rem; border-radius: .8rem; background: #fff; }
+.cms-image-grid-refined .cms-image-tile h3 { font-size: .94rem; margin: 0 0 .8rem; }
+.cms-image-grid-refined .cms-image-preview { height: 10rem; overflow: hidden; margin-bottom: 1rem; }
+.cms-image-grid-refined .cms-image-preview img { width: 100%; height: 100%; object-fit: cover; }
+.cms-file-action { display: flex; align-items: center; gap: .5rem; font-size: .8rem; font-weight: 700; color: #2d6835; cursor: pointer; margin: .65rem 0; overflow-wrap: anywhere; }
+.cms-file-input { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+.cms-image-grid-refined .cms-library-open { margin-top: .7rem; }
+.cms-photo-count { font-size: .8rem; font-weight: 700; color: #748176; }
+.cms-images-empty { padding: 1.5rem; color: #778179; }
+.cms-images-empty a { color: #2d6835; }
+@media (max-width: 930px) { .cms-text-fields,.cms-image-grid-refined { grid-template-columns: 1fr; } }
+@media (max-width: 600px) { .cms-text-footer { align-items: stretch; } .cms-text-footer button { width: 100%; } .cms-field-key { display: none; } }
