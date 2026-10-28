@@ -1,1 +1,24 @@
-<?php require dirname(__DIR__).'/includes/site.php';bia_header('Contato','Contato');?><section class="page-hero"><div class="shell"><span class="eyebrow">É sempre bom receber você</span><h1 class="title">Vamos conversar?</h1><p class="lead">Confira onde estamos, nosso horário de funcionamento e os canais para falar com a equipe.</p></div></section><section class="shell section contact-grid"><div><span class="eyebrow">Encontre a Bia</span><h2 class="title">A sua próxima parada para o almoço.</h2><div class="contact-detail"><strong>Endereço</strong><p><?=bia_esc(bia_info('address','Rua Dr. Sobral Pinto, 425'))?> · <?=bia_esc(bia_info('district','Vila Laroca'))?><br><?=bia_esc(bia_info('city','Além Paraíba, MG'))?></p></div><div class="contact-detail"><strong>Horário</strong><p><?=bia_esc(bia_info('hours','Todos os dias · 10h30 às 15h'))?></p></div><div class="contact-detail"><strong>WhatsApp</strong><p><a href="<?=bia_esc(bia_whatsapp())?>" target="_blank" rel="noopener noreferrer"><?=bia_esc(bia_info('phone','(32) 98711-2340'))?> ↗</a></p></div><div class="contact-detail"><strong>Telefones e e-mail</strong><p>(32) 3466-3643 · (32) 3462-2131<br>restaurantedabia@hotmail.com</p></div></div><div><?php bia_photo('table','Ambiente de restaurante com mesa preparada','',true);?><a class="map-link" href="https://www.google.com/maps/search/?api=1&query=Rua%20Dr.%20Sobral%20Pinto%20425%20Vila%20Laroca%20Al%C3%A9m%20Para%C3%ADba" target="_blank" rel="noopener noreferrer"><strong>Como chegar ↗</strong><p>Abra a localização no Google Maps e trace sua rota.</p></a></div></section><?php bia_footer();
+<?php
+require dirname(__DIR__).'/includes/site.php';
+$address=bia_info('address','Rua Dr. Sobral Pinto, 425');
+$district=bia_info('district','Vila Laroca');
+$city=bia_info('city','Além Paraíba, MG');
+$maps=bia_info('maps');
+if($maps===''||!filter_var($maps,FILTER_VALIDATE_URL)||!str_starts_with($maps,'https://')){$maps='https://www.google.com/maps/search/?api=1&query='.rawurlencode($address.', '.$district.', '.$city);}
+bia_header('Contato','Contato');
+?>
+<section class="contact-modern shell" aria-labelledby="contact-title">
+ <div class="contact-modern-heading"><div><span class="eyebrow">FALE COM A GENTE</span><h1 class="title" id="contact-title">Vamos conversar?</h1><p>Quer conhecer a casa, tirar uma dúvida ou saber como chegar? Estamos por aqui.</p></div><a class="contact-modern-whatsapp" href="<?=bia_esc(bia_whatsapp())?>" target="_blank" rel="noopener noreferrer"><i class="bi bi-whatsapp" aria-hidden="true"></i> Conversar no WhatsApp <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a></div>
+ <div class="contact-modern-layout">
+  <div class="contact-modern-info">
+   <h2>Venha nos visitar.</h2><p class="contact-modern-intro">Uma boa comida e um ambiente acolhedor esperam por você.</p>
+   <div class="contact-modern-list">
+    <div class="contact-modern-item"><span class="contact-modern-icon"><i class="bi bi-geo-alt" aria-hidden="true"></i></span><div><h3>Nosso endereço</h3><p><?=bia_esc($address)?><br><?=bia_esc($district)?> · <?=bia_esc($city)?></p><a href="<?=bia_esc($maps)?>" target="_blank" rel="noopener noreferrer">Ver rota no Google Maps <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a></div></div>
+    <div class="contact-modern-item"><span class="contact-modern-icon"><i class="bi bi-clock" aria-hidden="true"></i></span><div><h3>Horário de atendimento</h3><p><?=bia_esc(bia_info('hours','Todos os dias · 10h30 às 15h'))?></p></div></div>
+    <div class="contact-modern-item"><span class="contact-modern-icon"><i class="bi bi-telephone" aria-hidden="true"></i></span><div><h3>Telefone e WhatsApp</h3><p><?=bia_esc(bia_info('phone','(32) 98711-2340'))?></p></div></div>
+   </div>
+  </div>
+  <div class="contact-modern-visual"><?php bia_photo('table','Salão do Restaurante da Bia preparado para receber visitantes','contact-modern-photo',true);?><a class="contact-modern-map" href="<?=bia_esc($maps)?>" target="_blank" rel="noopener noreferrer"><span><i class="bi bi-pin-map" aria-hidden="true"></i> Encontre a Bia no mapa</span><i class="bi bi-arrow-up-right" aria-hidden="true"></i></a></div>
+ </div>
+</section>
+<?php bia_footer();

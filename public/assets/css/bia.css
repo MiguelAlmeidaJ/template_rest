@@ -48,3 +48,28 @@ body{font-size:var(--font-body)}
 
 /* Refined brand navigation */
 .header-inner{min-height:5.6rem;gap:1.5rem}.header-inner .custom-logo{max-height:4.45rem;width:auto;object-fit:contain}.site-header .nav{display:flex;align-items:center;gap:clamp(.9rem,1.55vw,1.65rem)}.site-header .nav>a:not(.btn){font-size:.8rem;font-weight:600}.site-header .nav .customer-nav-link{display:inline-flex;align-items:center;gap:.45rem;color:#2d6835;white-space:nowrap}.site-header .nav .customer-nav-link .bi{font-size:1.1rem}.site-header .nav .btn-nav{padding:.85rem 1.15rem;border-radius:.5rem;font-size:.8rem;white-space:nowrap;background:#f98017;border-color:#f98017;color:#212121}.site-header .nav .btn-nav:hover{background:#e9700c;transform:none}.site-header .nav .btn-nav .bi{font-size:1rem}.site-header .brand{flex-shrink:0}@media(max-width:1100px){.site-header .nav{gap:.85rem}.header-inner .custom-logo{max-height:3.8rem}}@media(max-width:900px){.site-header .nav{gap:1rem}.site-header .nav .btn-nav{width:100%}.site-header .nav .customer-nav-link{padding:.7rem 0}}
+
+/* Contact: compact, photo-led layout without a duplicated hero */
+.contact-modern{padding-top:clamp(2.3rem,5vw,4.75rem);padding-bottom:clamp(3.5rem,6vw,6rem)}
+.contact-modern-heading{display:flex;align-items:end;justify-content:space-between;gap:1.5rem;margin-bottom:clamp(2rem,3.5vw,3rem);padding-bottom:1.8rem;border-bottom:1px solid #e5dfd7}
+.contact-modern-heading .title{font-family:'Open Sans',Arial,sans-serif;font-size:clamp(2rem,3.2vw,3rem);margin:.5rem 0 .55rem;letter-spacing:-.035em}
+.contact-modern-heading p{margin:0;color:#72766d;font-size:.92rem;line-height:1.7;max-width:34rem}
+.contact-modern-whatsapp{display:inline-flex;align-items:center;justify-content:center;gap:.75rem;white-space:nowrap;border-radius:.55rem;padding:.95rem 1.25rem;color:#fff;background:#2d6835;font-size:.82rem;font-weight:700;transition:background .2s}
+.contact-modern-whatsapp:hover{background:#204f28;color:#fff}
+.contact-modern-layout{display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:clamp(2rem,5vw,5.2rem);align-items:start}
+.contact-modern-info h2{font-family:'Open Sans',Arial,sans-serif;font-weight:700;font-size:clamp(1.4rem,2vw,1.95rem);letter-spacing:-.025em;margin:0 0 .35rem}
+.contact-modern-intro{color:#74796f;font-size:.9rem;margin:0 0 1.3rem}
+.contact-modern-list{display:grid}
+.contact-modern-item{display:grid;grid-template-columns:2.5rem minmax(0,1fr);gap:1rem;padding:1.3rem 0;border-bottom:1px solid #e9e2d9}
+.contact-modern-item:last-child{border-bottom:0}
+.contact-modern-icon{width:2.5rem;height:2.5rem;display:grid;place-items:center;background:#fff1e4;border-radius:.65rem;color:#e97815;font-size:1.1rem}
+.contact-modern-item h3{font:700 .92rem 'Open Sans',Arial,sans-serif;margin:.05rem 0 .4rem}
+.contact-modern-item p{font-size:.87rem;line-height:1.7;color:#666d65;margin:0}
+.contact-modern-item a{display:inline-block;margin-top:.55rem;color:#2d6835;font-weight:700;font-size:.78rem}
+.contact-modern-visual{min-width:0;overflow:hidden;border-radius:.85rem;background:#e9e7df}
+.contact-modern-visual .contact-modern-photo{display:block;width:100%;height:clamp(18rem,31vw,27rem);object-fit:cover}
+.contact-modern-map{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1.15rem 1.4rem;background:#fff;color:#2d6835;font-size:.84rem;font-weight:700}
+.contact-modern-map span{display:flex;align-items:center;gap:.7rem}
+.contact-modern-map:hover{color:#bc1c23}
+@media(max-width:800px){.contact-modern-layout{grid-template-columns:1fr;gap:2rem}.contact-modern-heading{align-items:start;flex-direction:column}.contact-modern-visual .contact-modern-photo{height:22rem}}
+@media(max-width:500px){.contact-modern-whatsapp{width:100%}.contact-modern-visual .contact-modern-photo{height:16rem}.contact-modern{padding-top:2rem}}
