@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const phone = document.querySelector('#customer-phone');
   if (phone) {
     const maskPhone = (value) => {
-      const digits = String(value).replace(/\\D/g, '').slice(0, 11);
+      const digits = String(value).replace(/\D/g, '').slice(0, 11);
       if (digits.length <= 2) return digits.length ? '(' + digits : '';
       if (digits.length <= 6) return '(' + digits.slice(0, 2) + ') ' + digits.slice(2);
       const local = digits.slice(2);
@@ -14,6 +14,65 @@ document.addEventListener('DOMContentLoaded', () => {
       phone.value = maskPhone(phone.value);
     });
   }
+
+  const noticeDialog = document.querySelector('#lunch-notice-dialog');
+  const noticeTitle = document.querySelector('#lunch-notice-title');
+  const noticeText = document.querySelector('#lunch-notice-text');
+  const noticeInputWrap = document.querySelector('#lunch-notice-input-wrap');
+  const noticeInput = document.querySelector('#lunch-notice-input');
+  const noticeCancel = document.querySelector('#lunch-notice-cancel');
+  const noticeConfirm = document.querySelector('#lunch-notice-confirm');
+  const noticeClose = document.querySelector('#lunch-notice-close');
+
+  function openNotice({ title, message, type = 'notice', placeholder = '', defaultValue = '' }) {
+    return new Promise((resolve) => {
+      noticeTitle.textContent = title;
+      noticeText.textContent = message;
+      noticeInputWrap.hidden = type !== 'prompt';
+      noticeInput.value = defaultValue;
+      noticeInput.placeholder = placeholder;
+      noticeCancel.hidden = type === 'notice';
+      noticeConfirm.textContent = type === 'notice' ? 'Entendi' : 'Confirmar';
+      noticeDialog.showModal();
+
+      let completed = false;
+      const finish = (value) => {
+        if (completed) return;
+        completed = true;
+        noticeDialog.close();
+        resolve(value);
+      };
+      const ok = () => {
+        if (type === 'prompt' && !noticeInput.value.trim()) {
+          noticeInput.focus();
+          return;
+        }
+        finish(type === 'prompt' ? noticeInput.value.trim() : true);
+      };
+      const cancel = () => finish(type === 'notice' ? true : null);
+      noticeConfirm.addEventListener('click', ok, { once: true, signal: controller.signal });
+      noticeCancel.addEventListener('click', cancel, { once: true, signal: controller.signal });
+      noticeClose.addEventListener('click', cancel, { once: true, signal: controller.signal });
+      noticeDialog.addEventListener('cancel', (event) => {
+        event.preventDefault();
+        cancel();
+      }, { once: true, signal: controller.signal });
+      const controller = new AbortController();
+      noticeDialog.addEventListener('close', () => {
+        controller.abort();
+        if (!completed) {
+          completed = true;
+          resolve(type === 'notice' ? true : null);
+        }
+      }, { once: true, signal: controller.signal });
+      if (type === 'prompt') noticeInput.focus();
+      else noticeConfirm.focus();
+    });
+  }
+  const awaitNotice = (message, title = 'Atenção') => openNotice({ title, message });
+  const askText = (title, message, placeholder = '', defaultValue = '') =>
+    openNotice({ title, message, type: 'prompt', placeholder, defaultValue });
+  const askConfirm = (title, message) => openNotice({ title, message, type: 'confirm' });
 
   const config = JSON.parse(document.querySelector('#lunch-config').textContent);
   const { items, settings } = config,
@@ -216,10 +275,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 : chosen.length > max;
             if (exceeds) {
               checkbox.checked = false;
-              feedback.textContent =
+              awaitNotice(
                 mode === 'category'
-                  ? 'Limite de ' + limit + ' em ' + category + '.'
-                  : 'Limite de ' + max + ' escolhas por quentinha.';
+                  ? 'Nesta categoria você pode escolher até ' + limit + ' prato(s).'
+                  : 'Você já selecionou o máximo de ' + max + ' pratos por quentinha.',
+                'Limite de escolhas',
+              );
               return;
             }
           }
@@ -330,9 +391,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (selected) applyAddress(selected);
   });
   document.querySelector('#lunch-save-address')?.addEventListener('click', async () => {
-    const label = prompt('Nome deste endereço (ex.: Casa, Trabalho):', 'Casa');
+    const label = await askText('Salvar endereço', 'Como deseja identificar este endereço?', 'Ex.: Casa, Trabalho', 'Casa');
     if (label === null) return;
-    const defaultChoice = confirm('Deseja definir este endereço como principal?');
+    const defaultChoice = await askConfirm('Endereço principal', 'Deseja usar este endereço como principal em novos pedidos?');
+    if (defaultChoice === null) return;
     try {
       await customerAction('save_address', {
         ...deliveryFields(),
@@ -345,7 +407,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   document.querySelector('#lunch-save-favorite')?.addEventListener('click', async () => {
-    const name = prompt('Nome da montagem (ex.: Minha quentinha de sempre):');
+    const name = await askText('Salvar pedido padrão', 'Dê um nome para reconhecer esta montagem na próxima compra.', 'Ex.: Minha quentinha de sempre');
     if (name === null) return;
     const boxes = groups.flatMap((g) =>
       Array.from({ length: g.count }, (_, index) => ({
