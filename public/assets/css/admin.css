@@ -47,3 +47,28 @@
 :root{--bia-orange:#f98017;--bia-red:#bc1c23;--bia-green:#2d6835;--bia-lime:#84a747;--bia-cream:#fff5ec;--bia-charcoal:#212121}
 
 .admin-body,.auth-body{font-family:'Montserrat',Arial,sans-serif;background:#f8f9f7;color:#212121}.page-title,.auth-box h2,.admin-brand,.content-heading h2{font-family:'Open Sans',Arial,sans-serif}.sidebar,.admin-body .sidebar{background:#fff!important;color:#212121!important;border-right:1px solid #e8e8e8}.sidebar .admin-brand,.sidebar .admin-brand:hover{color:#212121!important}.sidebar .admin-brand small{color:#777}.sidebar .sidebar-section{color:#777}.sidebar .side-nav a{color:#454545!important}.sidebar .side-nav a:hover{background:#fff5ec!important;color:#212121!important}.sidebar .side-nav a.active{background:#fff0e2!important;color:#212121!important;border-left:3px solid #f98017!important}.sidebar .side-nav a.active i{color:#f98017}.sidebar .sidebar-bottom{color:#777}.sidebar .status-dot{background:#84a747}.btn-bia{background:#f98017!important;border-color:#f98017!important;color:#212121!important}.btn-bia:hover{background:#ed730d!important}.page-kicker{color:#2d6835}.metric-icon{background:#f1f7ed;color:#2d6835}.admin-custom-logo{max-width:210px;max-height:82px}.admin-avatar{background:#fff0e2}.cms-pages-nav a.selected{background:#fff0e2;color:#bc1c23}.cms-page-selector{border-color:#efebe5}.cms-upload-feedback{font-size:12px;margin-top:10px;color:#bc1c23;min-height:20px}.cms-upload-feedback.success{color:#2d6835}
+
+/* Operação diária: editor do cardápio compacto, pesquisável e sem reload */
+.menu-manager .menu-heading{display:flex;align-items:center;justify-content:space-between;gap:1.2rem;flex-wrap:wrap}
+.menu-manager .menu-heading p{margin:.35rem 0 0;color:#6f7571;font-size:.85rem}
+.menu-save-box{display:flex;align-items:center;gap:.9rem;flex-wrap:wrap}
+.menu-unsaved{font-size:.78rem;color:#6a716c}
+.menu-filters{display:grid;grid-template-columns:minmax(12rem,2fr) repeat(3,minmax(9rem,1fr));gap:.7rem;padding:1.15rem 1.4rem;border-block:1px solid #ebede9;background:#fbfcfa}
+.menu-filters>label{display:flex;align-items:center;gap:.65rem;border:1px solid #dce2dc;border-radius:.55rem;background:white;padding:0 .75rem}
+.menu-filters input{width:100%;border:0;outline:0;padding:.7rem 0;min-width:0;font-size:.85rem;background:transparent}
+.menu-filters select{min-width:0;padding:.7rem .5rem;border:1px solid #dce2dc;border-radius:.55rem;background:white;font-size:.85rem}
+.menu-results{display:flex;gap:1rem;align-items:center;padding:.7rem 1.4rem;font-size:.77rem;color:#676f69;flex-wrap:wrap}
+.menu-clear-filters{border:0;background:transparent;color:#ad5115;cursor:pointer;text-decoration:underline}
+#menu-save-feedback{margin-left:auto;color:#23613e;font-weight:600}
+.menu-table{margin:0;width:100%;table-layout:fixed}
+.menu-table th,.menu-table td{padding:.75rem 1rem!important;vertical-align:middle}
+.menu-table th:first-child{width:38%}.menu-table th:nth-child(2){width:28%}
+.menu-table .form-control,.menu-table .form-select{font-size:.83rem;padding:.55rem .65rem;min-width:0}
+.menu-table .menu-row.is-edited{background:#fff8ed}
+.menu-table .menu-row[hidden]{display:none!important}
+.menu-switch{display:inline-flex;align-items:center;gap:.45rem;white-space:nowrap;font-size:.8rem;color:#515b53;cursor:pointer}
+.menu-switch input{width:1rem;height:1rem;accent-color:#f98017}
+.menu-empty{padding:2rem;text-align:center;color:#6f7571}
+.menu-save-box .btn:disabled{opacity:.5;cursor:not-allowed}
+@media(max-width:1100px){.menu-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.menu-filters>label{grid-column:span 2}}
+@media(max-width:650px){.menu-filters{grid-template-columns:1fr}.menu-filters>label{grid-column:auto}.menu-table{min-width:680px}.menu-save-box{width:100%}.menu-save-box .btn{margin-left:auto}}
