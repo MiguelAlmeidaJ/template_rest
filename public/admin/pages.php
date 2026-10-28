@@ -20,7 +20,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
    if(!array_key_exists($slot,$def['images']))throw new DomainException('Área de imagem inválida');
    $url=Cms::upload($_FILES['image']??[],'page-'.$page.'-'.$slot);
    $q=Db::pdo()->prepare('INSERT INTO cms_gallery(filename,caption,alt_text,is_visible,sort_order) VALUES(?,?,?,0,0)');
-   $q->execute([$url,$def['label'].' · '.$label,$label.' do Restaurante da Bia']);
+   $q->execute([$url,$def['label'].' · '.$def['images'][$slot],$def['images'][$slot].' do Restaurante da Bia']);
    Cms::saveField($page,'image_'.$slot,$url);
    cms_notice('Imagem enviada, salva na biblioteca e vinculada à página.');
   }elseif(($_POST['action']??'')==='library'){
