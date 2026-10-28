@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
       noticeDialog.showModal();
 
       let completed = false;
+      const controller = new AbortController();
       const finish = (value) => {
         if (completed) return;
         completed = true;
@@ -57,7 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault();
         cancel();
       }, { once: true, signal: controller.signal });
-      const controller = new AbortController();
       noticeDialog.addEventListener('close', () => {
         controller.abort();
         if (!completed) {
