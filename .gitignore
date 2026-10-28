@@ -4,3 +4,5 @@
 
 /public/assets/images/bia/uploads/*
 !/public/assets/images/bia/uploads/.htaccess
+
+node_modules
