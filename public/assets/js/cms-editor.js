@@ -1,7 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
   const textForm = document.querySelector('.cms-text-form');
   if (textForm) {
-    const inputs = [...textForm.querySelectorAll('.cms-text-field input, .cms-text-field textarea')];
+    const inputs = [
+      ...textForm.querySelectorAll('.cms-text-field input, .cms-text-field textarea'),
+    ];
     const initial = new Map(inputs.map((input) => [input.name, input.value]));
     const saveButton = document.querySelector('#cms-save-texts');
     const status = document.querySelector('#cms-text-feedback');
@@ -14,16 +16,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const refresh = () => {
       const pending = changed().length;
       saveButton.disabled = saving || pending === 0;
-      status.textContent = pending ? pending + ' alteração(ões) pendente(s)' : 'Nenhuma alteração pendente';
+      status.textContent = pending
+        ? pending + ' alteração(ões) pendente(s)'
+        : 'Nenhuma alteração pendente';
     };
 
     inputs.forEach((input) => input.addEventListener('input', refresh));
     filter?.addEventListener('input', () => {
-      const term = filter.value.normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase().trim();
+      const term = filter.value
+        .normalize('NFD')
+        .replace(/[\\u0300-\\u036f]/g, '')
+        .toLowerCase()
+        .trim();
       let visible = 0;
       fields.forEach((field) => {
-        const words = (field.dataset.fieldSearch + ' ' + field.querySelector('input,textarea').value)
-          .normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase();
+        const words = (
+          field.dataset.fieldSearch +
+          ' ' +
+          field.querySelector('input,textarea').value
+        )
+          .normalize('NFD')
+          .replace(/[\\u0300-\\u036f]/g, '')
+          .toLowerCase();
         field.hidden = !words.includes(term);
         if (!field.hidden) visible++;
       });
