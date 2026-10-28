@@ -1,4 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
+  const phone = document.querySelector('#customer-phone');
+  if (phone) {
+    const maskPhone = (value) => {
+      const digits = String(value).replace(/\\D/g, '').slice(0, 11);
+      if (digits.length <= 2) return digits.length ? '(' + digits : '';
+      if (digits.length <= 6) return '(' + digits.slice(0, 2) + ') ' + digits.slice(2);
+      const local = digits.slice(2);
+      const split = digits.length > 10 ? 5 : 4;
+      return '(' + digits.slice(0, 2) + ') ' + local.slice(0, split) + '-' + local.slice(split);
+    };
+    phone.value = maskPhone(phone.value);
+    phone.addEventListener('input', () => { phone.value = maskPhone(phone.value); });
+  }
+
   const config = JSON.parse(document.querySelector('#lunch-config').textContent);
   const { items, settings } = config,
     price = settings.price_cents,
