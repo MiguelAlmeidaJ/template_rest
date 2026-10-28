@@ -8,7 +8,6 @@ if($maps===''||!filter_var($maps,FILTER_VALIDATE_URL)||!str_starts_with($maps,'h
 bia_header('Contato','Contato');
 ?>
 <section class="contact-modern shell" aria-labelledby="contact-title">
- <div class="contact-modern-heading"><div><span class="eyebrow">FALE COM A GENTE</span><h1 class="title" id="contact-title">Vamos conversar?</h1><p>Quer conhecer a casa, tirar uma dúvida ou saber como chegar? Estamos por aqui.</p></div><a class="contact-modern-whatsapp" href="<?=bia_esc(bia_whatsapp())?>" target="_blank" rel="noopener noreferrer"><i class="bi bi-whatsapp" aria-hidden="true"></i> Conversar no WhatsApp <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a></div>
  <div class="contact-modern-layout">
   <div class="contact-modern-info">
    <h2>Venha nos visitar.</h2><p class="contact-modern-intro">Uma boa comida e um ambiente acolhedor esperam por você.</p>
