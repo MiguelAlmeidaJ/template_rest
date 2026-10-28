@@ -1,52 +1,62 @@
 <?php
 declare(strict_types=1);
-require __DIR__.'/includes/cms-boot.php';
+require __DIR__ . '/includes/cms-boot.php';
 use App\Db;
 
-$statuses = ['pending' => 'Novo pedido','accepted' => 'Novo pedido','preparing' => 'Em preparação','out_for_delivery' => 'Saindo para entrega','delivered' => 'Pedido entregue','cancelled' => 'Cancelado'];
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    cms_csrf();
-    try {
-        $id = filter_var($_POST['id'] ?? null, FILTER_VALIDATE_INT);
-        $action = $_POST['action'] ?? '';
-        if (!$id) {
-            throw new DomainException('Pedido inválido');
-        }if ($action === 'status') {
-            $status = (string)($_POST['status'] ?? '');
-            if (!in_array($status, ['pending','preparing','out_for_delivery','delivered','cancelled'], true)) {
-                throw new DomainException('Status inválido');
-            }$q = Db::pdo()->prepare('UPDATE lunch_orders SET status=? WHERE id=?');
-            $q->execute([$status,$id]);
-            cms_notice('Pedido atualizado.');
-        } elseif ($action === 'paid') {
-            $q = Db::pdo()->prepare("UPDATE lunch_orders SET payment_status='paid' WHERE id=? AND status<>'cancelled'");
-            $q->execute([$id]);
-            cms_notice('Pagamento registrado.');
-        } else {
-            throw new DomainException('Ação inválida');
-        }
-    } catch (Throwable $e) {
-        cms_notice($e instanceof DomainException ? $e->getMessage() : 'Erro ao atualizar', 'danger');
-    }
+$statuses = [
+    'pending' => 'Novo pedido',
+    'accepted' => 'Novo pedido',
+    'preparing' => 'Em preparação',
+    'out_for_delivery' => 'Saindo para entrega',
+    'delivered' => 'Entregue',
+    'cancelled' => 'Cancelado',
+];
+$filter = (string) ($_GET['status'] ?? '');
+if ($filter !== '' && !array_key_exists($filter, $statuses)) $filter = '';
+
+$query = 'SELECT o.id,o.customer_name,o.customer_phone,o.neighborhood,o.quantity,
+                 o.total_cents,o.payment_method,o.payment_status,o.status,o.created_at
+          FROM lunch_orders o';
+$params = [];
+if ($filter !== '') {
+    $query .= $filter === 'pending' ? " WHERE o.status IN ('pending','accepted')" : ' WHERE o.status = ?';
+    if ($filter !== 'pending') $params[] = $filter;
 }
-$orders = Db::pdo()->query('SELECT * FROM lunch_orders ORDER BY id DESC LIMIT 40')->fetchAll();
-$details = [];
-if ($orders) {
-    $ids = array_column($orders, 'id');
-    $placeholders = implode(',', array_fill(0, count($ids), '?'));
-    $q = Db::pdo()->prepare('SELECT b.order_id,b.box_number,b.box_name,c.item_name FROM lunch_order_boxes b JOIN lunch_order_choices c ON c.box_id=b.id WHERE b.order_id IN ('.$placeholders.') ORDER BY b.order_id,b.box_number,c.id');
-    $q->execute($ids);
-    foreach ($q->fetchAll() as $row) {
-        $details[(int)$row['order_id']][(int)$row['box_number']]['items'][] = $row['item_name'];
-    }$details[(int)$row['order_id']][(int)$row['box_number']]['name'] = $row['box_name'];
-}
-$filter = (string)($_GET['status'] ?? '');
-if ($filter && isset($statuses[$filter])) {
-    $orders = array_values(array_filter($orders, fn ($o) => $o['status'] === $filter));
-}
+$query .= ' ORDER BY o.id DESC LIMIT 100';
+$stmt = Db::pdo()->prepare($query);
+$stmt->execute($params);
+$orders = $stmt->fetchAll();
+
 adm_start('Pedidos recebidos', 'lunch-orders');
-cms_feedback();?>
-<div class="mb-4"><span class="page-kicker">OPERAÇÃO</span><h1 class="page-title">Pedidos recebidos</h1><p class="page-subtitle">Acompanhe os pedidos de quentinhas e atualize as etapas de entrega.</p></div>
-<div class="d-flex gap-2 flex-wrap mb-4"><?php foreach (['' => 'Todos','pending' => 'Novos','preparing' => 'Em preparação','out_for_delivery' => 'Saindo para entrega','delivered' => 'Entregues','cancelled' => 'Cancelados'] as $key => $label):?><a href="?status=<?=adm_h($key)?>" class="btn <?=$key === $filter ? 'btn-bia' : 'btn-outline-secondary'?> btn-sm"><?=adm_h($label)?></a><?php endforeach;?></div>
-<section class="content-card"><div class="content-heading"><h2>Últimos pedidos</h2></div><div class="table-responsive"><table class="table"><thead><tr><th>#</th><th>Cliente / endereço</th><th>Quentinhas</th><th>Valor</th><th>Pagamento</th><th>Status</th></tr></thead><tbody><?php foreach ($orders as $o):?><tr><td><?=adm_h($o['id'])?><br><a href="/admin/lunch-chat.php?order=<?=adm_h($o['id'])?>" class="small">Mensagens</a></td><td><?=adm_h($o['customer_name'])?><br><small><?=adm_h($o['address'])?>, <?=adm_h($o['neighborhood'])?><br>Referência: <?=adm_h($o['reference_point'])?><br><?=adm_h($o['customer_phone'])?></small></td><td><strong><?=adm_h($o['quantity'])?></strong><?php foreach (($details[(int)$o['id']] ?? []) as $number => $box):?><div class="small text-secondary mt-2"><strong>Quentinha <?=adm_h($number)?> — <?=adm_h($box['name'])?>:</strong> <?=adm_h(implode(', ', $box['items']))?></div><?php endforeach;?></td><td>R$ <?=number_format($o['total_cents'] / 100, 2, ',', '.')?></td><td><?=adm_h($o['payment_method'] === 'pix' ? 'Pix' : 'Cartão')?> · <?=adm_h($o['payment_status'] === 'paid' ? 'Pago' : 'Pendente')?><?php if ($o['payment_status'] === 'pending' && $o['status'] !== 'cancelled'):?><form method="post" class="mt-2" onsubmit="return confirm('O pagamento foi realmente recebido?')"><input type="hidden" name="csrf" value="<?=adm_h($csrf)?>"><input type="hidden" name="action" value="paid"><input type="hidden" name="id" value="<?=adm_h($o['id'])?>"><button class="btn btn-outline-secondary btn-sm">Confirmar recebimento</button></form><?php endif;?></td><td><form method="post"><input type="hidden" name="csrf" value="<?=adm_h($csrf)?>"><input type="hidden" name="action" value="status"><input type="hidden" name="id" value="<?=adm_h($o['id'])?>"><select class="form-select" name="status"><?php foreach (['pending' => 'Novo pedido','preparing' => 'Em preparação','out_for_delivery' => 'Saindo para entrega','delivered' => 'Pedido entregue','cancelled' => 'Cancelado'] as $key => $value):?><option value="<?=$key?>" <?=in_array($o['status'], [$key,...($key === 'pending' ? ['accepted'] : [])], true) ? 'selected' : ''?>><?=$value?></option><?php endforeach;?></select><button class="btn btn-bia btn-sm mt-2">Atualizar</button></form></td></tr><?php endforeach;?></tbody></table></div></section>
-<?php adm_end();
+?>
+<header class="mb-4">
+    <span class="page-kicker">OPERAÇÃO</span>
+    <h1 class="page-title">Pedidos recebidos</h1>
+    <p class="page-subtitle">Visualize os pedidos e acompanhe o atendimento em tempo real.</p>
+</header>
+<nav class="orders-filterbar" aria-label="Filtrar pedidos">
+    <?php foreach ([''=>'Todos','pending'=>'Novos','preparing'=>'Em preparação','out_for_delivery'=>'Saindo para entrega','delivered'=>'Entregues','cancelled'=>'Cancelados'] as $value=>$label): ?>
+    <a class="orders-filter <?=$value===$filter?'active':''?>" href="?status=<?=urlencode($value)?>"><?=adm_h($label)?></a>
+    <?php endforeach; ?>
+</nav>
+<section class="content-card">
+    <div class="content-heading">
+        <div><h2>Últimos pedidos</h2><small class="text-secondary"><?=count($orders)?> pedidos nesta visualização</small></div>
+        <span class="orders-live-label"><span></span> Atualização automática</span>
+    </div>
+    <div class="orders-list" id="admin-orders-list" data-filter="<?=adm_h($filter)?>">
+      <?php if (!$orders): ?><div class="orders-list-empty">Nenhum pedido encontrado neste filtro.</div><?php endif; ?>
+      <?php foreach ($orders as $order): ?>
+      <a class="orders-list-item" href="/admin/lunch-order.php?id=<?=(int)$order['id']?>">
+        <span class="orders-list-number">#<?=(int)$order['id']?></span>
+        <span class="orders-list-customer"><strong><?=adm_h($order['customer_name'])?></strong><small><?=adm_h($order['neighborhood'])?> · <?=adm_h(date('d/m H:i',strtotime($order['created_at'])))?></small></span>
+        <span class="orders-list-count"><?=(int)$order['quantity']?> <?=((int)$order['quantity']===1?'quentinha':'quentinhas')?></span>
+        <span class="orders-list-price">R$ <?=number_format((int)$order['total_cents']/100,2,',','.')?></span>
+        <span class="orders-state orders-state-<?=adm_h($order['status'])?>"><?=adm_h($statuses[$order['status']]??$order['status'])?></span>
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+      </a>
+      <?php endforeach; ?>
+    </div>
+</section>
+<script src="/assets/js/admin-orders-live.js?v=1" defer></script>
+<?php adm_end(); ?>
