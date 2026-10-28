@@ -23,8 +23,8 @@ body{font-size:var(--font-body)}
 .benefits-editorial{gap:clamp(1.2rem,2vw,2.2rem)}
 .benefits-editorial .benefit{position:relative;border:0;border-top:1px solid #d9d7cf;border-radius:0;background:transparent;box-shadow:none;padding:1.7rem .25rem 0;transform:none;transition:border-color .25s ease}
 .benefits-editorial .benefit-icon{display:flex;align-items:center;justify-content:flex-start;background:none;color:#2d6835;width:2.25rem;height:2.25rem;border-radius:0;padding:0;margin:0 0 1.35rem;transform:none}
-.benefits-editorial .benefit-icon svg{height:2rem;width:2rem;transition:none}
+.benefits-editorial .benefit-icon .bi{font-size:1.85rem;line-height:1;display:inline-block}
 .benefits-editorial .benefit b{display:block;min-height:0;font-family:'Open Sans',Arial,sans-serif;font-weight:700;font-size:clamp(.99rem,1.2vw,1.13rem);line-height:1.45}
 .benefits-editorial .benefit p{font-size:.84rem;margin:.55rem 0 0;color:#666;line-height:1.75}
-@media(hover:hover){.benefits-editorial .benefit:hover{border-top-color:#2d6835;transform:none;box-shadow:none}.benefits-editorial .benefit:hover .benefit-icon,.benefits-editorial .benefit:hover svg{transform:none}}
+@media(hover:hover){.benefits-editorial .benefit:hover{border-top-color:#2d6835;transform:none;box-shadow:none}.benefits-editorial .benefit:hover .benefit-icon{transform:none}}
 @media(prefers-reduced-motion:reduce){.benefits-editorial .benefit{transition:none}}
