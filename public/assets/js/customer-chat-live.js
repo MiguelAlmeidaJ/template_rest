@@ -7,8 +7,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const feedback = document.querySelector('#customer-chat-feedback');
   const status = document.querySelector('#customer-order-status');
   const stateLabels = {
-    pending: 'Novo pedido', accepted: 'Novo pedido', preparing: 'Em preparação',
-    out_for_delivery: 'Saindo para entrega', delivered: 'Pedido entregue', cancelled: 'Cancelado',
+    pending: 'Novo pedido',
+    accepted: 'Novo pedido',
+    preparing: 'Em preparação',
+    out_for_delivery: 'Saindo para entrega',
+    delivered: 'Pedido entregue',
+    cancelled: 'Cancelado',
   };
   let lastSignature = '';
   let busy = false;
@@ -18,7 +22,10 @@ document.addEventListener('DOMContentLoaded', () => {
       method,
       cache: 'no-store',
       credentials: 'same-origin',
-      headers: { Accept: 'application/json', ...(body ? { 'Content-Type': 'application/json' } : {}) },
+      headers: {
+        Accept: 'application/json',
+        ...(body ? { 'Content-Type': 'application/json' } : {}),
+      },
       ...(body ? { body: JSON.stringify(body) } : {}),
     });
     const data = await response.json();
@@ -58,7 +65,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (feedback.textContent === 'Sem conexão. Tentaremos novamente.') feedback.textContent = '';
     } catch (error) {
       feedback.textContent = 'Sem conexão. Tentaremos novamente.';
-    } finally { busy = false; }
+    } finally {
+      busy = false;
+    }
   }
 
   form.addEventListener('submit', async (event) => {
@@ -67,19 +76,28 @@ document.addEventListener('DOMContentLoaded', () => {
     busy = true;
     const button = form.querySelector('button[type="submit"]');
     const body = form.elements.body.value.trim();
-    if (!body) { busy = false; return; }
+    if (!body) {
+      busy = false;
+      return;
+    }
     button.disabled = true;
     feedback.textContent = 'Enviando...';
     try {
       await exchange('POST', { csrf: form.elements.csrf.value, body });
       form.reset();
       feedback.textContent = 'Mensagem enviada.';
-    } catch (error) { feedback.textContent = error.message; }
-    finally { busy = false; button.disabled = false; }
+    } catch (error) {
+      feedback.textContent = error.message;
+    } finally {
+      busy = false;
+      button.disabled = false;
+    }
   });
 
   refresh();
   const timer = setInterval(refresh, 5000);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) refresh();
+  });
   window.addEventListener('pagehide', () => clearInterval(timer), { once: true });
 });

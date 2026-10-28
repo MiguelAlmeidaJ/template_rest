@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 require dirname(__DIR__, 2) . '/src/bootstrap.php';
@@ -19,16 +20,22 @@ function respond(int $status, array $data): never
 try {
     Customer::boot();
     $customerId = Customer::id();
-    if (!$customerId) respond(401, ['ok' => false, 'error' => 'Entre na sua conta.']);
+    if (!$customerId) {
+        respond(401, ['ok' => false, 'error' => 'Entre na sua conta.']);
+    }
 
     $orderId = filter_var($_GET['order'] ?? null, FILTER_VALIDATE_INT);
-    if (!$orderId) respond(400, ['ok' => false, 'error' => 'Pedido inválido.']);
+    if (!$orderId) {
+        respond(400, ['ok' => false, 'error' => 'Pedido inválido.']);
+    }
 
     $db = Db::pdo();
     $query = $db->prepare('SELECT id, status FROM lunch_orders WHERE id = ? AND customer_id = ?');
     $query->execute([$orderId, $customerId]);
     $order = $query->fetch();
-    if (!$order) respond(404, ['ok' => false, 'error' => 'Pedido não encontrado.']);
+    if (!$order) {
+        respond(404, ['ok' => false, 'error' => 'Pedido não encontrado.']);
+    }
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $data = json_decode(file_get_contents('php://input'), true, 512, JSON_THROW_ON_ERROR);

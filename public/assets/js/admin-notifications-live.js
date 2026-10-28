@@ -39,7 +39,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (navigator.sendBeacon) {
       navigator.sendBeacon('/admin/notifications.php', data);
     } else {
-      fetch('/admin/notifications.php', { method: 'POST', body: data, credentials: 'same-origin', keepalive: true }).catch(() => {});
+      fetch('/admin/notifications.php', {
+        method: 'POST',
+        body: data,
+        credentials: 'same-origin',
+        keepalive: true,
+      }).catch(() => {});
     }
     link.closest('.notification-item')?.classList.replace('is-unread', 'is-read');
   });
