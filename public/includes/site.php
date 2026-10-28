@@ -33,8 +33,8 @@ function bia_footer(): void
   <div class="shell footer-cols">
     <div class="footer-about">
       <a class="footer-logo-link" href="/" aria-label="Restaurante da Bia — início">
-        <?php $footerLogo=\App\Cms::setting('logo'); ?>
-        <?php if($footerLogo): ?>
+        <?php $footerLogo = \App\Cms::setting('logo'); ?>
+        <?php if ($footerLogo): ?>
           <img class="footer-logo" src="<?=bia_esc($footerLogo)?>" alt="Restaurante da Bia" loading="lazy">
         <?php else: ?>
           <span class="footer-brand-fallback">Restaurante <strong>da Bia</strong></span>
@@ -51,9 +51,9 @@ function bia_footer(): void
     </nav>
     <div class="footer-visit">
       <h3>Venha nos visitar</h3>
-      <p><?=bia_esc(bia_info('address','Rua Dr. Sobral Pinto, 425'))?><br><?=bia_esc(bia_info('district','Vila Laroca'))?> · <?=bia_esc(bia_info('city','Além Paraíba, MG'))?></p>
-      <p><i class="bi bi-clock" aria-hidden="true"></i> <?=bia_esc(bia_info('hours','Todos os dias · 10h30 às 15h'))?></p>
-      <a href="<?=bia_esc(bia_whatsapp())?>" target="_blank" rel="noopener noreferrer"><i class="bi bi-whatsapp" aria-hidden="true"></i> <?=bia_esc(bia_info('phone','(32) 98711-2340'))?> <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
+      <p><?=bia_esc(bia_info('address', 'Rua Dr. Sobral Pinto, 425'))?><br><?=bia_esc(bia_info('district', 'Vila Laroca'))?> · <?=bia_esc(bia_info('city', 'Além Paraíba, MG'))?></p>
+      <p><i class="bi bi-clock" aria-hidden="true"></i> <?=bia_esc(bia_info('hours', 'Todos os dias · 10h30 às 15h'))?></p>
+      <a href="<?=bia_esc(bia_whatsapp())?>" target="_blank" rel="noopener noreferrer"><i class="bi bi-whatsapp" aria-hidden="true"></i> <?=bia_esc(bia_info('phone', '(32) 98711-2340'))?> <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
     </div>
   </div>
   <div class="shell footer-base">
