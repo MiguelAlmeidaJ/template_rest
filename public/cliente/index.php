@@ -112,7 +112,36 @@ if ($id && $selected) {
         $messages = $q->fetchAll();
     }
 }
-bia_header('Minha conta', '');?><div class="shell section customer-page"><span class="eyebrow">ÁREA DO CLIENTE</span><h1 class="title">Minha conta</h1>
+if ($id): ?>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Minha conta | Restaurante da Bia</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@400;600;700;800&display=swap">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="/assets/css/bia.css?v=17">
+  <?php $customerFavicon=\App\Cms::setting('favicon'); if ($customerFavicon): ?>
+  <link rel="icon" href="<?=bia_esc($customerFavicon)?>">
+  <?php endif; ?>
+</head>
+<body class="customer-private-body">
+<a class="skip" href="#conteudo">Ir para conteúdo</a>
+<div class="customer-private-topbar">
+  <a href="/" class="customer-private-brand">
+    <?php $customerLogo=\App\Cms::setting('logo'); if ($customerLogo): ?>
+    <img src="<?=bia_esc($customerLogo)?>" alt="Restaurante da Bia">
+    <?php else: ?>Restaurante da Bia<?php endif; ?>
+  </a>
+  <span>Área do cliente</span>
+  <a href="/" class="customer-private-back"><i class="bi bi-arrow-left" aria-hidden="true"></i> Voltar ao site</a>
+</div>
+<main id="conteudo" class="shell section customer-page">
+<span class="eyebrow">ÁREA DO CLIENTE</span><h1 class="title">Minha conta</h1>
+<?php else: bia_header('Minha conta', ''); ?>
+<div class="shell section customer-page"><span class="eyebrow">ÁREA DO CLIENTE</span><h1 class="title">Minha conta</h1>
+<?php endif; ?>
 <?php if ($error):?><p class="customer-alert" role="alert"><?=bia_esc($error)?></p><?php endif;?><?php if ($notice):?><p class="customer-success" role="status"><?=bia_esc($notice)?></p><?php endif;?>
 <?php if (!$id):?>
 <div class="customer-access">
@@ -246,4 +275,8 @@ bia_header('Minha conta', '');?><div class="shell section customer-page"><span c
 <script type="application/json" id="customer-preferences-data"><?=json_encode(['addresses' => $extraAddresses,'csrf' => Customer::csrf()], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE)?></script>
 <script src="/assets/js/customer-preferences.js?v=2" defer></script>
 <?php endif; ?>
-<?php bia_footer();
+<?php if ($id): ?>
+</main>
+</body>
+</html>
+<?php else: bia_footer(); endif; ?>
