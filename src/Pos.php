@@ -91,33 +91,77 @@ final class Pos
         }
     }
 
+    /**
+     * One counter sale can contain multiple differently priced products.
+     * The sale header and line items are committed as a single transaction.
+     */
     public static function sale(int $operatorId, array $data): int
     {
-        $name = trim((string) ($data['description'] ?? ''));
-        $quantity = filter_var($data['quantity'] ?? null, FILTER_VALIDATE_INT);
-        $unit = filter_var($data['unit_price_cents'] ?? null, FILTER_VALIDATE_INT);
         $payment = (string) ($data['payment_method'] ?? '');
-
-        if (mb_strlen($name) < 2 || mb_strlen($name) > 180) {
-            throw new DomainException('Informe o produto ou descrição da venda.');
-        }
-        if ($quantity === false || $quantity < 1 || $quantity > 1000) {
-            throw new DomainException('Quantidade inválida.');
-        }
-        if ($unit === false || $unit < 1 || $unit > 10000000) {
-            throw new DomainException('Informe um preço válido.');
-        }
-        if (!in_array($payment, ['cash','pix','card'], true)) {
-            throw new DomainException('Escolha a forma de pagamento.');
+        if (!in_array($payment, ['cash', 'pix', 'card'], true)) {
+            throw new DomainException('Escolha como a venda foi paga.');
         }
 
-        $total = $quantity * $unit;
-        $stmt = Db::pdo()->prepare(
-            'INSERT INTO pos_sales(operator_id,description,quantity,unit_price_cents,total_cents,payment_method)
-             VALUES(?,?,?,?,?,?)'
-        );
-        $stmt->execute([$operatorId, $name, $quantity, $unit, $total, $payment]);
-        return (int) Db::pdo()->lastInsertId();
+        $raw = json_decode((string) ($data['items'] ?? ''), true);
+        if (!is_array($raw) || !array_is_list($raw) || count($raw) < 1 || count($raw) > 50) {
+            throw new DomainException('Adicione de 1 a 50 itens à venda.');
+        }
+
+        $items = [];
+        $total = 0;
+        $count = 0;
+        foreach ($raw as $index => $item) {
+            if (!is_array($item)) {
+                throw new DomainException('Confira os itens da venda.');
+            }
+            $name = trim((string) ($item['description'] ?? ''));
+            $quantity = filter_var($item['quantity'] ?? null, FILTER_VALIDATE_INT);
+            $price = filter_var($item['unit_price_cents'] ?? null, FILTER_VALIDATE_INT);
+            if (mb_strlen($name) < 2 || mb_strlen($name) > 180) {
+                throw new DomainException('Informe o nome do item '.($index + 1).'.');
+            }
+            if ($quantity === false || $quantity < 1 || $quantity > 1000) {
+                throw new DomainException('Quantidade inválida no item '.($index + 1).'.');
+            }
+            if ($price === false || $price < 1 || $price > 10000000) {
+                throw new DomainException('Preço inválido no item '.($index + 1).'.');
+            }
+            $subtotal = $quantity * $price;
+            $total += $subtotal;
+            $count += $quantity;
+            if ($total > 4294967295 || $count > 4294967295) {
+                throw new DomainException('O valor da venda excede o limite permitido.');
+            }
+            $items[] = [$name, $quantity, $price, $subtotal];
+        }
+
+        $description = $items[0][0].(count($items) > 1 ? ' + '.(count($items) - 1).' item(ns)' : '');
+        $db = Db::pdo();
+        $db->beginTransaction();
+        try {
+            // Existing columns remain populated for older views and exports.
+            $header = $db->prepare(
+                'INSERT INTO pos_sales(operator_id,description,quantity,unit_price_cents,total_cents,payment_method)
+                 VALUES(?,?,?,?,?,?)'
+            );
+            $header->execute([$operatorId, $description, $count, $items[0][2], $total, $payment]);
+            $saleId = (int) $db->lastInsertId();
+
+            $line = $db->prepare(
+                'INSERT INTO pos_sale_items(sale_id,description,quantity,unit_price_cents,total_cents)
+                 VALUES(?,?,?,?,?)'
+            );
+            foreach ($items as [$name, $quantity, $price, $subtotal]) {
+                $line->execute([$saleId, $name, $quantity, $price, $subtotal]);
+            }
+            $db->commit();
+            return $saleId;
+        } catch (\Throwable $exception) {
+            if ($db->inTransaction()) {
+                $db->rollBack();
+            }
+            throw $exception;
+        }
     }
 
     public static function financial(?string $day = null): array
