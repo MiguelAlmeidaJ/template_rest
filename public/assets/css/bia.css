@@ -3310,3 +3310,36 @@ body {
     width: 100%;
   }
 }
+
+/* Checkout: final payment action row */
+.lunch-payment-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e9eee7;
+}
+.lunch-payment-actions .lunch-confirm-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .65rem;
+  margin: 0;
+  border-radius: .6rem;
+}
+.lunch-payment-actions .lunch-step-back {
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  margin: 0;
+  color: #2d6835;
+  font-weight: 700;
+}
+#lunch-feedback:empty { display: none; }
+@media (max-width: 540px) {
+  .lunch-payment-actions { flex-direction: column-reverse; align-items: stretch; }
+  .lunch-payment-actions .lunch-confirm-button { width: 100%; }
+  .lunch-payment-actions .lunch-step-back { justify-content: center; }
+}
