@@ -46,8 +46,91 @@ if (isset($_SESSION['admin_id'])) {
     }
 }
 if (!isset($_SESSION['admin_id'])) {
-    adm_start('Entrar', '', true);?>
-<div class="auth-art"><a class="auth-brand text-white text-decoration-none" href="/"><span class="brand-icon">B.</span> Restaurante da Bia</a><div><span class="text-uppercase" style="letter-spacing:.2em">Gestão simplificada</span><h1 class="mt-3">Tudo para cuidar do seu restaurante.</h1><p>Acompanhe pedidos e recebimentos em um único lugar.</p></div><small>Área restrita · Restaurante da Bia</small></div><div class="auth-panel"><div class="auth-box"><span class="page-kicker">ÁREA ADMINISTRATIVA</span><h2 class="mt-2 mb-2">Bem-vindo de volta.</h2><p class="auth-caption mb-4">Entre com suas credenciais para acessar o painel.</p><?php if ($error):?><div class="alert alert-danger" role="alert"><?=adm_h($error)?></div><?php endif;?><form method="post"><input type="hidden" name="csrf" value="<?=adm_h($token)?>"><div class="mb-3"><label class="form-label" for="email">E-mail</label><input class="form-control" type="email" id="email" name="email" autocomplete="username" required autofocus></div><div class="mb-4"><label class="form-label" for="password">Senha</label><input class="form-control" type="password" id="password" name="password" autocomplete="current-password" required></div><button class="btn btn-bia w-100" type="submit">Acessar painel <i class="bi bi-arrow-right ms-2"></i></button></form><a class="d-block mt-4 small text-decoration-none text-secondary" href="/">← Voltar ao site</a></div></div><?php adm_end(true);
+    $loginLogo = \App\Cms::setting('logo');
+    adm_start('Acesso ao painel', '', true);
+    ?>
+    <main class="bia-login">
+        <section class="bia-login-story" aria-label="Restaurante da Bia">
+            <a class="bia-login-story-brand" href="/" aria-label="Voltar ao site do Restaurante da Bia">
+                <?php if ($loginLogo): ?>
+                    <img src="<?=adm_h($loginLogo)?>" alt="Restaurante da Bia">
+                <?php else: ?>
+                    <span class="bia-login-brand-fallback">Restaurante <strong>da Bia</strong></span>
+                <?php endif; ?>
+            </a>
+            <div class="bia-login-story-content">
+                <span class="bia-login-story-label"><span class="bia-login-status-dot"></span> CENTRAL DE OPERAÇÕES</span>
+                <h1>O cuidado com cada pedido começa aqui.</h1>
+                <p>Pedidos, atendimento e gestão em um ambiente feito para a rotina do restaurante.</p>
+                <div class="bia-login-story-line" aria-hidden="true"></div>
+                <span class="bia-login-story-signature">Restaurante da Bia <span>·</span> Além Paraíba, MG</span>
+            </div>
+            <span class="bia-login-story-bottom">Um espaço reservado para nossa equipe.</span>
+            <div class="bia-login-story-decoration" aria-hidden="true"><span></span><span></span><span></span></div>
+        </section>
+
+        <section class="bia-login-entry" aria-labelledby="bia-login-title">
+            <div class="bia-login-form-wrap">
+                <div class="bia-login-mobile-brand">
+                    <?php if ($loginLogo): ?>
+                        <img src="<?=adm_h($loginLogo)?>" alt="Restaurante da Bia">
+                    <?php else: ?>
+                        <strong>Restaurante da Bia</strong>
+                    <?php endif; ?>
+                </div>
+                <div class="bia-login-form-heading">
+                    <span class="bia-login-kicker">ACESSO RESTRITO</span>
+                    <h2 id="bia-login-title">Boas-vindas de volta.</h2>
+                    <p>Acesse sua conta para começar o atendimento.</p>
+                </div>
+
+                <?php if ($error): ?>
+                    <div class="bia-login-error" role="alert">
+                        <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                        <?=adm_h($error)?>
+                    </div>
+                <?php endif; ?>
+
+                <form method="post" class="bia-login-form" id="bia-admin-login-form">
+                    <input type="hidden" name="csrf" value="<?=adm_h($token)?>">
+                    <div class="bia-login-field">
+                        <label for="email">E-mail</label>
+                        <div class="bia-login-input-wrap">
+                            <i class="bi bi-envelope" aria-hidden="true"></i>
+                            <input type="email" id="email" name="email"
+                                value="<?=adm_h($email ?? '')?>" autocomplete="username"
+                                placeholder="seuemail@restaurante.com.br" maxlength="254"
+                                spellcheck="false" required autofocus>
+                        </div>
+                    </div>
+                    <div class="bia-login-field">
+                        <label for="password">Senha</label>
+                        <div class="bia-login-input-wrap bia-login-password-wrap">
+                            <i class="bi bi-lock" aria-hidden="true"></i>
+                            <input type="password" id="password" name="password"
+                                autocomplete="current-password" placeholder="Digite sua senha" required>
+                            <button type="button" class="bia-login-password-toggle" id="bia-show-password"
+                                aria-controls="password" aria-label="Mostrar senha" aria-pressed="false">
+                                <i class="bi bi-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button class="bia-login-submit" type="submit" id="bia-login-submit">
+                        <span>Entrar no painel</span>
+                        <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                    </button>
+                </form>
+                <div class="bia-login-form-bottom">
+                    <a href="/"><i class="bi bi-arrow-left" aria-hidden="true"></i> Voltar ao site</a>
+                    <span><i class="bi bi-shield-lock" aria-hidden="true"></i> Acesso seguro</span>
+                </div>
+            </div>
+            <small class="bia-login-copyright">© <?=date('Y')?> Restaurante da Bia</small>
+        </section>
+    </main>
+    <script src="/assets/js/admin-login.js?v=1" defer></script>
+    <?php
+    adm_end(true);
     exit;
 }
 $db = \App\Db::pdo();
