@@ -43,6 +43,11 @@ final class CustomerPreferences
             throw new DomainException('Preencha nome, telefone, endereço e bairro.');
         }
         $values['label'] = $values['label'] ?: 'Meu endereço';
+        $phone = preg_replace('/\\D/', '', $values['phone']);
+        if (!in_array(strlen($phone), [10, 11], true)) {
+            throw new DomainException('Informe um WhatsApp com DDD.');
+        }
+        $values['phone'] = $phone;
         $id = filter_var($data['id'] ?? 0, FILTER_VALIDATE_INT) ?: 0;
         $db = Db::pdo();
         $db->beginTransaction();

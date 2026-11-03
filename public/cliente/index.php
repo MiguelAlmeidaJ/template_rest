@@ -6,7 +6,7 @@ use App\Db;
 
 Customer::boot();
 $error = '';
-$notice = '';
+$notice = ($_GET['saved'] ?? '') === 'perfil' ? 'Suas informações foram atualizadas.' : '';
 $id = Customer::id();
 $next = ($_GET['next'] ?? '') === 'pedido' ? 'pedido' : '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -62,7 +62,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $stmt = Db::pdo()->prepare('UPDATE customer_accounts SET full_name=?,phone=?,cpf=? WHERE id=?');
             $stmt->execute([$name,$phone,$cpf ?: null,$id]);
-            $notice = 'Informações atualizadas.';
+            header('Location: /cliente/?tab=perfil&saved=perfil', true, 303);
+            exit;
         } elseif ($action === 'message') {
             // Redirect legacy form submissions to the live conversation endpoint.
             throw new DomainException('Atualize a página para usar o novo chat.');

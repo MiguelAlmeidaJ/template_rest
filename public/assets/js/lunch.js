@@ -432,7 +432,13 @@ document.addEventListener('DOMContentLoaded', () => {
     Object.keys(map).forEach((key) => {
       const inputName =
         key === 'recipient' ? 'customer_name' : key === 'phone' ? 'customer_phone' : key;
-      form.elements[inputName].value = address[key] || '';
+      if (key === 'address') {
+        form.elements.address.value = [address.address, address.number, address.complement]
+          .filter((part) => String(part || '').trim())
+          .join(', ');
+      } else {
+        form.elements[inputName].value = address[key] || '';
+      }
     });
     if (phone) phone.dispatchEvent(new Event('input', { bubbles: true }));
   }
