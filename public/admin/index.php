@@ -26,7 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($u && password_verify($password, $u['password_hash'])) {
         session_regenerate_id(true);
         $_SESSION['admin_id'] = (int)$u['id'];
-        header('Location: /admin/');
+        $staffRole = \App\Staff::role();
+        header('Location: '.($staffRole === 'employee' ? '/admin/pdv.php' : '/admin/'), true, 303);
         exit;
     }
     $error = 'E-mail ou senha incorretos.';
@@ -36,6 +37,9 @@ if (isset($_SESSION['admin_id'])) {
     if (!$staff) {
         $_SESSION = [];
         session_destroy();
+    } elseif ($staff['role'] === 'employee') {
+        header('Location: /admin/pdv.php', true, 302);
+        exit;
     } elseif (!\App\Staff::allowed('index.php', $staff['role'])) {
         http_response_code(403);
         exit('Sem permissão');

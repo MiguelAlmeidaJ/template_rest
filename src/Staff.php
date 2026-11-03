@@ -64,14 +64,15 @@ final class Staff
             return true;
         }
         if (in_array($script, ['profile.php', 'logout.php'], true)) {
-            return in_array($role, ['manager', 'employee'], true);
+            return $role === 'manager' || ($role === 'employee' && $script === 'logout.php');
         }
         $restricted = ['pages.php', 'users.php', 'payment-methods.php', 'payments.php'];
         if ($role === 'manager') {
             return !in_array($script, $restricted, true);
         }
         if ($role === 'employee') {
-            return in_array($script, ['index.php','lunch.php','lunch-orders.php','lunch-order.php','order-feed.php','lunch-chat.php','chats.php','notifications.php','alerts-status.php'], true);
+            // Employees operate exclusively from the POS (plus secure sign-out).
+            return in_array($script, ['pdv.php', 'pos-api.php', 'logout.php'], true);
         }
         return false;
     }
