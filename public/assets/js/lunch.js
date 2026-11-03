@@ -430,6 +430,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     const data = await response.json();
     if (!response.ok || !data.ok) throw Error(data.error || 'Não foi possível concluir.');
+    if (data.redirect) return data;
     authenticated = true;
     addresses = data.addresses || [];
     favorites = data.favorites || [];
@@ -577,10 +578,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const submit = document.querySelector('#lunch-account-submit');
     submit.disabled = true;
     try {
-      await customerAction(accountMode, {
+      const result = await customerAction(accountMode, {
         email: document.querySelector('#lunch-account-email').value,
         password: document.querySelector('#lunch-account-password').value,
       });
+      if (result.redirect === '/admin/') {
+        window.location.assign(result.redirect);
+        return;
+      }
       document.querySelector('#lunch-account-banner').innerHTML =
         '<i class="bi bi-person-check"></i> Você está conectado. <a href="/cliente/">Acompanhar meus pedidos</a>';
       dialog.close();
