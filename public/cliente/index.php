@@ -19,6 +19,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($action === 'login') {
             Customer::login((string)($_POST['email'] ?? ''), (string)($_POST['password'] ?? ''));
             $id = Customer::id();
+            // A conta de funcionário, gestor ou administrador deve abrir o painel interno.
+            if (\App\Staff::signInLinkedCustomer($id)) {
+                header('Location: /admin/', true, 303);
+                exit;
+            }
         } elseif ($action === 'logout') {
             $_SESSION = [];
             session_regenerate_id(true);
