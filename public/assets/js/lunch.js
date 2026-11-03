@@ -266,9 +266,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (mode === 'category' && limit === 0) return;
       const group = document.createElement('details');
       group.className = 'lunch-category';
-      group.open = Object.keys(categories)[0] === category || g.items.some((id) =>
-        list.some((item) => Number(item.id) === id)
-      );
+      group.open =
+        Object.keys(categories)[0] === category ||
+        g.items.some((id) => list.some((item) => Number(item.id) === id));
       const heading = document.createElement('summary');
       heading.className = 'lunch-category-header';
       const title = document.createElement('strong');
@@ -277,7 +277,8 @@ document.addEventListener('DOMContentLoaded', () => {
       count.className = 'lunch-category-count';
       const updateCount = () => {
         const selected = g.items.filter((id) => list.some((item) => Number(item.id) === id)).length;
-        count.textContent = selected + (mode === 'category' ? ' de ' + limit : '') + ' selecionado(s)';
+        count.textContent =
+          selected + (mode === 'category' ? ' de ' + limit : '') + ' selecionado(s)';
         count.classList.toggle('has-selection', selected > 0);
       };
       heading.append(title, count);
@@ -344,10 +345,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (incomplete) {
       activateTab(incomplete.id);
       document.querySelector('#lunch-panel-' + incomplete.id + ' .lunch-box-recipient')?.focus();
-      awaitNotice('Informe o nome da quentinha e escolha pelo menos um prato para continuar.', 'Finalize sua montagem');
+      awaitNotice(
+        'Informe o nome da quentinha e escolha pelo menos um prato para continuar.',
+        'Finalize sua montagem',
+      );
       return;
     }
-    document.querySelector('#lunch-step-entrega')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document
+      .querySelector('#lunch-step-entrega')
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
   document.querySelector('#lunch-plus').addEventListener('click', () => {
     if (qty < 20) {
