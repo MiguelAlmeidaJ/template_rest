@@ -23,7 +23,7 @@ $isEmployee = $staff['role'] === 'employee';
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="/assets/css/pos.css?v=1">
+  <link rel="stylesheet" href="/assets/css/pos.css?v=2">
 </head>
 <body class="pos-body">
 <header class="pos-header">
@@ -102,11 +102,22 @@ $isEmployee = $staff['role'] === 'employee';
 <dialog id="pos-order-dialog" class="pos-dialog pos-order-dialog" aria-labelledby="pos-order-title">
   <div class="pos-dialog-head"><div><span class="pos-eyebrow">PEDIDO ONLINE</span><h2 id="pos-order-title">Detalhes do pedido</h2><p id="pos-order-subtitle"></p></div><button type="button" class="pos-icon-close" data-close-dialog aria-label="Fechar"><i class="bi bi-x-lg"></i></button></div>
   <div class="pos-order-dialog-content" id="pos-order-content"></div>
-  <div class="pos-dialog-actions"><button type="button" class="pos-secondary" data-close-dialog>Fechar</button><button type="button" class="pos-primary" id="pos-order-next">Avançar etapa <i class="bi bi-arrow-right"></i></button></div>
+<section class="pos-chat-panel" id="pos-chat-panel" hidden>
+<header><strong><i class="bi bi-chat-dots"></i> Conversa com o cliente</strong><span id="pos-chat-indicator">Atualização automática</span></header>
+<div class="pos-chat-messages" id="pos-chat-messages" role="log" aria-live="polite"></div>
+<form id="pos-chat-form">
+<label for="pos-chat-body">Sua resposta</label>
+<textarea id="pos-chat-body" rows="3" maxlength="2000" placeholder="Digite uma mensagem..." required></textarea>
+<div class="pos-chat-actions"><span id="pos-chat-feedback" role="status"></span><button type="submit" class="pos-primary" id="pos-chat-submit"><i class="bi bi-send"></i> Enviar</button></div>
+</form>
+</section>
+<p id="pos-chat-unavailable" class="pos-chat-unavailable" hidden>Este pedido não possui conta vinculada para conversar pelo chat.</p>
+  <div class="pos-dialog-actions pos-order-actions"><a id="pos-order-whatsapp" class="pos-whatsapp-link" target="_blank" rel="noopener noreferrer" hidden><i class="bi bi-whatsapp"></i> Conversar no WhatsApp</a><button type="button" class="pos-secondary" data-close-dialog>Fechar</button><button type="button" class="pos-primary" id="pos-order-next">Avançar etapa <i class="bi bi-arrow-right"></i></button></div>
 </dialog>
 
 <div class="pos-toast" id="pos-toast" role="status" aria-live="polite" hidden></div>
 <script type="application/json" id="pos-initial"><?=json_encode(['orders' => $first,'finance' => $finance,'csrf' => $csrf], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR)?></script>
-<script src="/assets/js/pos.js?v=1" defer></script>
+<script src="/assets/js/pos.js?v=2" defer></script>
+<script src="/assets/js/pos-chat.js?v=1" defer></script>
 </body>
 </html>
