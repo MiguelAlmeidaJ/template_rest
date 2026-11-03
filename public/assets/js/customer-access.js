@@ -36,5 +36,31 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  activate(0);
+  // Preserve the selected tab after a failed registration.
+  activate(registerTab.getAttribute('aria-selected') === 'true' ? 1 : 0);
+
+  document.querySelectorAll('[data-customer-password]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const input = document.getElementById(button.dataset.customerPassword);
+      if (!input) return;
+      const visible = input.type === 'password';
+      input.type = visible ? 'text' : 'password';
+      button.setAttribute('aria-label', visible ? 'Ocultar senha' : 'Mostrar senha');
+      button.setAttribute('aria-pressed', String(visible));
+      const icon = button.querySelector('i');
+      if (icon) icon.className = visible ? 'bi bi-eye-slash' : 'bi bi-eye';
+      input.focus({ preventScroll: true });
+    });
+  });
+
+  document.querySelectorAll('.customer-login-form').forEach((form) => {
+    form.addEventListener('submit', () => {
+      if (!form.checkValidity()) return;
+      const button = form.querySelector('button[type="submit"]');
+      if (!button) return;
+      button.disabled = true;
+      const label = button.querySelector('span');
+      if (label) label.textContent = 'Aguarde...';
+    });
+  });
 });
