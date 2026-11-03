@@ -56,6 +56,12 @@ document.addEventListener('DOMContentLoaded', () => {
     return payload;
   }
 
+  function whatsappUrl(phone) {
+    const digits = String(phone || '').replace(/\D/g, '');
+    if ([10,11].includes(digits.length)) return 'https://wa.me/55' + digits;
+    if ([12,13].includes(digits.length) && digits.startsWith('55')) return 'https://wa.me/' + digits;
+    return null;
+  }
   function card(order) {
     const article = node('article', 'pos-order-card');
     const top = node('div', 'pos-order-top');
