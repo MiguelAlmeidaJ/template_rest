@@ -436,7 +436,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
     $('#pos-sale-total').textContent = money(total);
-    $('#pos-sale-items-count').textContent = saleRows.children.length + ' tipo(s) de produto · ' + count + ' unidade(s)';
+    $('#pos-sale-items-count').textContent =
+      saleRows.children.length + ' tipo(s) de produto · ' + count + ' unidade(s)';
   }
 
   $('#pos-add-item').addEventListener('click', () => addSaleItem()?.focus());
@@ -453,16 +454,26 @@ document.addEventListener('DOMContentLoaded', () => {
     event.preventDefault();
     if (submitting) return;
     const items = readItems();
-    const invalid = items.findIndex((item) =>
-      item.description.length < 2 || item.description.length > 180 ||
-      !Number.isInteger(item.quantity) || item.quantity < 1 || item.quantity > 1000 ||
-      !item.unit_price_cents
+    const invalid = items.findIndex(
+      (item) =>
+        item.description.length < 2 ||
+        item.description.length > 180 ||
+        !Number.isInteger(item.quantity) ||
+        item.quantity < 1 ||
+        item.quantity > 1000 ||
+        !item.unit_price_cents,
     );
     if (invalid !== -1) {
-      $('#pos-sale-error').textContent = 'Confira a descrição, a quantidade e o preço do item ' + (invalid + 1) + '.';
+      $('#pos-sale-error').textContent =
+        'Confira a descrição, a quantidade e o preço do item ' + (invalid + 1) + '.';
       const row = saleRows.children[invalid];
       if (items[invalid].description.length < 2) row.posFields.nameInput.focus();
-      else if (!Number.isInteger(items[invalid].quantity) || items[invalid].quantity < 1 || items[invalid].quantity > 1000) row.posFields.quantity.focus();
+      else if (
+        !Number.isInteger(items[invalid].quantity) ||
+        items[invalid].quantity < 1 ||
+        items[invalid].quantity > 1000
+      )
+        row.posFields.quantity.focus();
       else row.posFields.price.focus();
       return;
     }
