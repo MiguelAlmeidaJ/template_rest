@@ -668,5 +668,14 @@ a {
   }
 }
 
-.pos-unread-count{color:#bc1c23;font-size:.75rem;font-weight:800}
-.pos-card-whatsapp{color:#2d6835;font-size:.75rem;font-weight:700;align-self:center}
+.pos-unread-count {
+  color: #bc1c23;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+.pos-card-whatsapp {
+  color: #2d6835;
+  font-size: 0.75rem;
+  font-weight: 700;
+  align-self: center;
+}
