@@ -1,7 +1,7 @@
 -- PDV: vendas presenciais registradas separadamente dos pedidos de entrega.
 CREATE TABLE IF NOT EXISTS pos_sales (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  operator_id BIGINT UNSIGNED NOT NULL,
+  operator_id INT UNSIGNED NOT NULL,
   description VARCHAR(180) NOT NULL,
   quantity INT UNSIGNED NOT NULL,
   unit_price_cents INT UNSIGNED NOT NULL,
