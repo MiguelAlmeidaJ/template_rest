@@ -109,7 +109,7 @@ if ($id): ?>
   <title>Minha conta | Restaurante da Bia</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@400;600;700;800&display=swap">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="/assets/css/bia.css?v=17">
+  <link rel="stylesheet" href="/assets/css/bia.css?v=18">
   <?php $customerFavicon = \App\Cms::setting('favicon');
     if ($customerFavicon): ?>
   <link rel="icon" href="<?=bia_esc($customerFavicon)?>">
@@ -238,39 +238,84 @@ if ($id): ?>
     <?php if (!$extraAddresses): ?><div class="customer-dashboard-empty"><i class="bi bi-geo-alt"></i><h3>Nenhum endereço cadastrado.</h3><p>Cadastre sua casa, trabalho ou outro local de entrega.</p></div><?php endif; ?>
     <div class="customer-preference-list"><?php foreach ($extraAddresses as $entry): ?><div class="customer-preference-row"><div><strong><?=bia_esc($entry['label'])?> <?=$entry['is_default'] ? '· Principal' : ''?></strong><small><?=bia_esc($entry['address'])?>, <?=bia_esc($entry['number'] ?: 's/n')?><?= $entry['complement'] ? ', '.bia_esc($entry['complement']) : ''?> · <?=bia_esc($entry['neighborhood'])?></small><small>Referência: <?=bia_esc($entry['reference_point'] ?: 'Não informada')?></small></div><div class="customer-preference-actions"><button type="button" data-address-edit="<?= (int)$entry['id']?>">Editar</button><button type="button" data-address-delete="<?= (int)$entry['id']?>">Excluir</button></div></div><?php endforeach; ?></div>
   <?php else: ?>
-    <div class="customer-dashboard-heading"><div><span class="eyebrow">DADOS PESSOAIS</span><h2>Informações do usuário</h2><p>Mantenha seus dados atualizados para agilizar a entrega.</p></div></div>
-    <form method="post" class="customer-profile-form">
-      <input type="hidden" name="csrf" value="<?=bia_esc(Customer::csrf())?>"><input type="hidden" name="action" value="profile">
-      <label>Nome completo<input name="full_name" value="<?=bia_esc($profile['full_name'] ?? '')?>" maxlength="150" autocomplete="name" required></label>
-      <label>E-mail<input type="email" value="<?=bia_esc($profile['email'] ?? '')?>" disabled><small>Para alterar o e-mail, entre em contato com o restaurante.</small></label>
-      <label>Telefone / WhatsApp<input name="phone" type="tel" inputmode="tel" value="<?=bia_esc($profile['phone'] ?? '')?>" maxlength="20" autocomplete="tel"></label>
-      <label>CPF (opcional)<input name="cpf" inputmode="numeric" value="<?=bia_esc($profile['cpf'] ?? '')?>" maxlength="14" placeholder="000.000.000-00"><small>Informe apenas se desejar manter esse dado cadastrado.</small></label>
-      <button type="submit" class="btn">Salvar informações</button>
+    <div class="customer-dashboard-heading">
+      <div><span class="eyebrow">SEUS DADOS</span><h2>Meu perfil</h2><p>Deixe suas informações em dia para pedir com mais praticidade.</p></div>
+    </div>
+    <form method="post" class="customer-profile-form customer-profile-refined" id="customer-profile-form">
+      <input type="hidden" name="csrf" value="<?=bia_esc(Customer::csrf())?>">
+      <input type="hidden" name="action" value="profile">
+      <div class="customer-profile-section-label"><i class="bi bi-person-vcard" aria-hidden="true"></i><span>Dados de contato</span></div>
+      <label class="wide" for="profile-name">Nome completo <span class="required-mark">*</span>
+        <input id="profile-name" name="full_name" value="<?=bia_esc($profile['full_name'] ?? '')?>" maxlength="150" autocomplete="name" placeholder="Como podemos chamar você?" required>
+      </label>
+      <label for="profile-email">E-mail cadastrado
+        <input id="profile-email" type="email" value="<?=bia_esc($profile['email'] ?? '')?>" readonly>
+        <small>Seu e-mail de acesso. Para alterá-lo, fale com o restaurante.</small>
+      </label>
+      <label for="profile-phone">WhatsApp
+        <input id="profile-phone" name="phone" type="tel" inputmode="numeric" value="<?=bia_esc($profile['phone'] ?? '')?>" maxlength="15" autocomplete="tel" placeholder="(32) 99999-9999" data-br-phone>
+        <small>Usado para contato sobre a entrega.</small>
+      </label>
+      <div class="customer-profile-section-label"><i class="bi bi-shield-check" aria-hidden="true"></i><span>Informação opcional</span></div>
+      <label class="wide" for="profile-cpf">CPF
+        <input id="profile-cpf" name="cpf" inputmode="numeric" value="<?=bia_esc($profile['cpf'] ?? '')?>" maxlength="14" placeholder="000.000.000-00" data-br-cpf>
+        <small>Não é necessário informar o CPF para fazer pedidos.</small>
+      </label>
+      <div class="customer-profile-footer"><span><i class="bi bi-lock" aria-hidden="true"></i> Seus dados ficam disponíveis apenas na sua conta e para o atendimento.</span><button type="submit" class="btn"><i class="bi bi-check2" aria-hidden="true"></i> Salvar alterações</button></div>
     </form>
   <?php endif; ?>
   </div>
 </div>
 <?php endif;?></div><?php if ($id): ?>
-<dialog id="customer-address-dialog" class="customer-address-dialog" aria-labelledby="customer-address-title">
-<h2 id="customer-address-title">Cadastrar endereço</h2>
-<form id="customer-address-form">
-  <input type="hidden" name="id" value="">
-  <label>Identificação<input name="label" placeholder="Casa, Trabalho..." maxlength="70" required></label>
-  <label>Quem vai receber?<input name="recipient" maxlength="150" required></label>
-  <label>WhatsApp<input name="phone" type="tel" maxlength="24" required></label>
-  <label>Rua / endereço<input name="address" maxlength="350" required></label><label>Número<input name="number" maxlength="20" placeholder="Ex.: 425"></label><label>Complemento<input name="complement" maxlength="120" placeholder="Apto, bloco, casa..."></label>
-  <label>Bairro<input name="neighborhood" maxlength="120" required></label>
-  <label>Ponto de referência<input name="reference_point" maxlength="350"></label>
-  <label class="customer-address-checkbox"><input name="is_default" type="checkbox"> Usar como endereço principal</label>
-  <p id="customer-address-feedback" role="status" aria-live="polite"></p>
-  <div class="customer-address-dialog-buttons">
-    <button type="button" id="customer-address-cancel" class="btn btn-outline-secondary">Cancelar</button>
-    <button class="btn" type="submit">Salvar endereço</button>
+<dialog id="customer-address-dialog" class="customer-address-dialog customer-address-dialog-refined" aria-labelledby="customer-address-title">
+  <div class="customer-address-dialog-header">
+    <div><span class="eyebrow">LOCAL DE ENTREGA</span><h2 id="customer-address-title">Novo endereço</h2><p>Preencha os dados para receber seus próximos pedidos.</p></div>
+    <button type="button" id="customer-address-close" aria-label="Fechar cadastro" class="customer-address-close"><i class="bi bi-x-lg"></i></button>
   </div>
-</form>
+  <form id="customer-address-form">
+    <input type="hidden" name="id" value="">
+    <div class="customer-address-dialog-body">
+      <div class="customer-address-form-grid">
+        <label class="wide" for="address-label">Como deseja identificar? <span class="required-mark">*</span>
+          <input id="address-label" name="label" placeholder="Ex.: Casa, Trabalho, Casa da mãe" maxlength="70" required autocomplete="off">
+        </label>
+        <div class="customer-address-group-title"><i class="bi bi-person"></i> Quem vai receber?</div>
+        <label for="address-recipient">Nome de quem recebe <span class="required-mark">*</span>
+          <input id="address-recipient" name="recipient" maxlength="150" autocomplete="name" required placeholder="Nome completo">
+        </label>
+        <label for="address-phone">WhatsApp <span class="required-mark">*</span>
+          <input id="address-phone" name="phone" type="tel" inputmode="numeric" maxlength="15" pattern="\([0-9]{2}\) [0-9]{4,5}-[0-9]{4}" title="Informe telefone com DDD" data-br-phone placeholder="(32) 99999-9999" required autocomplete="tel">
+        </label>
+        <div class="customer-address-group-title"><i class="bi bi-geo-alt"></i> Onde entregar?</div>
+        <label class="wide" for="address-street">Rua / avenida <span class="required-mark">*</span>
+          <input id="address-street" name="address" maxlength="350" minlength="3" autocomplete="address-line1" required placeholder="Ex.: Rua Dr. Sobral Pinto">
+        </label>
+        <label for="address-number">Número
+          <input id="address-number" name="number" maxlength="20" placeholder="Ex.: 425" autocomplete="off">
+        </label>
+        <label for="address-complement">Complemento
+          <input id="address-complement" name="complement" maxlength="120" placeholder="Casa, apto, bloco..." autocomplete="address-line2">
+        </label>
+        <label class="wide" for="address-neighborhood">Bairro <span class="required-mark">*</span>
+          <input id="address-neighborhood" name="neighborhood" maxlength="120" autocomplete="address-level3" required placeholder="Ex.: Vila Laroca">
+        </label>
+        <label class="wide" for="address-reference">Ponto de referência
+          <input id="address-reference" name="reference_point" maxlength="350" placeholder="Ex.: Portão verde, próximo à praça">
+        </label>
+        <label class="customer-address-checkbox wide"><input name="is_default" type="checkbox"> <span>Definir como meu endereço principal<small>Será selecionado automaticamente no próximo pedido.</small></span></label>
+      </div>
+    </div>
+    <div class="customer-address-dialog-footer">
+      <p id="customer-address-feedback" role="status" aria-live="polite"></p>
+      <div class="customer-address-dialog-buttons">
+        <button type="button" id="customer-address-cancel" class="btn btn-outline-secondary">Cancelar</button>
+        <button class="btn" type="submit"><i class="bi bi-check2"></i> Salvar endereço</button>
+      </div>
+    </div>
+  </form>
 </dialog>
 <script type="application/json" id="customer-preferences-data"><?=json_encode(['addresses' => $extraAddresses,'csrf' => Customer::csrf()], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE)?></script>
-<script src="/assets/js/customer-preferences.js?v=2" defer></script><script src="/assets/js/customer-chat-live.js?v=2" defer></script>
+<script src="/assets/js/customer-preferences.js?v=3" defer></script><script src="/assets/js/customer-chat-live.js?v=2" defer></script>
 <?php endif; ?>
 <?php if ($id): ?>
 </main>

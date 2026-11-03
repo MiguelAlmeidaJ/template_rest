@@ -6,6 +6,43 @@ document.addEventListener('DOMContentLoaded', () => {
   const dialog = document.querySelector('#customer-address-dialog');
   const form = document.querySelector('#customer-address-form');
   const status = document.querySelector('#customer-address-feedback');
+
+  function maskPhone(value) {
+    const digits = String(value || '').replace(/\D/g, '').slice(0, 11);
+    if (digits.length <= 2) return digits ? '(' + digits : '';
+    const local = digits.slice(2);
+    if (local.length <= 4) return '(' + digits.slice(0, 2) + ') ' + local;
+    const split = local.length > 8 ? 5 : 4;
+    return '(' + digits.slice(0, 2) + ') ' + local.slice(0, split) + '-' + local.slice(split);
+  }
+
+  function maskCpf(value) {
+    const digits = String(value || '').replace(/\D/g, '').slice(0, 11);
+    return digits.replace(/^(\d{3})(\d)/, '$1.$2').replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
+      .replace(/\.(\d{3})(\d)/, '.$1-$2');
+  }
+
+  document.querySelectorAll('[data-br-phone]').forEach((input) => {
+    const update = () => { input.value = maskPhone(input.value); };
+    input.addEventListener('input', update);
+    update();
+  });
+  document.querySelectorAll('[data-br-cpf]').forEach((input) => {
+    const update = () => { input.value = maskCpf(input.value); };
+    input.addEventListener('input', update);
+    update();
+  });
+  const profileForm = document.querySelector('#customer-profile-form');
+  profileForm?.addEventListener('submit', (event) => {
+    const input = profileForm.elements.phone;
+    const digits = input.value.replace(/\D/g, '');
+    if (digits && digits.length !== 10 && digits.length !== 11) {
+      event.preventDefault();
+      input.setCustomValidity('Informe um telefone com DDD.');
+      input.reportValidity();
+    }
+  });
+  profileForm?.elements.phone.addEventListener('input', () => profileForm.elements.phone.setCustomValidity(''));
   async function action(type, payload = {}) {
     const response = await fetch('/api/customer.php', {
       method: 'POST',
@@ -23,6 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
     status.textContent = '';
     document.querySelector('#customer-address-title').textContent = 'Cadastrar endereço';
     dialog.showModal();
+    dialog.querySelector('.customer-address-dialog-body').scrollTop = 0;
   });
   document.querySelectorAll('[data-address-edit]').forEach((button) =>
     button.addEventListener('click', () => {
@@ -42,18 +80,28 @@ document.addEventListener('DOMContentLoaded', () => {
       ]) {
         form.elements[key].value = selected[key] || '';
       }
+      form.elements.phone.value = maskPhone(form.elements.phone.value);
       form.elements.is_default.checked = Number(selected.is_default) === 1;
       status.textContent = '';
       document.querySelector('#customer-address-title').textContent = 'Editar endereço';
       dialog.showModal();
     }),
   );
+  document.querySelector('#customer-address-close')?.addEventListener('click', () => dialog.close());
   document
     .querySelector('#customer-address-cancel')
     ?.addEventListener('click', () => dialog.close());
+  form?.elements.phone.addEventListener('input', () => form.elements.phone.setCustomValidity(''));
   form?.addEventListener('submit', async (event) => {
     event.preventDefault();
     const submit = form.querySelector('button[type=submit]');
+    const digits = form.elements.phone.value.replace(/\D/g, '');
+    if (digits.length !== 10 && digits.length !== 11) {
+      form.elements.phone.setCustomValidity('Informe telefone com DDD.');
+      form.elements.phone.reportValidity();
+      return;
+    }
+    form.elements.phone.setCustomValidity('');
     submit.disabled = true;
     const payload = Object.fromEntries(new FormData(form));
     payload.is_default = form.elements.is_default.checked ? '1' : '0';
