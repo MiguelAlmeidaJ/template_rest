@@ -23,7 +23,7 @@ $isEmployee = $staff['role'] === 'employee';
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="/assets/css/pos.css?v=2">
+  <link rel="stylesheet" href="/assets/css/pos.css?v=3">
 </head>
 <body class="pos-body">
 <header class="pos-header">
@@ -87,13 +87,13 @@ $isEmployee = $staff['role'] === 'employee';
   <form id="pos-sale-form">
     <input type="hidden" name="csrf" value="<?=adm_h($csrf)?>">
     <input type="hidden" name="action" value="sale">
-    <label for="pos-item">Produto ou descrição<input id="pos-item" name="description" maxlength="180" placeholder="Ex.: Almoço no salão" required></label>
-    <div class="pos-sale-fields">
-      <label for="pos-quantity">Quantidade<input id="pos-quantity" type="number" name="quantity" min="1" max="1000" value="1" required></label>
-      <label for="pos-price">Preço unitário (R$)<input id="pos-price" type="text" inputmode="decimal" placeholder="20,00" autocomplete="off" required></label>
+    <div class="pos-items-heading">
+      <div><strong>Itens da venda</strong><small>Inclua refeições, bebidas e outros produtos com preços diferentes.</small></div>
+      <button type="button" id="pos-add-item" class="pos-add-item"><i class="bi bi-plus-lg"></i> Adicionar item</button>
     </div>
+    <div id="pos-sale-items" class="pos-sale-items"></div>
     <label for="pos-payment">Pagamento recebido<select id="pos-payment" name="payment_method" required><option value="">Selecione a forma de pagamento</option><option value="cash">Dinheiro</option><option value="pix">Pix</option><option value="card">Cartão</option></select></label>
-    <div class="pos-sale-total"><span>Total desta venda</span><strong id="pos-sale-total">R$ 0,00</strong></div>
+    <div class="pos-sale-total"><span><strong>Total da venda</strong><small id="pos-sale-items-count">0 itens</small></span><strong id="pos-sale-total">R$ 0,00</strong></div>
     <p id="pos-sale-error" class="pos-form-error" role="alert"></p>
     <div class="pos-dialog-actions"><button type="button" class="pos-secondary" data-close-dialog>Cancelar</button><button class="pos-primary" id="pos-sale-submit" type="submit">Registrar venda <i class="bi bi-check2"></i></button></div>
   </form>
@@ -117,7 +117,7 @@ $isEmployee = $staff['role'] === 'employee';
 
 <div class="pos-toast" id="pos-toast" role="status" aria-live="polite" hidden></div>
 <script type="application/json" id="pos-initial"><?=json_encode(['orders' => $first,'finance' => $finance,'csrf' => $csrf], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR)?></script>
-<script src="/assets/js/pos.js?v=2" defer></script>
+<script src="/assets/js/pos.js?v=3" defer></script>
 <script src="/assets/js/pos-chat.js?v=1" defer></script>
 </body>
 </html>
