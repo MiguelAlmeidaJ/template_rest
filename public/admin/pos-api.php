@@ -18,6 +18,17 @@ function reply(int $code, array $payload): never
 }
 
 try {
+    if ($_SERVER['REQUEST_METHOD'] === 'GET' && ($_GET['type'] ?? '') === 'chat') {
+        $orderId = filter_var($_GET['order_id'] ?? null, FILTER_VALIDATE_INT);
+        if (!$orderId) throw new DomainException('Pedido inválido.');
+        $customer = Db::pdo()->prepare('SELECT customer_id FROM lunch_orders WHERE id=?');
+        $customer->execute([$orderId]);
+        if (!$customer->fetchColumn()) throw new DomainException('Este pedido não possui chat cadastrado.');
+        $messages = Db::pdo()->prepare('SELECT id,sender,body,created_at FROM lunch_messages WHERE order_id=? ORDER BY id ASC LIMIT 200');
+        $messages->execute([$orderId]);
+        \App\AdminNotification::markReferenceRead('chat', $orderId);
+        reply(200, ['ok' => true, 'messages' => $messages->fetchAll()]);
+    }
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         reply(200, ['ok' => true, 'orders' => Pos::board(), 'finance' => Pos::financial()]);
     }
