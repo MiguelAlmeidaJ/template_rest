@@ -4,7 +4,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const messages = document.querySelector('#pos-chat-messages');
   const form = document.querySelector('#pos-chat-form');
   const feedback = document.querySelector('#pos-chat-feedback');
-  let orderId = 0, busy = false, fingerprint = '';
+  let orderId = 0,
+    busy = false,
+    fingerprint = '';
 
   async function request(url, opts = {}) {
     const response = await fetch(url, { credentials: 'same-origin', cache: 'no-store', ...opts });
@@ -13,11 +15,11 @@ document.addEventListener('DOMContentLoaded', () => {
     return data;
   }
   function draw(rows) {
-    const ids = rows.map(row => row.id).join(',');
+    const ids = rows.map((row) => row.id).join(',');
     if (ids === fingerprint) return;
     fingerprint = ids;
     const nearBottom = messages.scrollHeight - messages.scrollTop - messages.clientHeight < 90;
-    const elements = rows.map(row => {
+    const elements = rows.map((row) => {
       const el = document.createElement('article');
       el.className = 'pos-chat-bubble ' + (row.sender === 'restaurant' ? 'outgoing' : 'incoming');
       const title = document.createElement('strong');
@@ -46,7 +48,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (orderId === id && dialog.open) draw(data.messages || []);
     } catch (error) {
       if (orderId === id) feedback.textContent = error.message;
-    } finally { busy = false; }
+    } finally {
+      busy = false;
+    }
   }
   async function opened() {
     const match = document.querySelector('#pos-order-title').textContent.match(/\d+/);
@@ -62,10 +66,14 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const data = await request('/admin/pos-api.php');
       if (!dialog.open || orderId !== id) return;
-      const order = data.orders.find(item => Number(item.id) === id);
+      const order = data.orders.find((item) => Number(item.id) === id);
       if (!order) return;
       const phone = String(order.customer_phone || '').replace(/\D/g, '');
-      const valid = [10,11].includes(phone.length) ? '55' + phone : ([12,13].includes(phone.length) && phone.startsWith('55') ? phone : null);
+      const valid = [10, 11].includes(phone.length)
+        ? '55' + phone
+        : [12, 13].includes(phone.length) && phone.startsWith('55')
+          ? phone
+          : null;
       const whatsapp = document.querySelector('#pos-order-whatsapp');
       whatsapp.hidden = !valid;
       if (valid) whatsapp.href = 'https://wa.me/' + valid;
@@ -81,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (dialog.open) opened();
     else orderId = 0;
   }).observe(dialog, { attributes: true, attributeFilter: ['open'] });
-  form.addEventListener('submit', async event => {
+  form.addEventListener('submit', async (event) => {
     event.preventDefault();
     if (!orderId || busy) return;
     const input = document.querySelector('#pos-chat-body');
@@ -100,9 +108,14 @@ document.addEventListener('DOMContentLoaded', () => {
       if (orderId === id) input.value = '';
       feedback.textContent = 'Mensagem enviada.';
       refresh();
-    } catch (error) { feedback.textContent = error.message; }
-    finally { button.disabled = false; }
+    } catch (error) {
+      feedback.textContent = error.message;
+    } finally {
+      button.disabled = false;
+    }
   });
   setInterval(refresh, 5000);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) refresh();
+  });
 });
