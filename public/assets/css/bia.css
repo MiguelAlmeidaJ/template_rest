@@ -3218,4 +3218,11 @@ body {
 }
 
 /* Keep customer profile messages readable after redirecting successful saves. */
-.customer-private-body .customer-success{border:1px solid #cfe4d0;background:#eef8ed;border-radius:.65rem;color:#2d6835;padding:.85rem 1rem;font-size:.85rem}
+.customer-private-body .customer-success {
+  border: 1px solid #cfe4d0;
+  background: #eef8ed;
+  border-radius: 0.65rem;
+  color: #2d6835;
+  padding: 0.85rem 1rem;
+  font-size: 0.85rem;
+}
