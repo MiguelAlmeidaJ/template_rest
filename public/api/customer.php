@@ -34,6 +34,9 @@ try {
         Customer::register((string)($data['email'] ?? ''), (string)($data['password'] ?? ''));
     } elseif ($action === 'login') {
         Customer::login((string)($data['email'] ?? ''), (string)($data['password'] ?? ''));
+        if (\App\Staff::signInLinkedCustomer(Customer::id())) {
+            respond(200, ['ok' => true, 'redirect' => '/admin/']);
+        }
     } elseif ($action === 'save_address') {
         if (!Customer::id()) {
             respond(401, ['ok' => false,'error' => 'Entre na sua conta.']);
