@@ -173,6 +173,13 @@ document.addEventListener('DOMContentLoaded', () => {
               '',
               '#' + sale.id + ' · ' + sale.description + ' (' + sale.quantity + 'x)',
             );
+            if (Array.isArray(sale.items) && sale.items.length) {
+              const details = node('small', 'pos-sale-history-items');
+              details.textContent = sale.items.map((item) =>
+                item.quantity + '× ' + item.description + ' (' + money(item.total_cents) + ')'
+              ).join(' · ');
+              description.append(details);
+            }
             row.append(
               description,
               node('span', '', paymentLabels[sale.payment_method] || sale.payment_method),
