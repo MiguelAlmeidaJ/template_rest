@@ -340,20 +340,53 @@ document.addEventListener('DOMContentLoaded', () => {
     activateTab(activeGroupId);
     summary();
   }
-  document.querySelector('#lunch-go-delivery')?.addEventListener('click', () => {
-    const incomplete = groups.find((group) => !group.name.trim() || !group.items.length);
-    if (incomplete) {
-      activateTab(incomplete.id);
+  // O cliente só vê a etapa atual. Voltar preserva as opções escolhidas.
+  let checkoutStep = 1;
+  const stepPanels = [
+    document.querySelector('#lunch-step-montagem'),
+    document.querySelector('#lunch-step-entrega'),
+    document.querySelector('#lunch-step-pagamento'),
+  ];
+  const stepMarkers = [...document.querySelectorAll('[data-checkout-progress]')];
+  function openStep(step) {
+    checkoutStep = step;
+    stepPanels.forEach((panel, index) => { panel.hidden = index + 1 !== step; });
+    stepMarkers.forEach((marker, index) => {
+      const active = index + 1 === step;
+      marker.classList.toggle('active', active);
+      marker.classList.toggle('completed', index + 1 < step);
+      if (active) marker.setAttribute('aria-current', 'step');
+      else marker.removeAttribute('aria-current');
+    });
+    stepPanels[step - 1].scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function validateMontagem() {
+    const incomplete = groups.find((g) => g.name.trim().length < 2 || !g.items.length);
+    if (!incomplete) return true;
+    activeGroupId = incomplete.id;
+    activateTab(incomplete.id);
+    if (incomplete.name.trim().length < 2) {
       document.querySelector('#lunch-panel-' + incomplete.id + ' .lunch-box-recipient')?.focus();
-      awaitNotice(
-        'Informe o nome da quentinha e escolha pelo menos um prato para continuar.',
-        'Finalize sua montagem',
-      );
-      return;
     }
-    document
-      .querySelector('#lunch-step-entrega')
-      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    awaitNotice('Informe um nome e escolha ao menos um prato em cada montagem.', 'Revise sua quentinha');
+    return false;
+  }
+  function validateDelivery() {
+    const fields = [...stepPanels[1].querySelectorAll('input[required]')];
+    const invalid = fields.find((field) => !field.checkValidity());
+    if (!invalid) return true;
+    invalid.focus();
+    invalid.reportValidity();
+    return false;
+  }
+  document.querySelector('#lunch-go-delivery')?.addEventListener('click', () => {
+    if (validateMontagem()) openStep(2);
+  });
+  document.querySelector('#lunch-go-payment')?.addEventListener('click', () => {
+    if (validateDelivery()) openStep(3);
+  });
+  document.querySelectorAll('[data-back-step]').forEach((button) => {
+    button.addEventListener('click', () => openStep(Number(button.dataset.backStep)));
   });
   document.querySelector('#lunch-plus').addEventListener('click', () => {
     if (qty < 20) {
@@ -605,6 +638,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (checkoutStep !== 3) return;
+    if (!validateMontagem()) { openStep(1); return; }
+    if (!validateDelivery()) { openStep(2); validateDelivery(); return; }
+    if (!form.querySelector('input[name="payment_method"]:checked')) {
+      awaitNotice('Escolha Pix ou cartão na entrega.', 'Selecione o pagamento');
+      return;
+    }
     const submit = document.querySelector('#lunch-submit');
     const payload = [];
     for (const g of groups) {
@@ -652,6 +692,7 @@ document.addEventListener('DOMContentLoaded', () => {
       groups = [{ id: nextId++, count: 1, name: '', items: [] }];
       activeGroupId = groups[0].id;
       render();
+      openStep(1);
     } catch (err) {
       feedback.textContent = err.message;
     } finally {
