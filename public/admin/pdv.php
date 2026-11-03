@@ -54,7 +54,7 @@ $isEmployee = $staff['role'] === 'employee';
     <div class="pos-metric"><span>Novos pedidos</span><strong id="pos-count-new">0</strong><small>Aguardando preparação</small></div>
     <div class="pos-metric"><span>Em preparação</span><strong id="pos-count-preparing">0</strong><small>Na cozinha</small></div>
     <div class="pos-metric"><span>Saindo para entrega</span><strong id="pos-count-delivering">0</strong><small>A caminho do cliente</small></div>
-    <div class="pos-metric pos-metric-finance"><span>Recebido hoje</span><strong id="pos-finance-total">R$ <?=number_format($finance['grand_total_cents']/100,2,',','.')?></strong><small>Presenciais + pedidos pagos</small></div>
+    <div class="pos-metric pos-metric-finance"><span>Recebido hoje</span><strong id="pos-finance-total">R$ <?=number_format($finance['grand_total_cents'] / 100, 2, ',', '.')?></strong><small>Presenciais + pedidos pagos</small></div>
   </div>
   <div class="pos-section-heading">
     <div><h2>Fluxo de pedidos</h2><p>Os cartões mudam de coluna quando a etapa é atualizada.</p></div>
@@ -71,9 +71,9 @@ $isEmployee = $staff['role'] === 'employee';
       <span class="pos-today"><?=adm_h(date('d/m/Y'))?></span>
     </div>
     <div class="pos-finance-grid">
-      <div><span>Vendas presenciais</span><strong id="pos-sales-local">R$ <?=number_format((int)$finance['local']['total_cents']/100,2,',','.')?></strong><small id="pos-sales-count">0 vendas</small></div>
-      <div><span>Pedidos online pagos</span><strong id="pos-sales-online">R$ <?=number_format((int)$finance['online']['received_cents']/100,2,',','.')?></strong></div>
-      <div><span>Total recebido</span><strong id="pos-sales-total">R$ <?=number_format($finance['grand_total_cents']/100,2,',','.')?></strong></div>
+      <div><span>Vendas presenciais</span><strong id="pos-sales-local">R$ <?=number_format((int)$finance['local']['total_cents'] / 100, 2, ',', '.')?></strong><small id="pos-sales-count">0 vendas</small></div>
+      <div><span>Pedidos online pagos</span><strong id="pos-sales-online">R$ <?=number_format((int)$finance['online']['received_cents'] / 100, 2, ',', '.')?></strong></div>
+      <div><span>Total recebido</span><strong id="pos-sales-total">R$ <?=number_format($finance['grand_total_cents'] / 100, 2, ',', '.')?></strong></div>
     </div>
     <details class="pos-sales-history">
       <summary>Ver vendas presenciais registradas hoje <i class="bi bi-chevron-down"></i></summary>
@@ -106,7 +106,7 @@ $isEmployee = $staff['role'] === 'employee';
 </dialog>
 
 <div class="pos-toast" id="pos-toast" role="status" aria-live="polite" hidden></div>
-<script type="application/json" id="pos-initial"><?=json_encode(['orders'=>$first,'finance'=>$finance,'csrf'=>$csrf],JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_UNESCAPED_UNICODE|JSON_THROW_ON_ERROR)?></script>
+<script type="application/json" id="pos-initial"><?=json_encode(['orders' => $first,'finance' => $finance,'csrf' => $csrf], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR)?></script>
 <script src="/assets/js/pos.js?v=1" defer></script>
 </body>
 </html>

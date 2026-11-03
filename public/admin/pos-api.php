@@ -1,10 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 require __DIR__ . '/includes/cms-boot.php';
 
-use App\Pos;
 use App\Db;
+use App\Pos;
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, private');
@@ -33,19 +34,25 @@ try {
     }
     if ($action === 'next') {
         $id = filter_var($_POST['id'] ?? null, FILTER_VALIDATE_INT);
-        if (!$id) throw new DomainException('Pedido inválido.');
+        if (!$id) {
+            throw new DomainException('Pedido inválido.');
+        }
         Pos::move($id, (string) ($_POST['next'] ?? ''));
         reply(200, ['ok' => true, 'message' => 'Etapa atualizada.']);
     }
     if ($action === 'paid') {
         $id = filter_var($_POST['id'] ?? null, FILTER_VALIDATE_INT);
-        if (!$id) throw new DomainException('Pedido inválido.');
+        if (!$id) {
+            throw new DomainException('Pedido inválido.');
+        }
         $q = Db::pdo()->prepare(
             "UPDATE lunch_orders SET payment_status='paid'
              WHERE id=? AND status<>'cancelled' AND payment_status='pending'"
         );
         $q->execute([$id]);
-        if (!$q->rowCount()) throw new DomainException('Pagamento já confirmado ou pedido indisponível.');
+        if (!$q->rowCount()) {
+            throw new DomainException('Pagamento já confirmado ou pedido indisponível.');
+        }
         reply(200, ['ok' => true, 'message' => 'Pagamento confirmado.']);
     }
     throw new DomainException('Operação não permitida.');
