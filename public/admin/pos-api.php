@@ -20,10 +20,14 @@ function reply(int $code, array $payload): never
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'GET' && ($_GET['type'] ?? '') === 'chat') {
         $orderId = filter_var($_GET['order_id'] ?? null, FILTER_VALIDATE_INT);
-        if (!$orderId) throw new DomainException('Pedido inválido.');
+        if (!$orderId) {
+            throw new DomainException('Pedido inválido.');
+        }
         $customer = Db::pdo()->prepare('SELECT customer_id FROM lunch_orders WHERE id=?');
         $customer->execute([$orderId]);
-        if (!$customer->fetchColumn()) throw new DomainException('Este pedido não possui chat cadastrado.');
+        if (!$customer->fetchColumn()) {
+            throw new DomainException('Este pedido não possui chat cadastrado.');
+        }
         $messages = Db::pdo()->prepare('SELECT id,sender,body,created_at FROM lunch_messages WHERE order_id=? ORDER BY id ASC LIMIT 200');
         $messages->execute([$orderId]);
         \App\AdminNotification::markReferenceRead('chat', $orderId);
@@ -48,7 +52,9 @@ try {
         $query = Db::pdo()->prepare('SELECT customer_id FROM lunch_orders WHERE id=?');
         $query->execute([$orderId]);
         $customerId = $query->fetchColumn();
-        if (!$customerId) throw new DomainException('Pedido sem conta de cliente vinculada.');
+        if (!$customerId) {
+            throw new DomainException('Pedido sem conta de cliente vinculada.');
+        }
         $insert = Db::pdo()->prepare(
             "INSERT INTO lunch_messages(order_id,customer_id,sender,body) VALUES(?,?,'restaurant',?)"
         );
