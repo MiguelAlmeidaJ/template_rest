@@ -49,47 +49,28 @@ if (!isset($_SESSION['admin_id'])) {
     $loginLogo = \App\Cms::setting('logo');
     adm_start('Acesso ao painel', '', true);
     ?>
-    <main class="bia-login">
-        <section class="bia-login-story" aria-label="Restaurante da Bia">
-            <a class="bia-login-story-brand" href="/" aria-label="Voltar ao site do Restaurante da Bia">
+    <main class="bia-login" aria-labelledby="bia-login-title">
+        <section class="bia-login-card">
+            <a href="/" class="bia-login-brand" aria-label="Ir para o site do Restaurante da Bia">
                 <?php if ($loginLogo): ?>
                     <img src="<?=adm_h($loginLogo)?>" alt="Restaurante da Bia">
                 <?php else: ?>
                     <span class="bia-login-brand-fallback">Restaurante <strong>da Bia</strong></span>
                 <?php endif; ?>
             </a>
-            <div class="bia-login-story-content">
-                <span class="bia-login-story-label"><span class="bia-login-status-dot"></span> CENTRAL DE OPERAÇÕES</span>
-                <h1>O cuidado com cada pedido começa aqui.</h1>
-                <p>Pedidos, atendimento e gestão em um ambiente feito para a rotina do restaurante.</p>
-                <div class="bia-login-story-line" aria-hidden="true"></div>
-                <span class="bia-login-story-signature">Restaurante da Bia <span>·</span> Além Paraíba, MG</span>
+
+            <div class="bia-login-form-heading">
+                <span class="bia-login-kicker">ÁREA ADMINISTRATIVA</span>
+                <h1 id="bia-login-title">Acessar painel</h1>
+                <p>Entre com seu e-mail e senha.</p>
             </div>
-            <span class="bia-login-story-bottom">Um espaço reservado para nossa equipe.</span>
-            <div class="bia-login-story-decoration" aria-hidden="true"><span></span><span></span><span></span></div>
-        </section>
 
-        <section class="bia-login-entry" aria-labelledby="bia-login-title">
-            <div class="bia-login-form-wrap">
-                <div class="bia-login-mobile-brand">
-                    <?php if ($loginLogo): ?>
-                        <img src="<?=adm_h($loginLogo)?>" alt="Restaurante da Bia">
-                    <?php else: ?>
-                        <strong>Restaurante da Bia</strong>
-                    <?php endif; ?>
+            <?php if ($error): ?>
+                <div class="bia-login-error" role="alert">
+                    <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                    <?=adm_h($error)?>
                 </div>
-                <div class="bia-login-form-heading">
-                    <span class="bia-login-kicker">ACESSO RESTRITO</span>
-                    <h2 id="bia-login-title">Boas-vindas de volta.</h2>
-                    <p>Acesse sua conta para começar o atendimento.</p>
-                </div>
-
-                <?php if ($error): ?>
-                    <div class="bia-login-error" role="alert">
-                        <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
-                        <?=adm_h($error)?>
-                    </div>
-                <?php endif; ?>
+            <?php endif; ?>
 
                 <form method="post" class="bia-login-form" id="bia-admin-login-form">
                     <input type="hidden" name="csrf" value="<?=adm_h($token)?>">
@@ -120,12 +101,7 @@ if (!isset($_SESSION['admin_id'])) {
                         <i class="bi bi-arrow-right" aria-hidden="true"></i>
                     </button>
                 </form>
-                <div class="bia-login-form-bottom">
-                    <a href="/"><i class="bi bi-arrow-left" aria-hidden="true"></i> Voltar ao site</a>
-                    <span><i class="bi bi-shield-lock" aria-hidden="true"></i> Acesso seguro</span>
-                </div>
-            </div>
-            <small class="bia-login-copyright">© <?=date('Y')?> Restaurante da Bia</small>
+            <a class="bia-login-back" href="/"><i class="bi bi-arrow-left" aria-hidden="true"></i> Voltar ao site</a>
         </section>
     </main>
     <script src="/assets/js/admin-login.js?v=1" defer></script>
