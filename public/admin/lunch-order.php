@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$status,$id]);
             $notice = 'Etapa do pedido atualizada.';
         } elseif ($action === 'paid') {
-            $stmt = $db->prepare("UPDATE lunch_orders SET payment_status='paid' WHERE id=? AND status<>'cancelled'");
+            $stmt = $db->prepare("UPDATE lunch_orders SET payment_status='paid',paid_at=COALESCE(paid_at,NOW()) WHERE id=? AND status<>'cancelled'");
             $stmt->execute([$id]);
             $notice = 'Pagamento confirmado.';
         } else {

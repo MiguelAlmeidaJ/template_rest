@@ -123,7 +123,8 @@ final class Pos
     {
         $date = $day ?? date('Y-m-d');
         if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)
-            || \DateTimeImmutable::createFromFormat('!Y-m-d', $date)?->format('Y-m-d') !== $date) {
+            || !($parsed = \DateTimeImmutable::createFromFormat('!Y-m-d', $date))
+            || $parsed->format('Y-m-d') !== $date) {
             throw new DomainException('Data inválida.');
         }
         $db = Db::pdo();
@@ -139,7 +140,7 @@ final class Pos
         $local = $stmt->fetch(PDO::FETCH_ASSOC);
         $stmt = $db->prepare(
             "SELECT COUNT(*) orders_count,COALESCE(SUM(total_cents),0) received_cents
-             FROM lunch_orders WHERE created_at>=? AND created_at<DATE_ADD(?,INTERVAL 1 DAY)
+             FROM lunch_orders WHERE paid_at>=? AND paid_at<DATE_ADD(?,INTERVAL 1 DAY)
              AND payment_status='paid' AND status<>'cancelled'"
         );
         $stmt->execute([$date,$date]);

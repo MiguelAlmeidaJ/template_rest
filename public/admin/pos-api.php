@@ -46,7 +46,7 @@ try {
             throw new DomainException('Pedido inválido.');
         }
         $q = Db::pdo()->prepare(
-            "UPDATE lunch_orders SET payment_status='paid'
+            "UPDATE lunch_orders SET payment_status='paid',paid_at=NOW()
              WHERE id=? AND status<>'cancelled' AND payment_status='pending'"
         );
         $q->execute([$id]);

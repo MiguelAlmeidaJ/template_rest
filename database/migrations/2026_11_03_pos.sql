@@ -12,3 +12,8 @@ CREATE TABLE IF NOT EXISTS pos_sales (
   INDEX idx_pos_sales_operator (operator_id),
   CONSTRAINT fk_pos_sales_operator FOREIGN KEY (operator_id) REFERENCES admins(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Registrar o dia real em que o pagamento online foi confirmado.
+ALTER TABLE lunch_orders ADD COLUMN paid_at DATETIME NULL AFTER payment_status;
+UPDATE lunch_orders SET paid_at=created_at WHERE payment_status='paid' AND paid_at IS NULL;
+CREATE INDEX idx_lunch_orders_paid_at ON lunch_orders(paid_at);
