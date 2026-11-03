@@ -859,34 +859,159 @@ a {
 }
 
 /* Comanda presencial: itens independentes e resumo de pagamento */
-#pos-sale-dialog{width:min(95vw,48rem);max-height:min(92vh,56rem)}
-.pos-items-heading{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:.65rem}
-.pos-items-heading strong{display:block;font-size:.88rem;color:#213b29}
-.pos-items-heading small{display:block;color:var(--muted);font-size:.72rem;line-height:1.5;margin-top:.22rem}
-.pos-add-item{display:inline-flex;align-items:center;justify-content:center;gap:.45rem;border:1px solid #bbd4bc;background:#f0f8ef;color:var(--green);border-radius:.55rem;padding:.7rem .85rem;font-size:.77rem;font-weight:800;white-space:nowrap}
-.pos-add-item:hover{background:#e3f1e1}
-.pos-sale-items{display:grid;gap:.75rem;max-height:min(44vh,27rem);overflow:auto;overscroll-behavior:contain;padding:.15rem .2rem .4rem}
-.pos-sale-item{background:#fafbf8;border:1px solid #e2e9df;border-radius:.7rem;padding:1rem}
-.pos-sale-item-title{display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin-bottom:.8rem}
-.pos-sale-item-title strong{color:var(--green);font-size:.78rem}
-.pos-remove-item{border:0;background:transparent;color:#bc1c23;font-size:.73rem;font-weight:700;cursor:pointer;padding:.3rem}
-.pos-remove-item[hidden]{display:none}
-.pos-sale-item-fields{display:grid;grid-template-columns:minmax(0,2fr) minmax(4.5rem,.55fr) minmax(6rem,1fr) minmax(6rem,.9fr);gap:.65rem;align-items:end}
-#pos-sale-form .pos-sale-item-fields label{min-width:0;font-size:.71rem;gap:.3rem}
-#pos-sale-form .pos-sale-item-fields input{padding:.7rem .65rem;min-height:2.65rem;background:#fff}
-.pos-item-subtotal{display:grid;align-content:center;gap:.4rem;min-height:2.7rem;text-align:right}
-.pos-item-subtotal span{font-size:.66rem;color:var(--muted)}
-.pos-item-subtotal strong{font-size:.86rem;white-space:nowrap;color:var(--green)}
-.pos-sale-total>span{display:grid;gap:.25rem}
-.pos-sale-total>span>strong{font-size:.85rem;color:var(--dark)}
-.pos-sale-total>span>small{font-size:.7rem;color:var(--muted)}
-#pos-sale-dialog .pos-dialog-actions{padding-top:.8rem;border-top:1px solid var(--border)}
-.pos-sale-history-items{font-size:.72rem;color:#738075;line-height:1.5;display:block;margin-top:.25rem}
-@media(max-width:680px){
- .pos-items-heading{align-items:stretch;flex-direction:column}
- .pos-add-item{align-self:flex-start}
- .pos-sale-item-fields{grid-template-columns:minmax(0,1fr) minmax(5.5rem,.65fr)}
- .pos-sale-description{grid-column:1/-1}
- .pos-item-subtotal{grid-column:1/-1;display:flex;justify-content:space-between;min-height:0}
- .pos-sale-items{max-height:45vh}
+#pos-sale-dialog {
+  width: min(95vw, 48rem);
+  max-height: min(92vh, 56rem);
+}
+.pos-items-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.65rem;
+}
+.pos-items-heading strong {
+  display: block;
+  font-size: 0.88rem;
+  color: #213b29;
+}
+.pos-items-heading small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
+  margin-top: 0.22rem;
+}
+.pos-add-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border: 1px solid #bbd4bc;
+  background: #f0f8ef;
+  color: var(--green);
+  border-radius: 0.55rem;
+  padding: 0.7rem 0.85rem;
+  font-size: 0.77rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.pos-add-item:hover {
+  background: #e3f1e1;
+}
+.pos-sale-items {
+  display: grid;
+  gap: 0.75rem;
+  max-height: min(44vh, 27rem);
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 0.15rem 0.2rem 0.4rem;
+}
+.pos-sale-item {
+  background: #fafbf8;
+  border: 1px solid #e2e9df;
+  border-radius: 0.7rem;
+  padding: 1rem;
+}
+.pos-sale-item-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.8rem;
+}
+.pos-sale-item-title strong {
+  color: var(--green);
+  font-size: 0.78rem;
+}
+.pos-remove-item {
+  border: 0;
+  background: transparent;
+  color: #bc1c23;
+  font-size: 0.73rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0.3rem;
+}
+.pos-remove-item[hidden] {
+  display: none;
+}
+.pos-sale-item-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(4.5rem, 0.55fr) minmax(6rem, 1fr) minmax(6rem, 0.9fr);
+  gap: 0.65rem;
+  align-items: end;
+}
+#pos-sale-form .pos-sale-item-fields label {
+  min-width: 0;
+  font-size: 0.71rem;
+  gap: 0.3rem;
+}
+#pos-sale-form .pos-sale-item-fields input {
+  padding: 0.7rem 0.65rem;
+  min-height: 2.65rem;
+  background: #fff;
+}
+.pos-item-subtotal {
+  display: grid;
+  align-content: center;
+  gap: 0.4rem;
+  min-height: 2.7rem;
+  text-align: right;
+}
+.pos-item-subtotal span {
+  font-size: 0.66rem;
+  color: var(--muted);
+}
+.pos-item-subtotal strong {
+  font-size: 0.86rem;
+  white-space: nowrap;
+  color: var(--green);
+}
+.pos-sale-total > span {
+  display: grid;
+  gap: 0.25rem;
+}
+.pos-sale-total > span > strong {
+  font-size: 0.85rem;
+  color: var(--dark);
+}
+.pos-sale-total > span > small {
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+#pos-sale-dialog .pos-dialog-actions {
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--border);
+}
+.pos-sale-history-items {
+  font-size: 0.72rem;
+  color: #738075;
+  line-height: 1.5;
+  display: block;
+  margin-top: 0.25rem;
+}
+@media (max-width: 680px) {
+  .pos-items-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .pos-add-item {
+    align-self: flex-start;
+  }
+  .pos-sale-item-fields {
+    grid-template-columns: minmax(0, 1fr) minmax(5.5rem, 0.65fr);
+  }
+  .pos-sale-description {
+    grid-column: 1/-1;
+  }
+  .pos-item-subtotal {
+    grid-column: 1/-1;
+    display: flex;
+    justify-content: space-between;
+    min-height: 0;
+  }
+  .pos-sale-items {
+    max-height: 45vh;
+  }
 }

@@ -175,9 +175,12 @@ document.addEventListener('DOMContentLoaded', () => {
             );
             if (Array.isArray(sale.items) && sale.items.length) {
               const details = node('small', 'pos-sale-history-items');
-              details.textContent = sale.items.map((item) =>
-                item.quantity + '× ' + item.description + ' (' + money(item.total_cents) + ')'
-              ).join(' · ');
+              details.textContent = sale.items
+                .map(
+                  (item) =>
+                    item.quantity + '× ' + item.description + ' (' + money(item.total_cents) + ')',
+                )
+                .join(' · ');
               description.append(details);
             }
             row.append(
