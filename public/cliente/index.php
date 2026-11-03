@@ -121,7 +121,7 @@ if ($id && $selected) {
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="/assets/css/bia.css?v=18">
   <?php $customerFavicon = \App\Cms::setting('favicon');
-    if ($customerFavicon): ?>
+if ($customerFavicon): ?>
   <link rel="icon" href="<?=bia_esc($customerFavicon)?>">
   <?php endif; ?>
 </head>
@@ -130,7 +130,7 @@ if ($id && $selected) {
 <div class="customer-private-topbar">
   <a href="/" class="customer-private-brand">
     <?php $customerLogo = \App\Cms::setting('logo');
-    if ($customerLogo): ?>
+if ($customerLogo): ?>
     <img src="<?=bia_esc($customerLogo)?>" alt="Restaurante da Bia">
     <?php else: ?>Restaurante da Bia<?php endif; ?>
   </a>
@@ -142,14 +142,14 @@ if ($id && $selected) {
 <?php if ($error): ?><p class="customer-alert" role="alert"><?=bia_esc($error)?></p><?php endif; ?>
 <?php if ($notice): ?><p class="customer-success" role="status"><?=bia_esc($notice)?></p><?php endif; ?>
 <?php
-    $tab = (string) ($_GET['tab'] ?? 'pedidos');
-    if (!in_array($tab, ['pedidos','padrao','enderecos','perfil'], true)) {
-        $tab = 'pedidos';
-    }
-    $profileQuery = Db::pdo()->prepare('SELECT email, full_name, phone, cpf FROM customer_accounts WHERE id=?');
-    $profileQuery->execute([$id]);
-    $profile = $profileQuery->fetch() ?: [];
-    ?>
+$tab = (string) ($_GET['tab'] ?? 'pedidos');
+if (!in_array($tab, ['pedidos','padrao','enderecos','perfil'], true)) {
+    $tab = 'pedidos';
+}
+$profileQuery = Db::pdo()->prepare('SELECT email, full_name, phone, cpf FROM customer_accounts WHERE id=?');
+$profileQuery->execute([$id]);
+$profile = $profileQuery->fetch() ?: [];
+?>
 <div class="customer-dashboard">
   <aside class="customer-dashboard-nav" aria-label="Menu da minha conta">
     <div class="customer-dashboard-identity"><span class="customer-dashboard-avatar"><i class="bi bi-person" aria-hidden="true"></i></span><div><strong><?=bia_esc($profile['full_name'] ?: 'Minha conta')?></strong><small><?=bia_esc($profile['email'] ?? '')?></small></div></div>
