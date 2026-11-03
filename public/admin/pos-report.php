@@ -17,7 +17,7 @@ try {
     $data = Pos::financial($day);
 }
 
-$amount = static fn(mixed $cents): string => 'R$ '.number_format(((int) $cents) / 100, 2, ',', '.');
+$amount = static fn (mixed $cents): string => 'R$ '.number_format(((int) $cents) / 100, 2, ',', '.');
 
 adm_start('Relatório financeiro · PDV', 'pdv');
 ?>
@@ -80,9 +80,9 @@ adm_start('Relatório financeiro · PDV', 'pdv');
           <td>#<?=(int)$sale['id']?></td>
           <td><?=adm_h($sale['description'])?></td>
           <td><?=(int)$sale['quantity']?></td>
-          <td><?=adm_h(['cash'=>'Dinheiro','pix'=>'Pix','card'=>'Cartão'][$sale['payment_method']] ?? $sale['payment_method'])?></td>
+          <td><?=adm_h(['cash' => 'Dinheiro','pix' => 'Pix','card' => 'Cartão'][$sale['payment_method']] ?? $sale['payment_method'])?></td>
           <td><?=adm_h($amount($sale['total_cents']))?></td>
-          <td><?=adm_h(date('H:i',strtotime($sale['created_at'])))?></td>
+          <td><?=adm_h(date('H:i', strtotime($sale['created_at'])))?></td>
         </tr>
       <?php endforeach; ?>
       <?php if (!$data['sales']): ?><tr><td colspan="6" class="text-center py-4 text-secondary">Nenhuma venda presencial registrada nessa data.</td></tr><?php endif; ?>
