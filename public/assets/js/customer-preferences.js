@@ -8,7 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const status = document.querySelector('#customer-address-feedback');
 
   function maskPhone(value) {
-    const digits = String(value || '').replace(/\D/g, '').slice(0, 11);
+    const digits = String(value || '')
+      .replace(/\D/g, '')
+      .slice(0, 11);
     if (digits.length <= 2) return digits ? '(' + digits : '';
     const local = digits.slice(2);
     if (local.length <= 4) return '(' + digits.slice(0, 2) + ') ' + local;
@@ -17,18 +19,26 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function maskCpf(value) {
-    const digits = String(value || '').replace(/\D/g, '').slice(0, 11);
-    return digits.replace(/^(\d{3})(\d)/, '$1.$2').replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
+    const digits = String(value || '')
+      .replace(/\D/g, '')
+      .slice(0, 11);
+    return digits
+      .replace(/^(\d{3})(\d)/, '$1.$2')
+      .replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
       .replace(/\.(\d{3})(\d)/, '.$1-$2');
   }
 
   document.querySelectorAll('[data-br-phone]').forEach((input) => {
-    const update = () => { input.value = maskPhone(input.value); };
+    const update = () => {
+      input.value = maskPhone(input.value);
+    };
     input.addEventListener('input', update);
     update();
   });
   document.querySelectorAll('[data-br-cpf]').forEach((input) => {
-    const update = () => { input.value = maskCpf(input.value); };
+    const update = () => {
+      input.value = maskCpf(input.value);
+    };
     input.addEventListener('input', update);
     update();
   });
@@ -42,7 +52,9 @@ document.addEventListener('DOMContentLoaded', () => {
       input.reportValidity();
     }
   });
-  profileForm?.elements.phone.addEventListener('input', () => profileForm.elements.phone.setCustomValidity(''));
+  profileForm?.elements.phone.addEventListener('input', () =>
+    profileForm.elements.phone.setCustomValidity(''),
+  );
   async function action(type, payload = {}) {
     const response = await fetch('/api/customer.php', {
       method: 'POST',
@@ -87,7 +99,9 @@ document.addEventListener('DOMContentLoaded', () => {
       dialog.showModal();
     }),
   );
-  document.querySelector('#customer-address-close')?.addEventListener('click', () => dialog.close());
+  document
+    .querySelector('#customer-address-close')
+    ?.addEventListener('click', () => dialog.close());
   document
     .querySelector('#customer-address-cancel')
     ?.addEventListener('click', () => dialog.close());
