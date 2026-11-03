@@ -34,7 +34,7 @@ $isEmployee = $staff['role'] === 'employee';
   </div>
   <div class="pos-header-actions">
     <span class="pos-live" id="pos-connection"><span class="pos-live-dot"></span> Conectado</span>
-    <?php if (!$isEmployee): ?><a class="pos-return" href="/admin/"><i class="bi bi-arrow-left"></i> Painel de gestão</a><?php endif; ?>
+    <?php if (!$isEmployee): ?><a class="pos-return" href="/admin/pos-report.php"><i class="bi bi-bar-chart"></i> Relatórios</a><a class="pos-return" href="/admin/"><i class="bi bi-arrow-left"></i> Gestão</a><?php endif; ?>
     <form action="/admin/logout.php" method="post">
       <input type="hidden" name="csrf" value="<?=adm_h($csrf)?>">
       <button class="pos-logout" type="submit" title="Sair da conta"><i class="bi bi-box-arrow-right"></i><span>Sair</span></button>
