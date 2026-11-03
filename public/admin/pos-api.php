@@ -39,6 +39,22 @@ try {
     cms_csrf();
     $action = (string) ($_POST['action'] ?? '');
 
+    if ($action === 'chat_send') {
+        $orderId = filter_var($_POST['order_id'] ?? null, FILTER_VALIDATE_INT);
+        $body = trim((string) ($_POST['body'] ?? ''));
+        if (!$orderId || $body === '' || mb_strlen($body) > 2000) {
+            throw new DomainException('Digite uma mensagem válida de até 2.000 caracteres.');
+        }
+        $query = Db::pdo()->prepare('SELECT customer_id FROM lunch_orders WHERE id=?');
+        $query->execute([$orderId]);
+        $customerId = $query->fetchColumn();
+        if (!$customerId) throw new DomainException('Pedido sem conta de cliente vinculada.');
+        $insert = Db::pdo()->prepare(
+            "INSERT INTO lunch_messages(order_id,customer_id,sender,body) VALUES(?,?,'restaurant',?)"
+        );
+        $insert->execute([$orderId, $customerId, $body]);
+        reply(201, ['ok' => true, 'message' => 'Mensagem enviada.']);
+    }
     if ($action === 'sale') {
         $id = Pos::sale((int) $staff['id'], $_POST);
         reply(201, ['ok' => true, 'message' => 'Venda presencial #'.$id.' registrada.']);
