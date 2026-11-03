@@ -551,9 +551,10 @@ document.addEventListener('DOMContentLoaded', () => {
     qty = valid.length;
     activeGroupId = groups[0].id;
     render();
-    feedback.textContent = valid.length < stored.length
-      ? 'Alguns pratos desta montagem não estão disponíveis hoje e foram retirados.'
-      : '';
+    feedback.textContent =
+      valid.length < stored.length
+        ? 'Alguns pratos desta montagem não estão disponíveis hoje e foram retirados.'
+        : '';
   });
   const dialog = document.querySelector('#lunch-account-dialog');
   let accountMode = 'register';
