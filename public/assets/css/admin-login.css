@@ -1,396 +1,171 @@
-/* Restaurante da Bia — dedicated administrative login */
+/* Login administrativo · Restaurante da Bia
+   Estilos isolados do restante do painel. */
 :root {
-  --login-green: #2d6835;
-  --login-forest: #193c29;
   --login-orange: #f98017;
-  --login-cream: #fff5ec;
-  --login-text: #212b25;
-  --login-muted: #78857b;
-}
-html {
-  min-height: 100%;
+  --login-green: #2d6835;
+  --login-ink: #24342a;
+  --login-muted: #7b887e;
 }
 body.auth-body {
+  margin: 0;
   display: block;
   min-height: 100vh;
-  margin: 0;
-  background: #fffdf9;
-  font-family: Montserrat, Arial, sans-serif;
-  color: var(--login-text);
+  color: var(--login-ink);
+  background: #a94b0b;
+  font-family: "Montserrat", Arial, sans-serif;
 }
-.bia-login,
-.bia-login * {
-  box-sizing: border-box;
-}
+.bia-login, .bia-login * { box-sizing: border-box; }
 .bia-login {
-  display: grid;
-  grid-template-columns: minmax(0, 0.96fr) minmax(0, 1fr);
+  min-height: 100vh;
   min-height: 100svh;
-}
-.bia-login-story {
-  background: var(--login-forest);
-  color: white;
-  padding: clamp(1.8rem, 4.3vw, 4.2rem);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
-}
-.bia-login-story::before {
-  content: "";
-  position: absolute;
-  z-index: -2;
-  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: clamp(1.25rem, 4vw, 3rem);
   background:
-    radial-gradient(ellipse at 97% 0%, #588a5361 0%, transparent 56%),
-    radial-gradient(ellipse at 10% 105%, #0f2b1c 10%, transparent 60%),
-    linear-gradient(153deg, #244e2d, #183a28);
+    linear-gradient(115deg, rgba(145, 56, 8, .80), rgba(249, 128, 23, .66)),
+    linear-gradient(0deg, rgba(41, 22, 10, .35), rgba(41, 22, 10, .12)),
+    url("https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1800&q=85") center / cover no-repeat;
 }
-.bia-login-story::after {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  top: 18%;
-  right: -20%;
-  width: 70%;
-  aspect-ratio: 1;
-  border: 1px solid #bce5ad22;
-  border-radius: 50%;
-  box-shadow:
-    0 0 0 4.5rem #9fc8960b,
-    0 0 0 9rem #9fc89609;
-  pointer-events: none;
+.bia-login-card {
+  width: min(100%, 27rem);
+  border-radius: 1.1rem;
+  background: rgba(255, 255, 255, .98);
+  border: 1px solid rgba(255, 255, 255, .6);
+  box-shadow: 0 1.5rem 5rem rgba(65, 30, 9, .23);
+  padding: clamp(1.75rem, 3.7vw, 2.75rem);
 }
-.bia-login-story-brand {
-  display: inline-flex;
-  align-items: center;
-  width: fit-content;
-  position: relative;
-  z-index: 2;
-  text-decoration: none;
-  color: white;
-}
-.bia-login-story-brand img {
-  display: block;
-  object-fit: contain;
-  max-width: 13.8rem;
-  max-height: 5rem;
-  filter: drop-shadow(0 4px 12px #12251b29);
-}
-.bia-login-brand-fallback {
-  font:
-    600 1.1rem "Open Sans",
-    sans-serif;
-  color: #fff;
-}
-.bia-login-brand-fallback strong {
-  color: #ffb361;
-}
-.bia-login-story-content {
-  position: relative;
-  max-width: 35rem;
-  margin: clamp(3rem, 10vh, 7rem) 0;
-}
-.bia-login-story-label,
-.bia-login-kicker {
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.16em;
-}
-.bia-login-story-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.65rem;
-  color: #e5eccd;
-}
-.bia-login-status-dot {
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 50%;
-  background: #fa9a37;
-  box-shadow: 0 0 0 0.25rem #fa9a3718;
-}
-.bia-login-story h1 {
-  font:
-    700 clamp(2.2rem, 4vw, 4.1rem) / 1.17 "Open Sans",
-    Arial,
-    sans-serif;
-  letter-spacing: -0.055em;
-  margin: 1.5rem 0 1.2rem;
-  max-width: 12.5ch;
-}
-.bia-login-story-content > p {
-  font-size: clamp(0.92rem, 1.15vw, 1.04rem);
-  line-height: 1.9;
-  color: #e0e9dc;
-  max-width: 29rem;
-  margin: 0;
-}
-.bia-login-story-line {
-  width: 3.8rem;
-  height: 3px;
-  background: #f98017;
-  border-radius: 2rem;
-  margin: 2.2rem 0 1.1rem;
-}
-.bia-login-story-signature {
-  font-size: 0.78rem;
-  color: #d0e0ce;
-  font-weight: 600;
-}
-.bia-login-story-signature span {
-  color: #f98017;
-  margin: 0 0.35rem;
-}
-.bia-login-story-bottom {
-  font-size: 0.74rem;
-  color: #bfd2bd;
-  position: relative;
-  z-index: 2;
-}
-.bia-login-entry {
+.bia-login-brand {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
   align-items: center;
-  min-width: 0;
-  padding: clamp(2rem, 4.5vw, 5rem) clamp(1.25rem, 5vw, 4rem);
-  position: relative;
+  justify-content: center;
+  margin: .1rem auto 2.1rem;
+  width: fit-content;
+  text-decoration: none;
 }
-.bia-login-form-wrap {
-  width: min(100%, 26.5rem);
-  margin: auto 0;
-}
-.bia-login-mobile-brand {
-  display: none;
-}
-.bia-login-form-heading {
-  margin: 0 0 2.3rem;
-}
-.bia-login-kicker {
-  color: var(--login-green);
-}
-.bia-login-form-heading h2 {
-  font:
-    750 clamp(1.95rem, 3vw, 2.65rem) / 1.22 "Open Sans",
-    Arial,
-    sans-serif;
-  letter-spacing: -0.045em;
-  color: #1e3426;
-  margin: 0.8rem 0 0.8rem;
-}
-.bia-login-form-heading p {
-  font-size: 0.9rem;
-  line-height: 1.7;
-  color: var(--login-muted);
-  margin: 0;
-}
-.bia-login-form {
-  display: grid;
-  gap: 1.35rem;
-}
-.bia-login-field {
-  display: grid;
-  gap: 0.55rem;
-}
-.bia-login-field > label {
+.bia-login-brand img {
   display: block;
-  font-size: 0.82rem;
-  font-weight: 750;
-  color: #324737;
+  width: auto;
+  height: auto;
+  max-width: min(100%, 13rem);
+  max-height: 5.6rem;
+  object-fit: contain;
 }
+.bia-login-brand-fallback { font: 700 1.25rem "Open Sans", Arial, sans-serif; color: var(--login-green); }
+.bia-login-brand-fallback strong { color: #e66e0e; }
+.bia-login-form-heading { margin-bottom: 1.7rem; text-align: center; }
+.bia-login-kicker {
+  font-size: .66rem;
+  color: var(--login-green);
+  font-weight: 800;
+  letter-spacing: .16em;
+}
+.bia-login-form-heading h1 {
+  font: 750 clamp(1.7rem, 3vw, 2rem)/1.25 "Open Sans", Arial, sans-serif;
+  letter-spacing: -.035em;
+  color: #213629;
+  margin: .5rem 0 .4rem;
+}
+.bia-login-form-heading p { margin: 0; color: var(--login-muted); font-size: .82rem; line-height: 1.6; }
+.bia-login-form { display: grid; gap: 1.1rem; }
+.bia-login-field { display: grid; gap: .45rem; }
+.bia-login-field label { font-size: .79rem; font-weight: 700; color: #34473a; }
 .bia-login-input-wrap {
   position: relative;
   display: flex;
   align-items: center;
+  min-height: 3.25rem;
   background: #fff;
-  border: 1px solid #dfe7dd;
-  border-radius: 0.7rem;
-  min-height: 3.5rem;
-  transition:
-    border-color 0.15s,
-    box-shadow 0.15s;
+  border: 1px solid #dbe3dc;
+  border-radius: .6rem;
+  transition: border-color .15s ease, box-shadow .15s ease;
 }
-.bia-login-input-wrap:focus-within {
-  border-color: #2d6835;
-  box-shadow: 0 0 0 3px #2d68351a;
-}
-.bia-login-input-wrap > .bi {
+.bia-login-input-wrap:focus-within { border-color: var(--login-green); box-shadow: 0 0 0 3px rgba(45, 104, 53, .12); }
+.bia-login-input-wrap > i {
   position: absolute;
-  left: 1.05rem;
-  font-size: 1.05rem;
-  color: #839a86;
+  left: .95rem;
+  color: #879a8a;
+  font-size: 1rem;
   pointer-events: none;
 }
 .bia-login-input-wrap input {
   width: 100%;
-  border: 0;
-  background: transparent;
-  color: #24382a;
-  padding: 1rem 1rem 1rem 3rem;
-  min-height: 3.4rem;
-  font-size: 0.86rem;
-  outline: 0;
   min-width: 0;
-}
-.bia-login-input-wrap input::placeholder {
-  color: #98a59b;
-}
-.bia-login-password-wrap input {
-  padding-right: 3.8rem;
-}
-.bia-login-password-toggle {
-  display: grid !important;
-  place-items: center;
-  position: absolute;
-  right: 0.5rem;
-  top: 50%;
-  transform: translateY(-50%);
-  border: 0;
-  border-radius: 0.48rem;
-  color: #5f7664;
+  min-height: 3.15rem;
   background: transparent;
-  min-width: 2.5rem;
-  width: 2.5rem !important;
-  height: 2.5rem;
+  border: none;
+  border-radius: inherit;
+  outline: none;
+  padding: .8rem .85rem .8rem 2.8rem;
+  font-size: .85rem;
+  color: #26392c;
+}
+.bia-login-input-wrap input::placeholder { color: #9aa69d; }
+.bia-login-password-wrap input { padding-right: 3.4rem; }
+.bia-login-password-toggle {
+  position: absolute;
+  top: 50%;
+  right: .4rem;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  background: transparent;
+  color: #64776a;
+  border: 0;
+  border-radius: .45rem;
   cursor: pointer;
 }
-.bia-login-password-toggle:hover {
-  background: #f1f6ef;
-  color: #2d6835;
-}
+.bia-login-password-toggle:hover { background: #eff5ef; color: var(--login-green); }
 .bia-login-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .7rem;
+  min-height: 3.25rem;
   width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-top: 0.4rem;
-  background: #f98017;
-  color: #212121;
-  border: 1px solid #f98017;
-  border-radius: 0.68rem;
-  padding: 1.08rem 1.25rem;
-  font-size: 0.88rem;
+  margin-top: .35rem;
+  border-radius: .6rem;
+  border: 1px solid var(--login-orange);
+  background: var(--login-orange);
+  color: #24251d;
   font-weight: 800;
-  transition:
-    background 0.15s,
-    transform 0.15s;
+  font-size: .85rem;
+  cursor: pointer;
+  transition: background .15s ease;
 }
-.bia-login-submit:hover {
-  background: #ef7510;
-  border-color: #ef7510;
-  transform: translateY(-1px);
-}
-.bia-login-submit:focus-visible,
-.bia-login-entry a:focus-visible,
-.bia-login-password-toggle:focus-visible {
-  outline: 3px solid #f9801780;
-  outline-offset: 2px;
-}
-.bia-login-submit:disabled {
-  opacity: 0.7;
-  cursor: progress;
-  transform: none;
-}
-.bia-login-submit i {
-  font-size: 1.1rem;
-}
-.bia-login-form-bottom {
+.bia-login-submit:hover { background: #ed750e; border-color: #ed750e; }
+.bia-login-submit:disabled { opacity: .7; cursor: wait; }
+.bia-login-back {
   display: flex;
+  justify-content: center;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1rem;
-  border-top: 1px solid #e8eee6;
-  padding-top: 1.5rem;
-  margin-top: 2rem;
-}
-.bia-login-form-bottom a {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  font-size: 0.78rem;
+  gap: .5rem;
+  margin-top: 1.5rem;
+  padding-top: 1.15rem;
+  border-top: 1px solid #e8eee8;
+  font-size: .76rem;
   font-weight: 700;
-  color: #446c4b;
+  color: #497450;
   text-decoration: none;
 }
-.bia-login-form-bottom a:hover {
-  text-decoration: underline;
-}
-.bia-login-form-bottom span {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.73rem;
-  color: #929d94;
-}
-.bia-login-copyright {
-  position: absolute;
-  bottom: 1.8rem;
-  color: #9ca79e;
-  font-size: 0.7rem !important;
-}
+.bia-login-back:hover { color: #295a30; text-decoration: underline; }
 .bia-login-error {
   display: flex;
   align-items: center;
-  gap: 0.7rem;
-  color: #9b3030;
-  background: #fff1ed;
-  border: 1px solid #f3d5ce;
-  padding: 0.9rem 1rem;
-  border-radius: 0.6rem;
-  font-size: 0.82rem;
-  margin-bottom: 1.35rem;
+  gap: .6rem;
+  margin-bottom: 1rem;
+  padding: .85rem;
+  border: 1px solid #f1d4ce;
+  border-radius: .55rem;
+  background: #fff2ef;
+  color: #963c30;
+  font-size: .8rem;
 }
-@media (max-width: 1000px) {
-  .bia-login {
-    grid-template-columns: 0.85fr 1fr;
-  }
-  .bia-login-story {
-    padding: 2.3rem;
-  }
-  .bia-login-story h1 {
-    font-size: clamp(2rem, 3.7vw, 3rem);
-  }
+.bia-login-card :focus-visible { outline: 2px solid var(--login-orange); outline-offset: 3px; }
+@media(max-width:480px){
+  .bia-login { padding: 1.1rem; }
+  .bia-login-card { padding: 1.6rem 1.35rem; border-radius: .85rem; }
+  .bia-login-brand { margin-bottom: 1.6rem; }
 }
-@media (max-width: 760px) {
-  .bia-login {
-    grid-template-columns: 1fr;
-  }
-  .bia-login-story {
-    display: none;
-  }
-  .bia-login-entry {
-    min-height: 100svh;
-    padding: 2rem 1.5rem 4.5rem;
-    background: linear-gradient(160deg, #fffaf5, #fff);
-  }
-  .bia-login-mobile-brand {
-    display: flex;
-    justify-content: center;
-    margin: 0 0 3rem;
-  }
-  .bia-login-mobile-brand img {
-    max-width: 12rem;
-    max-height: 4.5rem;
-    object-fit: contain;
-  }
-  .bia-login-form-wrap {
-    margin: auto 0;
-  }
-  .bia-login-form-heading {
-    text-align: center;
-  }
-  .bia-login-copyright {
-    bottom: 1.2rem;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .bia-login-submit,
-  .bia-login-input-wrap {
-    transition: none;
-  }
-}
+@media(prefers-reduced-motion:reduce){ .bia-login-input-wrap,.bia-login-submit { transition: none; } }
