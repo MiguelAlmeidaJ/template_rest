@@ -135,7 +135,8 @@ final class Pos
             $items[] = [$name, $quantity, $price, $subtotal];
         }
 
-        $description = $items[0][0].(count($items) > 1 ? ' + '.(count($items) - 1).' item(ns)' : '');
+        $summary = $items[0][0].(count($items) > 1 ? ' + '.(count($items) - 1).' item(ns)' : '');
+        $description = mb_substr($summary, 0, 180);
         $db = Db::pdo();
         $db->beginTransaction();
         try {
