@@ -217,6 +217,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const add = document.querySelector('#lunch-add-group');
     add.disabled = groups.length >= qty || !groups.some((g) => g.count > 1);
   }
+  function updateSelectedSummary(group, element = null) {
+    const target = element || boxes.querySelector('[data-selected-count="' + group.id + '"]');
+    if (!target) return;
+    const total = group.items.length;
+    target.textContent = total
+      ? total + ' prato(s) selecionado(s) nesta montagem'
+      : 'Nenhum prato selecionado ainda.';
+  }
   function renderBox(g, index) {
     const section = document.createElement('fieldset');
     section.className = 'lunch-box';
@@ -255,18 +263,28 @@ document.addEventListener('DOMContentLoaded', () => {
     items.forEach((x) => (categories[x.category] ??= []).push(x));
     Object.entries(categories).forEach(([category, list]) => {
       const limit = mode === 'category' ? Number(limits[category] ?? 0) : max;
-      const heading = document.createElement('h4');
-      heading.textContent = category;
-      if (mode === 'category') {
-        const note = document.createElement('small');
-        note.className = 'lunch-limit-note';
-        note.textContent = ' · até ' + limit;
-        heading.append(note);
-      }
-      section.append(heading);
       if (mode === 'category' && limit === 0) return;
+      const group = document.createElement('details');
+      group.className = 'lunch-category';
+      group.open = Object.keys(categories)[0] === category || g.items.some((id) =>
+        list.some((item) => Number(item.id) === id)
+      );
+      const heading = document.createElement('summary');
+      heading.className = 'lunch-category-header';
+      const title = document.createElement('strong');
+      title.textContent = category;
+      const count = document.createElement('span');
+      count.className = 'lunch-category-count';
+      const updateCount = () => {
+        const selected = g.items.filter((id) => list.some((item) => Number(item.id) === id)).length;
+        count.textContent = selected + (mode === 'category' ? ' de ' + limit : '') + ' selecionado(s)';
+        count.classList.toggle('has-selection', selected > 0);
+      };
+      heading.append(title, count);
+      group.append(heading);
       const grid = document.createElement('div');
       grid.className = 'lunch-options';
+      updateCount();
       list.forEach((item) => {
         const label = document.createElement('label'),
           checkbox = document.createElement('input');
@@ -295,13 +313,21 @@ document.addEventListener('DOMContentLoaded', () => {
           g.items = [...section.querySelectorAll('input[type=checkbox]:checked')].map((x) =>
             Number(x.value),
           );
+          updateCount();
+          updateSelectedSummary(g);
           feedback.textContent = '';
         });
         label.append(checkbox, document.createTextNode(' ' + item.name));
         grid.append(label);
       });
-      section.append(grid);
+      group.append(grid);
+      section.append(group);
     });
+    const chosen = document.createElement('p');
+    chosen.className = 'lunch-chosen-summary';
+    chosen.dataset.selectedCount = String(g.id);
+    section.append(chosen);
+    updateSelectedSummary(g, chosen);
     return section;
   }
   function render() {
@@ -313,6 +339,16 @@ document.addEventListener('DOMContentLoaded', () => {
     activateTab(activeGroupId);
     summary();
   }
+  document.querySelector('#lunch-go-delivery')?.addEventListener('click', () => {
+    const incomplete = groups.find((group) => !group.name.trim() || !group.items.length);
+    if (incomplete) {
+      activateTab(incomplete.id);
+      document.querySelector('#lunch-panel-' + incomplete.id + ' .lunch-box-recipient')?.focus();
+      awaitNotice('Informe o nome da quentinha e escolha pelo menos um prato para continuar.', 'Finalize sua montagem');
+      return;
+    }
+    document.querySelector('#lunch-step-entrega')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
   document.querySelector('#lunch-plus').addEventListener('click', () => {
     if (qty < 20) {
       qty++;

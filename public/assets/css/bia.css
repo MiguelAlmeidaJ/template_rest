@@ -3024,3 +3024,33 @@ body {
     max-height: calc(92vh - 210px);
   }
 }
+
+/* Guided lunch checkout: progressive categories and clear purchase stages */
+.lunch-order-steps{display:flex;justify-content:space-between;align-items:center;gap:.7rem;margin:1.4rem 0 2rem;padding:.9rem 1rem;border-radius:.75rem;background:#fff9f2;border:1px solid #f1e9df}
+.lunch-order-steps span{display:flex;align-items:center;gap:.55rem;font-size:.72rem;font-weight:700;color:#7d887e;line-height:1.35}
+.lunch-order-steps b{display:grid;place-items:center;flex:none;width:1.6rem;height:1.6rem;background:#ecefe9;border-radius:50%;color:#64796b;font-size:.73rem}
+.lunch-order-steps span.active{color:#2d6835}
+.lunch-order-steps span.active b{background:#2d6835;color:white}
+.lunch-checkout-step{padding-top:.9rem;margin-bottom:2.4rem;scroll-margin-top:1.5rem}
+.lunch-checkout-step+.lunch-checkout-step{border-top:1px solid #e8eae5;padding-top:1.7rem}
+.lunch-step-heading{margin:0 0 1.25rem}
+.lunch-step-eyebrow{font-size:.7rem;letter-spacing:.13em;color:#e9780f;font-weight:800}
+.lunch-checkout-step .lunch-step-heading h3{font:700 1.2rem 'Open Sans',Arial,sans-serif;color:#263d2c;margin:.4rem 0}
+.lunch-step-heading p{color:#718075;font-size:.79rem;line-height:1.5;margin:0}
+.lunch-limit-hint{font-size:.78rem;background:#edf5ec;color:#2d6835;border-radius:.5rem;padding:.75rem;margin:.75rem 0}
+.lunch-category{border:1px solid #e5e9e1;border-radius:.65rem;background:#fff;margin:.75rem 0;overflow:hidden}
+.lunch-category-header{display:flex;align-items:center;justify-content:space-between;gap:1rem;cursor:pointer;list-style:none;padding:1.05rem 1.1rem;user-select:none}
+.lunch-category-header::-webkit-details-marker{display:none}
+.lunch-category-header strong{color:#2d6835;font-size:.86rem;font-weight:800}
+.lunch-category-header::after{content:"";width:.5rem;height:.5rem;flex:none;border-bottom:2px solid #718275;border-right:2px solid #718275;transform:rotate(45deg);transition:transform .2s}
+.lunch-category[open]>.lunch-category-header::after{transform:rotate(225deg)}
+.lunch-category-count{margin-left:auto;color:#8b978c;font-size:.7rem;font-weight:700}
+.lunch-category-count.has-selection{color:#2d6835;background:#eaf4e7;border-radius:3rem;padding:.3rem .5rem}
+.lunch-category>.lunch-options{padding:.25rem 1rem 1rem;border-top:1px solid #f1f3f0;margin:0}
+.lunch-category[open]{border-color:#cddfcc}
+.lunch-category:focus-within{box-shadow:0 0 0 2px #2d683517}
+.lunch-chosen-summary{font-size:.77rem;font-weight:700;color:#2d6835;margin:1rem 0 0}
+.lunch-step-next{display:flex;align-items:center;justify-content:center;gap:.7rem;border:1px solid #2d6835;border-radius:.55rem;background:#fff;color:#2d6835;font-size:.86rem;font-weight:800;padding:.9rem 1.2rem;margin-top:1.5rem;cursor:pointer}
+.lunch-step-next:hover{background:#edf5ed}
+.lunch-confirm-button{padding:1rem 1.6rem!important;font-weight:800}
+@media(max-width:560px){.lunch-order-steps{gap:.4rem;padding:.8rem .65rem}.lunch-order-steps span{font-size:.62rem;gap:.3rem}.lunch-order-steps b{width:1.4rem;height:1.4rem}.lunch-category-header{padding:.9rem}.lunch-category>.lunch-options{padding:.5rem}.lunch-step-next{width:100%}}
