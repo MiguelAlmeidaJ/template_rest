@@ -196,12 +196,31 @@ final class Pos
              ORDER BY id DESC LIMIT 60'
         );
         $stmt->execute([$date,$date]);
+        $sales = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $ids = array_column($sales, 'id');
+        $lineItems = [];
+        if ($ids) {
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $query = $db->prepare(
+                "SELECT sale_id,description,quantity,unit_price_cents,total_cents
+                 FROM pos_sale_items WHERE sale_id IN ($placeholders) ORDER BY id ASC"
+            );
+            $query->execute($ids);
+            foreach ($query->fetchAll(PDO::FETCH_ASSOC) as $line) {
+                $lineItems[(int) $line['sale_id']][] = $line;
+            }
+        }
+        foreach ($sales as &$sale) {
+            $sale['items'] = $lineItems[(int) $sale['id']] ?? [];
+        }
+        unset($sale);
+
         return [
             'date' => $date,
             'local' => $local,
             'online' => $online,
             'grand_total_cents' => (int) $local['total_cents'] + (int) $online['received_cents'],
-            'sales' => $stmt->fetchAll(PDO::FETCH_ASSOC),
+            'sales' => $sales,
         ];
     }
 }
