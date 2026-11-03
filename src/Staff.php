@@ -17,6 +17,43 @@ final class Staff
         $q->execute([(int)$_SESSION['admin_id']]);
         return $q->fetch() ?: null;
     }
+    /**
+     * Sign in a customer-linked staff account after Customer::login verifies
+     * the password. Customer and admin use independent session cookies.
+     */
+    public static function signInLinkedCustomer(int $customerId): bool
+    {
+        if ($customerId < 1 || Customer::id() !== $customerId) {
+            return false;
+        }
+
+        $query = Db::pdo()->prepare(
+            "SELECT id FROM admins WHERE customer_id = ? AND role IN ('admin','manager','employee') LIMIT 1"
+        );
+        $query->execute([$customerId]);
+        $adminId = (int) $query->fetchColumn();
+        if (!$adminId) {
+            return false;
+        }
+
+        // Do not leave a second logged-in client account in the browser.
+        unset($_SESSION['bia_customer_id']);
+        session_write_close();
+
+        session_name('raiz_admin');
+        session_set_cookie_params([
+            'httponly' => true,
+            'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+            'samesite' => 'Lax',
+        ]);
+        session_start();
+        session_regenerate_id(true);
+        $_SESSION['admin_id'] = $adminId;
+        $_SESSION['csrf'] = bin2hex(random_bytes(24));
+
+        return true;
+    }
+
     public static function role(): string
     {
         return self::current()['role'] ?? '';
