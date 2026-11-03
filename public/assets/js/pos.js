@@ -315,40 +315,165 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('[data-close-dialog]').forEach((button) => {
     button.addEventListener('click', () => button.closest('dialog').close());
   });
-  $('#pos-new-sale').addEventListener('click', () => {
-    $('#pos-sale-form').reset();
-    $('#pos-quantity').value = '1';
-    $('#pos-sale-error').textContent = '';
-    $('#pos-sale-total').textContent = money(0);
-    $('#pos-sale-dialog').showModal();
-    $('#pos-item').focus();
-  });
-
   function parseCents(value) {
     const input = String(value).trim().replace(/\s/g, '').replace(/^R\$/i, '');
-    // Brazilian format (20,50) or plain decimal with dot (20.50).
     if (!/^\d+(?:[,.]\d{1,2})?$/.test(input)) return null;
     const parts = input.replace(',', '.').split('.');
     const cents = Number(parts[0]) * 100 + Number((parts[1] || '').padEnd(2, '0'));
-    return Number.isSafeInteger(cents) && cents > 0 ? cents : null;
+    return Number.isSafeInteger(cents) && cents > 0 && cents <= 10000000 ? cents : null;
   }
-  function updateTotal() {
-    const cents = parseCents($('#pos-price').value);
-    const qty = Number($('#pos-quantity').value);
-    $('#pos-sale-total').textContent = money(
-      cents && Number.isInteger(qty) && qty > 0 ? cents * qty : 0,
-    );
+
+  const saleRows = $('#pos-sale-items');
+  let rowCounter = 0;
+
+  function addSaleItem(values = {}) {
+    if (saleRows.children.length >= 50) {
+      $('#pos-sale-error').textContent = 'O limite é de 50 itens por venda.';
+      return;
+    }
+    const index = ++rowCounter;
+    const row = node('div', 'pos-sale-item');
+    const header = node('div', 'pos-sale-item-title');
+    header.append(node('strong', '', 'Item ' + (saleRows.children.length + 1)));
+    const remove = node('button', 'pos-remove-item', 'Remover');
+    remove.type = 'button';
+    remove.setAttribute('aria-label', 'Remover este item');
+    remove.addEventListener('click', () => {
+      if (saleRows.children.length === 1) {
+        $('#pos-sale-error').textContent = 'Adicione pelo menos um item à venda.';
+        return;
+      }
+      row.remove();
+      renumberSaleItems();
+      recalculateSale();
+    });
+    header.append(remove);
+
+    const fields = node('div', 'pos-sale-item-fields');
+    const description = node('label', 'pos-sale-description');
+    description.append(node('span', '', 'Produto'));
+    const nameInput = node('input');
+    nameInput.type = 'text';
+    nameInput.placeholder = 'Ex.: Almoço, Coca-Cola';
+    nameInput.maxLength = 180;
+    nameInput.required = true;
+    nameInput.value = values.description || '';
+    nameInput.setAttribute('aria-label', 'Produto do item ' + index);
+    description.append(nameInput);
+
+    const quantityLabel = node('label');
+    quantityLabel.append(node('span', '', 'Qtd.'));
+    const quantity = node('input');
+    quantity.type = 'number';
+    quantity.min = '1';
+    quantity.max = '1000';
+    quantity.step = '1';
+    quantity.value = values.quantity || 1;
+    quantity.required = true;
+    quantity.setAttribute('aria-label', 'Quantidade do item ' + index);
+    quantityLabel.append(quantity);
+
+    const priceLabel = node('label');
+    priceLabel.append(node('span', '', 'Preço (R$)'));
+    const price = node('input');
+    price.type = 'text';
+    price.inputMode = 'decimal';
+    price.placeholder = '20,00';
+    price.required = true;
+    price.value = values.price || '';
+    price.setAttribute('aria-label', 'Preço do item ' + index);
+    priceLabel.append(price);
+
+    const lineTotal = node('div', 'pos-item-subtotal');
+    lineTotal.append(node('span', '', 'Subtotal'), node('strong', '', money(0)));
+    fields.append(description, quantityLabel, priceLabel, lineTotal);
+    row.append(header, fields);
+    saleRows.append(row);
+
+    row.posFields = { nameInput, quantity, price, subtotal: lineTotal.querySelector('strong') };
+    for (const field of [nameInput, quantity, price]) {
+      field.addEventListener('input', () => {
+        $('#pos-sale-error').textContent = '';
+        recalculateSale();
+      });
+    }
+    renumberSaleItems();
+    recalculateSale();
+    return nameInput;
   }
-  $('#pos-price').addEventListener('input', updateTotal);
-  $('#pos-quantity').addEventListener('input', updateTotal);
+
+  function renumberSaleItems() {
+    [...saleRows.children].forEach((row, i) => {
+      row.querySelector('.pos-sale-item-title strong').textContent = 'Item ' + (i + 1);
+      row.querySelector('.pos-remove-item').hidden = saleRows.children.length === 1;
+    });
+  }
+
+  function readItems() {
+    return [...saleRows.children].map((row) => {
+      const { nameInput, quantity, price } = row.posFields;
+      const cents = parseCents(price.value);
+      return {
+        description: nameInput.value.trim(),
+        quantity: Number(quantity.value),
+        unit_price_cents: cents,
+      };
+    });
+  }
+
+  function recalculateSale() {
+    let total = 0;
+    let count = 0;
+    for (const row of saleRows.children) {
+      const { quantity, price, subtotal } = row.posFields;
+      const qty = Number(quantity.value);
+      const unit = parseCents(price.value);
+      const valid = Number.isInteger(qty) && qty > 0 && qty <= 1000 && unit;
+      subtotal.textContent = money(valid ? qty * unit : 0);
+      if (valid) {
+        total += qty * unit;
+        count += qty;
+      }
+    }
+    $('#pos-sale-total').textContent = money(total);
+    $('#pos-sale-items-count').textContent = saleRows.children.length + ' tipo(s) de produto · ' + count + ' unidade(s)';
+  }
+
+  $('#pos-add-item').addEventListener('click', () => addSaleItem()?.focus());
+  $('#pos-new-sale').addEventListener('click', () => {
+    $('#pos-sale-form').reset();
+    saleRows.replaceChildren();
+    $('#pos-sale-error').textContent = '';
+    addSaleItem();
+    $('#pos-sale-dialog').showModal();
+    saleRows.firstElementChild.posFields.nameInput.focus();
+  });
+
   $('#pos-sale-form').addEventListener('submit', async (event) => {
     event.preventDefault();
     if (submitting) return;
-    const form = event.currentTarget;
-    const cents = parseCents($('#pos-price').value);
-    if (!cents) {
-      $('#pos-sale-error').textContent = 'Informe um preço válido, como 20,00.';
-      $('#pos-price').focus();
+    const items = readItems();
+    const invalid = items.findIndex((item) =>
+      item.description.length < 2 || item.description.length > 180 ||
+      !Number.isInteger(item.quantity) || item.quantity < 1 || item.quantity > 1000 ||
+      !item.unit_price_cents
+    );
+    if (invalid !== -1) {
+      $('#pos-sale-error').textContent = 'Confira a descrição, a quantidade e o preço do item ' + (invalid + 1) + '.';
+      const row = saleRows.children[invalid];
+      if (items[invalid].description.length < 2) row.posFields.nameInput.focus();
+      else if (!Number.isInteger(items[invalid].quantity) || items[invalid].quantity < 1 || items[invalid].quantity > 1000) row.posFields.quantity.focus();
+      else row.posFields.price.focus();
+      return;
+    }
+    if (!$('#pos-payment').value) {
+      $('#pos-sale-error').textContent = 'Escolha a forma de pagamento recebida.';
+      $('#pos-payment').focus();
+      return;
+    }
+    const total = items.reduce((sum, item) => sum + item.quantity * item.unit_price_cents, 0);
+    if (total > 4294967295) {
+      $('#pos-sale-error').textContent = 'O total ultrapassa o valor máximo permitido.';
       return;
     }
     submitting = true;
@@ -356,9 +481,11 @@ document.addEventListener('DOMContentLoaded', () => {
     button.disabled = true;
     $('#pos-sale-error').textContent = '';
     try {
-      const data = Object.fromEntries(new FormData(form));
-      data.unit_price_cents = cents;
-      const result = await action(data);
+      const result = await action({
+        action: 'sale',
+        items: JSON.stringify(items),
+        payment_method: $('#pos-payment').value,
+      });
       $('#pos-sale-dialog').close();
       toast(result.message);
       await refresh(true);
