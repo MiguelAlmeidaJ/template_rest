@@ -36,7 +36,7 @@ final class Pos
              ORDER BY created_at ASC,id ASC LIMIT 150"
         )->fetchAll(PDO::FETCH_ASSOC);
 
-        $ids = array_map(static fn(array $row): int => (int) $row['id'], $orders);
+        $ids = array_map(static fn (array $row): int => (int) $row['id'], $orders);
         $boxes = [];
         if ($ids) {
             $placeholders = implode(',', array_fill(0, count($ids), '?'));
@@ -83,7 +83,9 @@ final class Pos
             $db->commit();
             AdminNotification::markReferenceRead('order', $orderId);
         } catch (\Throwable $e) {
-            if ($db->inTransaction()) $db->rollBack();
+            if ($db->inTransaction()) {
+                $db->rollBack();
+            }
             throw $e;
         }
     }
@@ -143,9 +145,9 @@ final class Pos
         $stmt->execute([$date,$date]);
         $online = $stmt->fetch(PDO::FETCH_ASSOC);
         $stmt = $db->prepare(
-            "SELECT id,description,quantity,total_cents,payment_method,created_at
+            'SELECT id,description,quantity,total_cents,payment_method,created_at
              FROM pos_sales WHERE created_at>=? AND created_at<DATE_ADD(?,INTERVAL 1 DAY)
-             ORDER BY id DESC LIMIT 60"
+             ORDER BY id DESC LIMIT 60'
         );
         $stmt->execute([$date,$date]);
         return [
