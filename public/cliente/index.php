@@ -87,6 +87,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 $id = Customer::id();
+if (!$id) {
+    require __DIR__ . '/login-view.php';
+    exit;
+}
 $address = $id ? Customer::address($id) : [];
 $extraAddresses = $id ? \App\CustomerPreferences::addresses($id) : [];
 $savedFavorites = $id ? \App\CustomerPreferences::favorites($id) : [];
@@ -106,7 +110,7 @@ if ($id && $selected) {
         $messages = $q->fetchAll();
     }
 }
-if ($id): ?>
+?>
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -135,59 +139,8 @@ if ($id): ?>
 </div>
 <main id="conteudo" class="shell section customer-page">
 <span class="eyebrow">ÁREA DO CLIENTE</span><h1 class="title">Minha conta</h1>
-<?php else: bia_header('Minha conta', ''); ?>
-<div class="shell section customer-page"><span class="eyebrow">ÁREA DO CLIENTE</span><h1 class="title">Minha conta</h1>
-<?php endif; ?>
-<?php if ($error):?><p class="customer-alert" role="alert"><?=bia_esc($error)?></p><?php endif;?><?php if ($notice):?><p class="customer-success" role="status"><?=bia_esc($notice)?></p><?php endif;?>
-<?php if (!$id):?>
-<div class="customer-access">
-  <div class="customer-access-intro">
-    <span class="customer-access-kicker"><i class="bi bi-person-heart" aria-hidden="true"></i> Sua experiência com a Bia</span>
-    <h2>Seu almoço, ainda mais prático.</h2>
-    <p>Entre para acompanhar suas quentinhas, conversar com nossa equipe e guardar seu endereço para a próxima vez.</p>
-    <div class="customer-access-perks">
-      <span><i class="bi bi-bag-check" aria-hidden="true"></i> Acompanhe seus pedidos</span>
-      <span><i class="bi bi-geo-alt" aria-hidden="true"></i> Endereço sempre à mão</span>
-      <span><i class="bi bi-chat-dots" aria-hidden="true"></i> Converse com a equipe</span>
-    </div>
-  </div>
-  <section class="customer-access-card" aria-labelledby="customer-access-title">
-    <div class="customer-access-tabs" role="tablist" aria-label="Acesso de clientes">
-      <button type="button" id="customer-login-tab" role="tab" aria-controls="customer-login-panel" aria-selected="true" class="active">Entrar</button>
-      <button type="button" id="customer-register-tab" role="tab" aria-controls="customer-register-panel" aria-selected="false" tabindex="-1">Criar conta</button>
-    </div>
-    <div class="customer-access-body">
-      <div id="customer-login-panel" role="tabpanel" aria-labelledby="customer-login-tab">
-        <h2 id="customer-access-title">Que bom ter você por aqui.</h2>
-        <p>Entre com seu e-mail e senha para acessar seus pedidos.</p>
-        <form method="post" class="customer-access-form">
-          <input type="hidden" name="csrf" value="<?=bia_esc(Customer::csrf())?>">
-          <input type="hidden" name="action" value="login">
-          <label for="customer-login-email">E-mail</label>
-          <input id="customer-login-email" type="email" name="email" placeholder="seuemail@exemplo.com" required autocomplete="email">
-          <label for="customer-login-password">Senha</label>
-          <input id="customer-login-password" type="password" name="password" placeholder="Sua senha" required autocomplete="current-password">
-          <button class="btn customer-access-submit" type="submit">Entrar na minha conta <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
-        </form>
-      </div>
-      <div id="customer-register-panel" role="tabpanel" aria-labelledby="customer-register-tab" hidden>
-        <h2>Vamos criar sua conta?</h2>
-        <p>É rápido. Você só precisa de um e-mail e uma senha.</p>
-        <form method="post" class="customer-access-form">
-          <input type="hidden" name="csrf" value="<?=bia_esc(Customer::csrf())?>">
-          <input type="hidden" name="action" value="register">
-          <label for="customer-register-email">E-mail</label>
-          <input id="customer-register-email" type="email" name="email" placeholder="seuemail@exemplo.com" required autocomplete="email">
-          <label for="customer-register-password">Crie uma senha</label>
-          <input id="customer-register-password" type="password" name="password" minlength="10" maxlength="128" placeholder="Mínimo de 10 caracteres" required autocomplete="new-password">
-          <button class="btn customer-access-submit" type="submit">Criar minha conta <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
-        </form>
-      </div>
-    </div>
-  </section>
-</div>
-<script src="/assets/js/customer-access.js?v=1" defer></script>
-<?php else: ?>
+<?php if ($error): ?><p class="customer-alert" role="alert"><?=bia_esc($error)?></p><?php endif; ?>
+<?php if ($notice): ?><p class="customer-success" role="status"><?=bia_esc($notice)?></p><?php endif; ?>
 <?php
     $tab = (string) ($_GET['tab'] ?? 'pedidos');
     if (!in_array($tab, ['pedidos','padrao','enderecos','perfil'], true)) {
@@ -272,7 +225,7 @@ if ($id): ?>
   <?php endif; ?>
   </div>
 </div>
-<?php endif;?></div><?php if ($id): ?>
+</div>
 <dialog id="customer-address-dialog" class="customer-address-dialog customer-address-dialog-refined" aria-labelledby="customer-address-title">
   <div class="customer-address-dialog-header">
     <div><span class="eyebrow">LOCAL DE ENTREGA</span><h2 id="customer-address-title">Novo endereço</h2><p>Preencha os dados para receber seus próximos pedidos.</p></div>
@@ -322,9 +275,6 @@ if ($id): ?>
 </dialog>
 <script type="application/json" id="customer-preferences-data"><?=json_encode(['addresses' => $extraAddresses,'csrf' => Customer::csrf()], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE)?></script>
 <script src="/assets/js/customer-preferences.js?v=3" defer></script><script src="/assets/js/customer-chat-live.js?v=2" defer></script>
-<?php endif; ?>
-<?php if ($id): ?>
 </main>
 </body>
 </html>
-<?php else: bia_footer(); endif; ?>
