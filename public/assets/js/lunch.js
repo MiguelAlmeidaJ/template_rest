@@ -350,7 +350,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const stepMarkers = [...document.querySelectorAll('[data-checkout-progress]')];
   function openStep(step) {
     checkoutStep = step;
-    stepPanels.forEach((panel, index) => { panel.hidden = index + 1 !== step; });
+    stepPanels.forEach((panel, index) => {
+      panel.hidden = index + 1 !== step;
+    });
     stepMarkers.forEach((marker, index) => {
       const active = index + 1 === step;
       marker.classList.toggle('active', active);
@@ -368,7 +370,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (incomplete.name.trim().length < 2) {
       document.querySelector('#lunch-panel-' + incomplete.id + ' .lunch-box-recipient')?.focus();
     }
-    awaitNotice('Informe um nome e escolha ao menos um prato em cada montagem.', 'Revise sua quentinha');
+    awaitNotice(
+      'Informe um nome e escolha ao menos um prato em cada montagem.',
+      'Revise sua quentinha',
+    );
     return false;
   }
   function validateDelivery() {
@@ -639,8 +644,15 @@ document.addEventListener('DOMContentLoaded', () => {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (checkoutStep !== 3) return;
-    if (!validateMontagem()) { openStep(1); return; }
-    if (!validateDelivery()) { openStep(2); validateDelivery(); return; }
+    if (!validateMontagem()) {
+      openStep(1);
+      return;
+    }
+    if (!validateDelivery()) {
+      openStep(2);
+      validateDelivery();
+      return;
+    }
     if (!form.querySelector('input[name="payment_method"]:checked')) {
       awaitNotice('Escolha Pix ou cartão na entrega.', 'Selecione o pagamento');
       return;
