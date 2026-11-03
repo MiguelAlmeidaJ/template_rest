@@ -73,12 +73,25 @@ adm_start('Relatório financeiro · PDV', 'pdv');
   <div class="content-heading"><div><h2>Vendas realizadas no local</h2><small class="text-secondary">Últimos 60 registros da data selecionada</small></div></div>
   <div class="table-responsive">
     <table class="table align-middle mb-0">
-      <thead><tr><th>Venda</th><th>Descrição</th><th>Quantidade</th><th>Pagamento</th><th>Total</th><th>Horário</th></tr></thead>
+      <thead><tr><th>Venda</th><th>Descrição</th><th>Unidades</th><th>Pagamento</th><th>Total</th><th>Horário</th></tr></thead>
       <tbody>
       <?php foreach ($data['sales'] as $sale): ?>
         <tr>
           <td>#<?=(int)$sale['id']?></td>
-          <td><?=adm_h($sale['description'])?></td>
+          <td>
+            <strong><?=adm_h($sale['description'])?></strong>
+            <?php if (!empty($sale['items'])): ?>
+              <div class="mt-1 text-secondary small">
+                <?php foreach ($sale['items'] as $item): ?>
+                  <div><?= (int) $item['quantity'] ?> × <?=adm_h($item['description'])?>
+                    <span class="text-nowrap">(<?=adm_h($amount($item['unit_price_cents']))?> un. · <?=adm_h($amount($item['total_cents']))?>)</span>
+                  </div>
+                <?php endforeach; ?>
+              </div>
+            <?php else: ?>
+              <small class="d-block text-secondary">Registro anterior, sem itens separados</small>
+            <?php endif; ?>
+          </td>
           <td><?=(int)$sale['quantity']?></td>
           <td><?=adm_h(['cash' => 'Dinheiro','pix' => 'Pix','card' => 'Cartão'][$sale['payment_method']] ?? $sale['payment_method'])?></td>
           <td><?=adm_h($amount($sale['total_cents']))?></td>
