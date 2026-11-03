@@ -58,8 +58,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function whatsappUrl(phone) {
     const digits = String(phone || '').replace(/\D/g, '');
-    if ([10,11].includes(digits.length)) return 'https://wa.me/55' + digits;
-    if ([12,13].includes(digits.length) && digits.startsWith('55')) return 'https://wa.me/' + digits;
+    if ([10, 11].includes(digits.length)) return 'https://wa.me/55' + digits;
+    if ([12, 13].includes(digits.length) && digits.startsWith('55'))
+      return 'https://wa.me/' + digits;
     return null;
   }
   function card(order) {
@@ -111,7 +112,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (next) advance.addEventListener('click', () => move(Number(order.id), next[0], advance));
     buttons.append(view, advance);
     if (Number(order.unread_messages) > 0) {
-      const badge = node('span', 'pos-unread-count', order.unread_messages + ' mensagem(ns) não lida(s)');
+      const badge = node(
+        'span',
+        'pos-unread-count',
+        order.unread_messages + ' mensagem(ns) não lida(s)',
+      );
       article.append(badge);
     }
     const wa = whatsappUrl(order.customer_phone);
