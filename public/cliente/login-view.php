@@ -65,7 +65,7 @@ $enteredEmail = (string) ($_POST['email'] ?? '');
 
       <section id="customer-login-panel" role="tabpanel" aria-labelledby="customer-login-tab" <?=$registerActive ? 'hidden' : ''?>>
         <form method="post" class="bia-login-form customer-login-form">
-          <input type="hidden" name="csrf" value="<?=bia_esc(Customer::csrf())?>">
+          <input type="hidden" name="csrf" value="<?=bia_esc(\App\Customer::csrf())?>">
           <input type="hidden" name="action" value="login">
           <div class="bia-login-field">
             <label for="customer-login-email">E-mail</label>
@@ -95,7 +95,7 @@ $enteredEmail = (string) ($_POST['email'] ?? '');
 
       <section id="customer-register-panel" role="tabpanel" aria-labelledby="customer-register-tab" <?=$registerActive ? '' : 'hidden'?>>
         <form method="post" class="bia-login-form customer-login-form">
-          <input type="hidden" name="csrf" value="<?=bia_esc(Customer::csrf())?>">
+          <input type="hidden" name="csrf" value="<?=bia_esc(\App\Customer::csrf())?>">
           <input type="hidden" name="action" value="register">
           <div class="bia-login-field">
             <label for="customer-register-email">E-mail</label>
