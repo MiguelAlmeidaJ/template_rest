@@ -110,6 +110,19 @@ document.addEventListener('DOMContentLoaded', () => {
     advance.disabled = !next;
     if (next) advance.addEventListener('click', () => move(Number(order.id), next[0], advance));
     buttons.append(view, advance);
+    if (Number(order.unread_messages) > 0) {
+      const badge = node('span', 'pos-unread-count', order.unread_messages + ' mensagem(ns) não lida(s)');
+      article.append(badge);
+    }
+    const wa = whatsappUrl(order.customer_phone);
+    if (wa) {
+      const link = node('a', 'pos-card-whatsapp', 'WhatsApp');
+      link.href = wa;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.setAttribute('aria-label', 'Abrir WhatsApp de ' + order.customer_name);
+      buttons.append(link);
+    }
     article.append(top, customer, sub, food, bottom, buttons);
     return article;
   }
