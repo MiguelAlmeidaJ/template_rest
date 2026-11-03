@@ -29,11 +29,12 @@ final class Pos
     {
         $db = Db::pdo();
         $orders = $db->query(
-            "SELECT id,customer_name,customer_phone,address,neighborhood,reference_point,
-                    quantity,total_cents,payment_method,payment_status,status,created_at
-             FROM lunch_orders
+            "SELECT o.id,o.customer_id,o.customer_name,o.customer_phone,o.address,o.neighborhood,o.reference_point,
+                    o.quantity,o.total_cents,o.payment_method,o.payment_status,o.status,o.created_at,
+                    (SELECT COUNT(*) FROM admin_notifications n WHERE n.type='chat' AND n.reference_id=o.id AND n.is_read=0) AS unread_messages
+             FROM lunch_orders o
              WHERE status IN ('pending','accepted','preparing','out_for_delivery')
-             ORDER BY created_at ASC,id ASC LIMIT 150"
+             ORDER BY o.created_at ASC,o.id ASC LIMIT 150"
         )->fetchAll(PDO::FETCH_ASSOC);
 
         $ids = array_map(static fn (array $row): int => (int) $row['id'], $orders);
